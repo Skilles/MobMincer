@@ -19,6 +19,9 @@
   "entrypoints": {
     "main": [
       "net.mobmincer.fabric.MobMincerFabric"
+    ],
+    "client": [
+      "net.mobmincer.fabric.ModMincerFabricClient"
     ]
   },
   "mixins": [
