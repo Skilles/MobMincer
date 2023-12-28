@@ -61,7 +61,7 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
                 if (!this.level().isClientSide) {
                     tickMince()
                 }
-                this.lerpTo(it.x, it.y + it.bbHeight, it.z, it.yHeadRot - 180, -it.xRot, 1)
+                this.lerpTo(it.x, it.y + it.bbHeight, it.z, it.yHeadRot - 180, it.xRot, 1)
             } else {
                 dropAsItem()
             }
