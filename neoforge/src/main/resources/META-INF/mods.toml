@@ -11,7 +11,7 @@ authors = "Skilles"
 description = '''
 Harvest mobs over time.
 '''
-logoFile = "icon.png"
+logoFile = "assets/mobmincer/icon.png"
 
 [[mixins]]
 config = "mobmincer-common.mixins.json"

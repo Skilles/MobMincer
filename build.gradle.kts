@@ -1,3 +1,5 @@
+import groovy.lang.Closure
+import io.github.pacifistmc.forgix.plugin.ForgixMergeExtension
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 
 plugins {
@@ -18,6 +20,11 @@ forgix {
     group = rootProject.property("maven_group").toString()
     mergedJarName = "${rootProject.property("archives_base_name")}-${rootProject.property("mod_version")}-${rootProject.property("minecraft_version")}.jar"
     outputDir = "build/libs/merged-${rootProject.property("minecraft_version")}"
+
+    @Suppress("UNCHECKED_CAST")
+    custom(closureOf<ForgixMergeExtension.CustomContainer> {
+        projectName = "neoforge"
+    } as Closure<ForgixMergeExtension.CustomContainer>)
 }
 
 subprojects {
