@@ -2,9 +2,10 @@ import net.fabricmc.loom.api.LoomGradleExtensionAPI
 
 plugins {
     id("java")
-    kotlin("jvm") version "1.8.22"
+    kotlin("jvm") version "2.0.0-Beta2"
+    kotlin("plugin.serialization") version "2.0.0-Beta2"
     id("architectury-plugin") version "3.4-SNAPSHOT"
-    id("dev.architectury.loom") version "1.3-SNAPSHOT" apply false
+    id("dev.architectury.loom") version "1.4-SNAPSHOT" apply false
     id("com.github.johnrengelman.shadow") version "8.1.1" apply false
     id("io.github.pacifistmc.forgix") version "1.2.6"
 }

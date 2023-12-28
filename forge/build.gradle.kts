@@ -4,29 +4,25 @@ plugins {
 
 architectury {
     platformSetupLoomIde()
-    forge()
+    neoForge()
 }
 
 loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
 
-    forge.apply {
-        convertAccessWideners.set(true)
-        extraAccessWideners.add(loom.accessWidenerPath.get().asFile.name)
-
-        mixinConfig("examplemod-common.mixins.json")
-        mixinConfig("examplemod.mixins.json")
+    neoForge.apply {
+        enableModProvidedJavadoc.set(true)
     }
 }
 
 val common: Configuration by configurations.creating
 val shadowCommon: Configuration by configurations.creating
-val developmentForge: Configuration by configurations.getting
+val developmentNeoForge: Configuration by configurations.getting
 
 configurations {
     compileOnly.configure { extendsFrom(common) }
     runtimeOnly.configure { extendsFrom(common) }
-    developmentForge.extendsFrom(common)
+    developmentNeoForge.extendsFrom(common)
 }
 
 repositories {
@@ -35,18 +31,22 @@ repositories {
         name = "Kotlin for Forge"
         setUrl("https://thedarkcolour.github.io/KotlinForForge/")
     }
+    maven {
+        name = "NeoForged"
+        setUrl("https://maven.neoforged.net/releases/")
+    }
 }
 
 dependencies {
-    forge("net.minecraftforge:forge:${rootProject.property("forge_version")}")
+    neoForge("net.neoforged:neoforge:${rootProject.property("neoforge_version")}")
     // Remove the next line if you don't want to depend on the API
-    modApi("dev.architectury:architectury-forge:${rootProject.property("architectury_version")}")
+    modApi("dev.architectury:architectury-neoforge:${rootProject.property("architectury_version")}")
 
     common(project(":common", "namedElements")) { isTransitive = false }
-    shadowCommon(project(":common", "transformProductionForge")) { isTransitive = false }
+    shadowCommon(project(":common", "transformProductionNeoForge")) { isTransitive = false }
 
     // Kotlin For Forge
-    implementation("thedarkcolour:kotlinforforge:${rootProject.property("kotlin_for_forge_version")}")
+    implementation("thedarkcolour:kotlinforforge-neoforge:${rootProject.property("kotlin_for_forge_version")}")
 }
 
 tasks.processResources {
@@ -75,6 +75,7 @@ tasks.shadowJar {
 
 tasks.remapJar {
     injectAccessWidener.set(true)
+
     inputFile.set(tasks.shadowJar.get().archiveFile)
     dependsOn(tasks.shadowJar)
     archiveClassifier.set(null as String?)
