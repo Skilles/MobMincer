@@ -1,7 +1,7 @@
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 
 plugins {
-    java
+    id("java")
     kotlin("jvm") version "1.8.22"
     id("architectury-plugin") version "3.4-SNAPSHOT"
     id("dev.architectury.loom") version "1.3-SNAPSHOT" apply false
@@ -65,12 +65,14 @@ allprojects {
         compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
     }
 
-    tasks.withType<JavaCompile> {
-        options.encoding = "UTF-8"
+    tasks.withType(JavaCompile::class.java) {
         options.release.set(17)
+        options.encoding = "UTF-8"
     }
+
     kotlin.target.compilations.all {
         kotlinOptions.jvmTarget = "17"
+        kotlinOptions.freeCompilerArgs.plus("-opt-in=kotlin.ExperimentalStdlibApi")
     }
 
     java {
