@@ -16,6 +16,8 @@ import net.minecraft.world.entity.AnimationState
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.enchantment.Enchantment
+import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.AABB
 import net.mobmincer.core.loot.LootFactory
@@ -35,6 +37,7 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
 
     var durability = 0
     var maxDurability = 0
+    private var unbreakingLevel = 0
 
     private lateinit var lootFactory: LootFactory
 
@@ -49,13 +52,20 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
 
     val idleAnimationState = AnimationState()
 
-    fun initialize(target: Mob, durability: Int, maxDurability: Int, lootFactory: LootFactory) {
+    fun initialize(
+        target: Mob,
+        durability: Int,
+        maxDurability: Int,
+        lootFactory: LootFactory,
+        enchantments: Map<Enchantment, Int>
+    ) {
         this.target = target
         this.durability = durability
         this.maxDurability = maxDurability
         this.targetUUID = target.uuid
         this.setPos(target.x, target.y + target.bbHeight, target.z)
         this.lootFactory = lootFactory
+        this.unbreakingLevel = enchantments.getOrDefault(Enchantments.UNBREAKING, 0)
     }
 
     companion object {
@@ -75,10 +85,6 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
         }
 
         mainTick(target)
-        /*targetUUID.let {
-            rebindTarget(it)
-            return
-        }*/
 
         super.tick()
     }
@@ -122,7 +128,7 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
             val cosBodyRotation = cos(bodyRotationRadians)
             val sinBodyRotation = sin(bodyRotationRadians)
 
-            val pitchAdjustmentMultiplier = leashOffset.y // Adjust this multiplier as needed
+            val pitchAdjustmentMultiplier = leashOffset.y
 
              val leashOffset = if (isAnimal) mob.getLeashOffset(0f).scale(1.7) else Vec3.ZERO
             val xOffset = cosHeadRotation * leashOffset.z
@@ -139,7 +145,7 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
             y += if (isAnimal) 0.15 else 0.0 + sinPitch * pitchAdjustmentMultiplier * 1.1*/
 
 
-            this.lerpTo(x, y, z, mob.yHeadRot - 180, mob.xRot, 1)
+            this.lerpTo(x, y, z, mob.yBodyRot - 180, mob.xRot, 1)
         } else if (!isClient) {
             dropAsItem()
         }
@@ -150,9 +156,7 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
             if (dropTargetLoot()) {
                 isErrored = false
                 target.hurt(damageSources().thorns(this), target.maxHealth * 0.1f)
-                if (--durability <= 0) {
-                    dropAsItem()
-                }
+                takeDurabilityDamage()
                 level.sendParticles(
                     ParticleTypes.HAPPY_VILLAGER, this.x, this.y + this.bbHeight, this.z,
                     3,
@@ -173,6 +177,16 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
                 )
             }
             currentMinceTick = 0
+        }
+    }
+
+    private fun takeDurabilityDamage() {
+        // Chance to ignore durability: (1 / bound) * level
+        if (this.random.nextInt(6) < unbreakingLevel) {
+            return
+        }
+        if (--durability <= 0) {
+            dropAsItem()
         }
     }
 

@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.enchantment.EnchantmentHelper
 import net.mobmincer.core.loot.LootFactoryCache
 import net.mobmincer.core.registry.MincerEntities
 
@@ -35,7 +36,8 @@ class MobMincerItem(properties: Properties) : Item(properties) {
                             interactionTarget,
                             stack.maxDamage - stack.damageValue,
                             stack.maxDamage,
-                            LootFactoryCache.getLootFactory(interactionTarget)
+                            LootFactoryCache.getLootFactory(interactionTarget),
+                            EnchantmentHelper.getEnchantments(stack)
                         )
                         player.level().addFreshEntity(mobMincerEntity)
                         stack.shrink(1)
@@ -47,5 +49,9 @@ class MobMincerItem(properties: Properties) : Item(properties) {
 
             else -> return InteractionResult.PASS
         }
+    }
+
+    override fun getEnchantmentValue(): Int {
+        return 1
     }
 }

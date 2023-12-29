@@ -18,10 +18,7 @@ object LootFactoryCache {
 
     fun hasLoot(mob: Mob): Boolean {
         val factory = getLootFactory(mob)
-        if (factory == LootFactory.EMPTY) {
-            return false
-        }
-        return !factory.generateLoot().isEmpty
+        return factory != LootFactory.EMPTY
     }
 
     private fun Mob.createLootFactory(damager: Entity?): LootFactory {
