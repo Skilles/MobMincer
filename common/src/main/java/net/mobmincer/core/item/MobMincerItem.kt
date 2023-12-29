@@ -7,8 +7,7 @@ import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
-import net.mobmincer.MobMincer
+import net.mobmincer.core.loot.LootFactoryCache
 import net.mobmincer.core.registry.MincerEntities
 
 /**
@@ -27,13 +26,19 @@ class MobMincerItem(properties: Properties) : Item(properties) {
 
             interactionTarget.isAlive && interactionTarget is Mob -> {
                 if (interactionTarget.addTag("mob_mincer")) {
-                    stack.hurtAndBreak(1, player) { player.drop(stack, false) }
                     val mobMincerEntity = MincerEntities.MOB_MINCER.get().create(player.level())
                     if (mobMincerEntity != null) {
-                        interactionTarget.equipItemIfPossible(Items.SKELETON_SKULL.defaultInstance)
-                        mobMincerEntity.initialize(interactionTarget, stack.maxDamage - stack.damageValue)
+                        if (!LootFactoryCache.hasLoot(interactionTarget)) {
+                            return InteractionResult.FAIL
+                        }
+                        mobMincerEntity.initialize(
+                            interactionTarget,
+                            stack.maxDamage - stack.damageValue,
+                            stack.maxDamage,
+                            LootFactoryCache.getLootFactory(interactionTarget)
+                        )
                         player.level().addFreshEntity(mobMincerEntity)
-                        MobMincer.logger.info("Spawned mob mincer entity ${mobMincerEntity.id} for ${interactionTarget.id}")
+                        stack.shrink(1)
                     }
                     return InteractionResult.SUCCESS
                 }
