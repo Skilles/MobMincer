@@ -47,6 +47,8 @@ dependencies {
 
     // Kotlin For Forge
     implementation("thedarkcolour:kotlinforforge-neoforge:${rootProject.property("kotlin_for_forge_version")}")
+
+    modImplementation("curse.maven:jade-324717:${rootProject.property("jade_version_neoforge")}")
 }
 
 tasks.processResources {

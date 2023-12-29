@@ -22,6 +22,9 @@
     ],
     "client": [
       "net.mobmincer.fabric.ModMincerFabricClient"
+    ],
+    "jade": [
+      "net.mobmincer.fabriclike.compat.jade.MobMincerPlugin"
     ]
   },
   "mixins": [

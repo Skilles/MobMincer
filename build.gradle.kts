@@ -48,6 +48,12 @@ subprojects {
             name = "Sonar Maven"
             url = uri("https://oss.sonatype.org/content/repositories/snapshots")
         }
+        maven {
+            url = uri("https://www.cursemaven.com")
+            content {
+                includeGroup("curse.maven")
+            }
+        }
     }
 }
 

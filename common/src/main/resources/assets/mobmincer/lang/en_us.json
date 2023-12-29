@@ -1,4 +1,11 @@
 {
+  "entity.mobmincer.mob_mincer": "Mob Mincer",
   "item.mobmincer.mob_mincer": "Mob Mincer",
-  "itemGroup.mobmincer.mob_mincer": "Mob Mincer"
+  "itemGroup.mobmincer.mob_mincer": "Mob Mincer",
+  "advancements.mobmincer.mob_mincer.title": "Mob Mincer",
+  "advancements.mobmincer.mob_mincer.description": "Craft a Mob Mincer",
+  "mobmincer.waila.tooltip.durability": "Durability: %d",
+  "mobmincer.waila.tooltip.progress": "%d%%",
+  "mobmincer.waila.tooltip.errored": "Invalid Mob",
+  "config.jade.plugin_mobmincer.mob_mincer": "Mob Mincer"
 }

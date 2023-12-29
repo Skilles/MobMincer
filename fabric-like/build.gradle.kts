@@ -12,6 +12,8 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     modApi("dev.architectury:architectury-fabric:${rootProject.property("architectury_version")}")
 
+    modImplementation("curse.maven:jade-324717:${rootProject.property("jade_version_fabric")}")
+
     compileOnly(project(":common", "namedElements")) {
         isTransitive = false
     }
