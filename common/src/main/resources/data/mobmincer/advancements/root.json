@@ -1,0 +1,38 @@
+{
+  "display": {
+    "title": {
+      "translate": "advancements.mobmincer.mob_mincer.title",
+      "color": "light_purple"
+    },
+    "description": {
+      "translate": "advancements.mobmincer.mob_mincer.description"
+    },
+    "icon": {
+      "item": "mobmincer:mob_mincer"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false,
+    "background": "minecraft:textures/gui/advancements/backgrounds/stone.png"
+  },
+  "criteria": {
+    "has_mincer": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "mobmincer:mob_mincer"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_mincer"
+    ]
+  ]
+}

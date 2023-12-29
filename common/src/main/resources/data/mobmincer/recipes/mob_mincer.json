@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " # ",
+    "#E#",
+    "#D#"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:ink_sac"
+    },
+    "E": {
+      "item": "minecraft:ender_eye"
+    },
+    "D": {
+      "item": "minecraft:diamond_sword"
+    }
+  },
+  "result": {
+    "item": "mobmincer:mob_mincer",
+    "count": 1
+  }
+}
