@@ -23,13 +23,14 @@ object LootFactoryCache {
 
     private fun Mob.createLootFactory(damager: Entity?): LootFactory {
         val resourceLocation: ResourceLocation = this.lootTable
-        val lootTable = level().server!!.lootData.getLootTable(resourceLocation)
-        val builder = LootParams.Builder(level() as ServerLevel)
+        val level = this.level() as ServerLevel
+        val lootTable = level.server.lootData.getLootTable(resourceLocation)
+        val builder = LootParams.Builder(level)
             .withParameter(LootContextParams.THIS_ENTITY, this)
             .withParameter(LootContextParams.ORIGIN, this.position())
             .withParameter(
                 LootContextParams.DAMAGE_SOURCE,
-                damager?.let { this.level().damageSources().thorns(it) } ?: this.level().damageSources().generic())
+                damager?.let { level.damageSources().thorns(it) } ?: level.damageSources().generic())
             .withOptionalParameter(LootContextParams.KILLER_ENTITY, damager)
             .withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, damager)
         val lootParams = builder.create(LootContextParamSets.ENTITY)

@@ -20,6 +20,7 @@ import net.minecraft.world.item.enchantment.Enchantment
 import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.AABB
+import net.mobmincer.core.config.MobMincerConfig
 import net.mobmincer.core.loot.LootFactory
 import net.mobmincer.core.registry.MincerEntities.MOB_MINCER
 import net.mobmincer.core.registry.MincerItems
@@ -33,7 +34,7 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
 
     var currentMinceTick = 0
 
-    var maxMinceTick = MAX_MINCE_TICK
+    var maxMinceTick: Int = MobMincerConfig.CONFIG.maxMinceTick.get()
 
     var durability = 0
     var maxDurability = 0
@@ -76,7 +77,7 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
 
     override fun tick() {
         if (!this::target.isInitialized) {
-            rebindTarget(targetUUID)
+            rebindTarget()
             return
         }
 
@@ -84,78 +85,85 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
             idleAnimationState.animateWhen(target.isAlive, this.tickCount)
         }
 
-        mainTick(target)
+        mainTick()
 
         super.tick()
     }
 
-    private fun rebindTarget(it: UUID) {
+    private fun rebindTarget() {
         val candidates = level().getEntities(
             this,
             AABB.ofSize(this.position(), 1.0, 1.0, 1.0)
-        ) { entity -> entity.uuid.equals(it) }
+        ) { entity -> entity.uuid.equals(targetUUID) }
         if (candidates.isEmpty() || candidates[0] !is Mob) {
-            this.discard()
+            dispose(true)
         } else {
             this.target = candidates[0] as Mob
             this.tick()
         }
     }
 
-    private fun mainTick(mob: Mob) {
+    private fun mainTick() {
         val isClient = this.level().isClientSide
-        if (mob.isAlive) {
-            if (!isClient) {
+
+        if (!isClient) {
+            if (target.isAlive) {
                 tickMince(this.level() as ServerLevel)
+            } else {
+                dropAsItem()
             }
-
-            var x = mob.x
-            var z = mob.z
-            var y = mob.y + mob.bbHeight
-            /*val yRot = mob.yHeadRot
-            val isAnimal = mob is Animal
-
-            val blendedRotation = (yRot * 0.3 + mob.yBodyRot * 0.7)
-            val headRotationRadians = Math.toRadians(blendedRotation) + 1.5707963267948966
-            val bodyRotationRadians = Math.toRadians(mob.yBodyRot.toDouble())
-            val pitchRadians = Math.toRadians(mob.xRot.toDouble())
-
-            // Adjust position based on head rotation
-            val cosPitch = cos(pitchRadians)
-            val sinPitch = sin(pitchRadians)
-            val cosHeadRotation = cos(headRotationRadians)
-            val sinHeadRotation = sin(headRotationRadians)
-            val cosBodyRotation = cos(bodyRotationRadians)
-            val sinBodyRotation = sin(bodyRotationRadians)
-
-            val pitchAdjustmentMultiplier = leashOffset.y
-
-             val leashOffset = if (isAnimal) mob.getLeashOffset(0f).scale(1.7) else Vec3.ZERO
-            val xOffset = cosHeadRotation * leashOffset.z
-            val zOffset = sinHeadRotation * leashOffset.z
-
-            // Calculate forward/backward direction based on body rotation
-            val forwardX = -sinBodyRotation * pitchAdjustmentMultiplier
-            val forwardZ = cosBodyRotation * pitchAdjustmentMultiplier
-
-
-            // Apply pitch adjustment
-            x += xOffset + sinPitch * forwardX
-            z += zOffset + sinPitch * forwardZ
-            y += if (isAnimal) 0.15 else 0.0 + sinPitch * pitchAdjustmentMultiplier * 1.1*/
-
-
-            this.lerpTo(x, y, z, mob.yBodyRot - 180, mob.xRot, 1)
-        } else if (!isClient) {
-            dropAsItem()
         }
+
+        updatePosition()
+    }
+
+    private fun updatePosition() {
+        var x = target.x
+        var z = target.z
+        var y = target.y + target.bbHeight
+        /*val yRot = mob.yHeadRot
+        val isAnimal = mob is Animal
+
+        val blendedRotation = (yRot * 0.3 + mob.yBodyRot * 0.7)
+        val headRotationRadians = Math.toRadians(blendedRotation) + 1.5707963267948966
+        val bodyRotationRadians = Math.toRadians(mob.yBodyRot.toDouble())
+        val pitchRadians = Math.toRadians(mob.xRot.toDouble())
+
+        // Adjust position based on head rotation
+        val cosPitch = cos(pitchRadians)
+        val sinPitch = sin(pitchRadians)
+        val cosHeadRotation = cos(headRotationRadians)
+        val sinHeadRotation = sin(headRotationRadians)
+        val cosBodyRotation = cos(bodyRotationRadians)
+        val sinBodyRotation = sin(bodyRotationRadians)
+
+        val pitchAdjustmentMultiplier = leashOffset.y
+
+         val leashOffset = if (isAnimal) mob.getLeashOffset(0f).scale(1.7) else Vec3.ZERO
+        val xOffset = cosHeadRotation * leashOffset.z
+        val zOffset = sinHeadRotation * leashOffset.z
+
+        // Calculate forward/backward direction based on body rotation
+        val forwardX = -sinBodyRotation * pitchAdjustmentMultiplier
+        val forwardZ = cosBodyRotation * pitchAdjustmentMultiplier
+
+
+        // Apply pitch adjustment
+        x += xOffset + sinPitch * forwardX
+        z += zOffset + sinPitch * forwardZ
+        y += if (isAnimal) 0.15 else 0.0 + sinPitch * pitchAdjustmentMultiplier * 1.1*/
+
+        this.lerpTo(x, y, z, target.yBodyRot - 180, target.xRot, 1)
     }
 
     private fun tickMince(level: ServerLevel) {
         if (++currentMinceTick >= MAX_MINCE_TICK) {
             if (dropTargetLoot()) {
                 isErrored = false
-                target.hurt(damageSources().thorns(this), target.maxHealth * 0.1f)
+                target.hurt(
+                    damageSources().thorns(this),
+                    target.maxHealth * MobMincerConfig.CONFIG.mobDamagePercent.get().toFloat()
+                )
                 takeDurabilityDamage()
                 level.sendParticles(
                     ParticleTypes.HAPPY_VILLAGER, this.x, this.y + this.bbHeight, this.z,
@@ -182,7 +190,7 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
 
     private fun takeDurabilityDamage() {
         // Chance to ignore durability: (1 / bound) * level
-        if (this.random.nextInt(6) < unbreakingLevel) {
+        if (this.random.nextInt(MobMincerConfig.CONFIG.unbreakingBound.get()) < unbreakingLevel) {
             return
         }
         if (--durability <= 0) {
@@ -207,13 +215,21 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
         if (this.isRemoved || level().isClientSide) {
             return
         }
-        target.removeTag("mob_mincer")
         if (durability > 0) {
             val itemStack = MincerItems.MOB_MINCER.get().defaultInstance
             itemStack.damageValue = itemStack.maxDamage - durability
-            target.spawnAtLocation(itemStack)
+            this.spawnAtLocation(itemStack)
         }
-        this.kill()
+        dispose()
+    }
+
+    private fun dispose(discard: Boolean = false) {
+        target.removeTag("mob_mincer")
+        if (discard) {
+            this.discard()
+        } else {
+            this.kill()
+        }
     }
 
     override fun hurt(source: DamageSource, amount: Float): Boolean {

@@ -26,12 +26,9 @@ class MobMincerItem(properties: Properties) : Item(properties) {
             }
 
             interactionTarget.isAlive && interactionTarget is Mob -> {
-                if (interactionTarget.addTag("mob_mincer")) {
+                if (LootFactoryCache.hasLoot(interactionTarget) && interactionTarget.addTag("mob_mincer")) {
                     val mobMincerEntity = MincerEntities.MOB_MINCER.get().create(player.level())
                     if (mobMincerEntity != null) {
-                        if (!LootFactoryCache.hasLoot(interactionTarget)) {
-                            return InteractionResult.FAIL
-                        }
                         mobMincerEntity.initialize(
                             interactionTarget,
                             stack.maxDamage - stack.damageValue,
