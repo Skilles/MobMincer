@@ -18,13 +18,22 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.mobmincer.fabric.MobMincerFabric"
+      {
+        "adapter": "kotlin",
+        "value": "net.mobmincer.fabric.MobMincerFabric"
+      }
     ],
     "client": [
-      "net.mobmincer.fabric.ModMincerFabricClient"
+      {
+        "adapter": "kotlin",
+        "value": "net.mobmincer.fabric.MobMincerFabricClient"
+      }
     ],
     "jade": [
-      "net.mobmincer.fabriclike.compat.jade.MobMincerPlugin"
+      {
+        "adapter": "kotlin",
+        "value": "net.mobmincer.fabriclike.compat.jade.MobMincerPlugin"
+      }
     ]
   },
   "mixins": [
@@ -33,7 +42,8 @@
   ],
   "depends": {
     "fabric": "*",
-    "minecraft": ">=1.20.1",
-    "architectury": ">=9.1.12"
+    "minecraft": ">=${minecraft_version}",
+    "architectury": ">=${architectury_version}",
+    "fabric-language-kotlin": ">=${fabric_kotlin_version}"
   }
 }

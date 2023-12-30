@@ -45,6 +45,14 @@ subprojects {
 
     repositories {
         maven {
+            name = "Fuzs Mod Resources"
+            url = uri("https://raw.githubusercontent.com/Fuzss/modresources/main/maven/")
+        }
+        maven {
+            name = "TerraformersMC"
+            url = uri("https://maven.terraformersmc.com/")
+        }
+        maven {
             name = "Sonar Maven"
             url = uri("https://oss.sonatype.org/content/repositories/snapshots")
         }

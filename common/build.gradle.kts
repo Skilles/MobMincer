@@ -12,4 +12,8 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${rootProject.property("fabric_loader_version")}")
     // Remove the next line if you don't want to depend on the API
     modApi("dev.architectury:architectury:${rootProject.property("architectury_version")}")
+
+    api("fuzs.forgeconfigapiport:forgeconfigapiport-common:${rootProject.property("forge_config_version")}")
+
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.property("mixin_extras_version")}")!!)
 }
