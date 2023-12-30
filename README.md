@@ -9,3 +9,51 @@
 Curseforge: https://www.curseforge.com/minecraft/mc-mods/mobmincer  
 Modrinth: https://modrinth.com/mod/mobmincer  
 Wiki: https://skilles.gitbook.io/mobmincer/
+
+### Description
+
+This mod adds one item, the Mob Mincer. This cute little guy can be used to mince mobs for their loot over a period of
+time. It is a mid-game alternative to mob farms to target a certain mob drop.
+
+### Usage
+
+#### Crafting
+
+![Crafting recipe](https://i.imgur.com/ifXGIXM.png)
+
+To use the Mob Mincer, simply right-click on a mob with it in your hand. The mincer will attach to the mob and produce
+drops over time.  
+To remove the mincer, left-click the mincer attached to the mob.  
+The Mob Mincer has durability and will break after a certain amount of minces. Can be enchanted with Unbreaking to
+reduce durability use.
+
+### Configuration
+
+* `baseDurability` - The base durability of the Mob Mincer. Default: 100
+* `maxMinceTick` - The maximum amount of mince ticks the Mob Mincer can have. Lower is faster. Default: 100
+* `unbreakingBound` - The bound used for the RNG when calculating unbreaking. Chance to ignore durability: (1 / bound) *
+  unbreakingLevel. Default: 6
+* `mobDamagePercent` - The percentage of health the mob takes when minced. Default: 0.1
+
+### Planned features
+
+- [ ] Ability to automate
+- [ ] More enchantments
+- [ ] Upgrades or attachments
+
+### Dependencies
+
+#### Both
+
+* [Architectury API](https://www.curseforge.com/minecraft/mc-mods/architectury-api)
+
+#### Fabric
+
+* [Forge Config API](https://www.curseforge.com/minecraft/mc-mods/forge-config-api-port-fabric)
+* [Fabric Language Kotlin](https://www.curseforge.com/minecraft/mc-mods/fabric-language-kotlin)
+
+#### Forge
+
+* [Kotlin for Forge](https://www.curseforge.com/minecraft/mc-mods/kotlin-for-forge)
+
+*Support for [Jade](https://www.curseforge.com/minecraft/mc-mods/jade) (WAILA) included*
