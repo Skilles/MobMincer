@@ -10,6 +10,13 @@ plugins {
     id("dev.architectury.loom") version "1.4-SNAPSHOT" apply false
     id("com.github.johnrengelman.shadow") version "8.1.1" apply false
     id("io.github.pacifistmc.forgix") version "1.2.6"
+    id("io.github.detekt.gradle.compiler-plugin") version "1.23.3"
+}
+
+dependencies {
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.4")
+    detektPlugins("io.cole.matthew.detekt.operator:detekt-operator:0.0.1")
+    detektPlugins("com.github.Faire:faire-detekt-rules:v0.1.1")
 }
 
 architectury {
@@ -51,10 +58,6 @@ subprojects {
         maven {
             name = "TerraformersMC"
             url = uri("https://maven.terraformersmc.com/")
-        }
-        maven {
-            name = "Sonar Maven"
-            url = uri("https://oss.sonatype.org/content/repositories/snapshots")
         }
         maven {
             url = uri("https://www.cursemaven.com")
