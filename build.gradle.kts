@@ -34,6 +34,11 @@ forgix {
     } as Closure<ForgixMergeExtension.CustomContainer>)
 }
 
+detekt {
+    config.setFrom(files("detekt.yml"))
+    buildUponDefaultConfig = true
+}
+
 subprojects {
     apply(plugin = "dev.architectury.loom")
 

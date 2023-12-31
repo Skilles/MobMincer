@@ -1,0 +1,17 @@
+config:
+  validation: true
+  warningsAsErrors: false
+
+complexity:
+  TooManyFunctions:
+    thresholdInClasses: 20
+
+style:
+  MaxLineLength:
+    maxLineLength: 200
+  MagicNumber:
+    active: false
+
+formatting:
+  MaximumLineLength:
+    maxLineLength: 200
