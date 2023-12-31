@@ -1,4 +1,4 @@
-# Mob Mincer
+# <img src="https://i.imgur.com/tCUYDOW.png" width="600" height="196">
 
 [![Version](https://cf.way2muchnoise.eu/versions/modmincer_latest.svg)](https://www.curseforge.com/minecraft/mc-mods/spoken-word)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Skilles_MobMincer&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Skilles_SpokenWord)
@@ -30,7 +30,7 @@ reduce durability use.
 ### Configuration
 
 * `baseDurability` - The base durability of the Mob Mincer. Default: 100
-* `maxMinceTick` - The maximum amount of mince ticks the Mob Mincer can have. Lower is faster. Default: 100
+* `maxMinceTick` - The amount of ticks that pass between minces. Lower is faster. Default: 100
 * `unbreakingBound` - The bound used for the RNG when calculating unbreaking. Chance to ignore durability: (1 / bound) *
   unbreakingLevel. Default: 6
 * `mobDamagePercent` - The percentage of health the mob takes when minced. Default: 0.1
