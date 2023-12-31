@@ -24,13 +24,32 @@ time. It is a mid-game alternative to mob farms to target a certain mob drop.
 To use the Mob Mincer, simply right-click on a mob with it in your hand. The mincer will attach to the mob and produce
 drops over time.  
 To remove the mincer, left-click the mincer attached to the mob.  
-The Mob Mincer has durability and will break after a certain amount of minces. Can be enchanted with Unbreaking to
-reduce durability use.
+The Mob Mincer has durability and will break after a certain amount of minces.
+
+#### Enchantments
+
+Enchant the Mob Mincer with an enchantment table or anvil
+
+* Unbreaking - Increases the chance to ignore durability damage
+* Silk Touch - Allows for player drops
+* Looting - Increases the amount of drops
+* ~~Mending - Repairs the Mob Mincer with XP~~ *Planned*
+* ~~Soulspeed - Increases the speed of mincing~~ *Planned*
+
+#### Attachments
+
+Right-click the Mob Mincer with the attachment in your hand to attach it
+
+* Storage - Chest - Stores the drops in the mincer instead of dropping them on the ground
+* Pacifier - Chorus Fruit - Disables the mob's AI
+* Feeder - Enchanted Golden Apple - Feeds the mob to heal it after mincing
+* Spreader - Sculk Catalyst - Duplicates and attaches to two nearby mobs once the attached mob dies (only one will drop the loot)
+* ~~Umbrella - Prevents the mob from burning in sunlight~~ *Planned*
 
 ### Configuration
 
 * `baseDurability` - The base durability of the Mob Mincer. Default: 100
-* `maxMinceTick` - The amount of ticks that pass between minces. Lower is faster. Default: 100
+* `maxMinceTick` - The amount of ticks that pass between minces. Soulspeed scales this down. Default: 500
 * `unbreakingBound` - The bound used for the RNG when calculating unbreaking. Chance to ignore durability: (1 / bound) *
   unbreakingLevel. Default: 6
 * `mobDamagePercent` - The percentage of health the mob takes when minced. Default: 0.1
@@ -39,7 +58,9 @@ reduce durability use.
 
 - [ ] Ability to automate
 - [ ] More enchantments
-- [ ] Upgrades or attachments
+- [ ] Attachments
+- [ ] More configuration
+- [ ] Suggestions welcome!
 
 ### Dependencies
 
