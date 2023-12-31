@@ -4,6 +4,9 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.Level
 
+/**
+ * An entity that uses interpolation to smooth its movement and rotation. Similar to [net.minecraft.world.entity.vehicle.Boat].
+ */
 abstract class SmoothMotionEntity(entityType: EntityType<*>, level: Level) : Entity(entityType, level) {
     private var lerpSteps = 0
     private var lerpX = 0.0

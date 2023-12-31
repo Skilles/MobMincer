@@ -18,7 +18,6 @@ import net.minecraft.client.model.geom.builders.MeshDefinition
 import net.minecraft.resources.ResourceLocation
 import net.mobmincer.MobMincer
 
-
 class MobMincerModel(private val root: ModelPart) : HierarchicalModel<MobMincerEntity>() {
     private val head: ModelPart = root.getChild("head")
     private val legs: ModelPart = root.getChild("legs")
@@ -131,7 +130,8 @@ class MobMincerModel(private val root: ModelPart) : HierarchicalModel<MobMincerE
             .withLength(2.0f)
             .looping()
             .addAnimation(
-                "head", AnimationChannel(
+                "head",
+                AnimationChannel(
                     AnimationChannel.Targets.ROTATION,
                     Keyframe(
                         0.0f,

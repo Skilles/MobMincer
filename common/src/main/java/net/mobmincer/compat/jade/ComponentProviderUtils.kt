@@ -8,7 +8,7 @@ object ComponentProviderUtils {
 
     fun MobMincerEntity.appendTooltipData(compound: CompoundTag) {
         compound.putInt("Durability", this.durability)
-        compound.putInt("MaxDurability", this.maxDurability)
+        compound.putInt("MaxDurability", this.sourceStack.maxDamage)
         compound.putFloat("Progress", this.currentMinceTick.toFloat() / this.maxMinceTick.toFloat())
         compound.putBoolean("Errored", this.isErrored)
     }

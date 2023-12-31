@@ -1,6 +1,5 @@
 package net.mobmincer.core.entity
 
-import dev.architectury.extensions.network.EntitySpawnExtension
 import dev.architectury.networking.NetworkManager
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.nbt.CompoundTag
@@ -10,37 +9,44 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.SoundSource
+import net.minecraft.world.Container
+import net.minecraft.world.ContainerListener
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.entity.AnimationState
 import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.HasCustomInventoryScreen
 import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.Enchantment
+import net.minecraft.world.item.enchantment.EnchantmentHelper
 import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.level.Level
-import net.minecraft.world.phys.AABB
 import net.mobmincer.core.config.MobMincerConfig
 import net.mobmincer.core.loot.LootFactory
+import net.mobmincer.core.loot.LootFactoryCache
 import net.mobmincer.core.registry.MincerEntities.MOB_MINCER
-import net.mobmincer.core.registry.MincerItems
-import java.util.*
 
-class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level), EntitySpawnExtension {
-    lateinit var target: Mob
-        private set
-
-    private lateinit var targetUUID: UUID
+class MobMincerEntity(level: Level) :
+    WearableEntity(
+        MOB_MINCER.get(),
+        level
+    ),
+    ContainerListener,
+    HasCustomInventoryScreen {
 
     var currentMinceTick = 0
 
     var maxMinceTick: Int = MobMincerConfig.CONFIG.maxMinceTick.get()
 
     var durability = 0
-    var maxDurability = 0
-    private var unbreakingLevel = 0
 
     private lateinit var lootFactory: LootFactory
+    private lateinit var itemEnchantments: Map<Enchantment, Int>
+    lateinit var sourceStack: ItemStack
 
     var isErrored: Boolean
         get() = entityData.get(IS_ERRORED)
@@ -55,18 +61,20 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
 
     fun initialize(
         target: Mob,
-        durability: Int,
-        maxDurability: Int,
-        lootFactory: LootFactory,
-        enchantments: Map<Enchantment, Int>
+        sourceStack: ItemStack,
     ) {
-        this.target = target
-        this.durability = durability
-        this.maxDurability = maxDurability
-        this.targetUUID = target.uuid
+        super.initialize(target)
         this.setPos(target.x, target.y + target.bbHeight, target.z)
-        this.lootFactory = lootFactory
-        this.unbreakingLevel = enchantments.getOrDefault(Enchantments.UNBREAKING, 0)
+
+        this.initSourceItem(sourceStack)
+    }
+
+    private fun initSourceItem(sourceStack: ItemStack) {
+        this.durability = sourceStack.maxDamage - sourceStack.damageValue
+        this.itemEnchantments = EnchantmentHelper.getEnchantments(sourceStack)
+        this.sourceStack = sourceStack
+        val killedByPlayer = itemEnchantments.containsKey(Enchantments.SILK_TOUCH)
+        this.lootFactory = LootFactoryCache.getLootFactory(target as Mob, killedByPlayer)
     }
 
     companion object {
@@ -76,31 +84,11 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
     }
 
     override fun tick() {
-        if (!this::target.isInitialized) {
-            rebindTarget()
-            return
-        }
-
         if (this.level().isClientSide) {
             idleAnimationState.animateWhen(target.isAlive, this.tickCount)
         }
-
         mainTick()
-
         super.tick()
-    }
-
-    private fun rebindTarget() {
-        val candidates = level().getEntities(
-            this,
-            AABB.ofSize(this.position(), 1.0, 1.0, 1.0)
-        ) { entity -> entity.uuid.equals(targetUUID) }
-        if (candidates.isEmpty() || candidates[0] !is Mob) {
-            dispose(true)
-        } else {
-            this.target = candidates[0] as Mob
-            this.tick()
-        }
     }
 
     private fun mainTick() {
@@ -113,47 +101,6 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
                 dropAsItem()
             }
         }
-
-        updatePosition()
-    }
-
-    private fun updatePosition() {
-        var x = target.x
-        var z = target.z
-        var y = target.y + target.bbHeight
-        /*val yRot = mob.yHeadRot
-        val isAnimal = mob is Animal
-
-        val blendedRotation = (yRot * 0.3 + mob.yBodyRot * 0.7)
-        val headRotationRadians = Math.toRadians(blendedRotation) + 1.5707963267948966
-        val bodyRotationRadians = Math.toRadians(mob.yBodyRot.toDouble())
-        val pitchRadians = Math.toRadians(mob.xRot.toDouble())
-
-        // Adjust position based on head rotation
-        val cosPitch = cos(pitchRadians)
-        val sinPitch = sin(pitchRadians)
-        val cosHeadRotation = cos(headRotationRadians)
-        val sinHeadRotation = sin(headRotationRadians)
-        val cosBodyRotation = cos(bodyRotationRadians)
-        val sinBodyRotation = sin(bodyRotationRadians)
-
-        val pitchAdjustmentMultiplier = leashOffset.y
-
-         val leashOffset = if (isAnimal) mob.getLeashOffset(0f).scale(1.7) else Vec3.ZERO
-        val xOffset = cosHeadRotation * leashOffset.z
-        val zOffset = sinHeadRotation * leashOffset.z
-
-        // Calculate forward/backward direction based on body rotation
-        val forwardX = -sinBodyRotation * pitchAdjustmentMultiplier
-        val forwardZ = cosBodyRotation * pitchAdjustmentMultiplier
-
-
-        // Apply pitch adjustment
-        x += xOffset + sinPitch * forwardX
-        z += zOffset + sinPitch * forwardZ
-        y += if (isAnimal) 0.15 else 0.0 + sinPitch * pitchAdjustmentMultiplier * 1.1*/
-
-        this.lerpTo(x, y, z, target.yBodyRot - 180, target.xRot, 1)
     }
 
     private fun tickMince(level: ServerLevel) {
@@ -190,7 +137,7 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
 
     private fun takeDurabilityDamage() {
         // Chance to ignore durability: (1 / bound) * level
-        if (this.random.nextInt(MobMincerConfig.CONFIG.unbreakingBound.get()) < unbreakingLevel) {
+        if (this.random.nextInt(MobMincerConfig.CONFIG.unbreakingBound.get()) < itemEnchantments.getOrDefault(Enchantments.UNBREAKING, 0)) {
             return
         }
         if (--durability <= 0) {
@@ -203,11 +150,11 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
         if (loot.isEmpty) {
             return false
         }
-        val lootItem = loot[0]
-        if (lootItem.count > 1) {
-            lootItem.count = 1
+        val lootItem = loot.firstOrNull { it.count > 0 }
+        lootItem?.let {
+            it.count = 1 * (1 + itemEnchantments.getOrDefault(Enchantments.MOB_LOOTING, 0))
+            target.spawnAtLocation(it)
         }
-        target.spawnAtLocation(lootItem)
         return true
     }
 
@@ -216,20 +163,25 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
             return
         }
         if (durability > 0) {
-            val itemStack = MincerItems.MOB_MINCER.get().defaultInstance
+            val itemStack = sourceStack
             itemStack.damageValue = itemStack.maxDamage - durability
             this.spawnAtLocation(itemStack)
+        } else {
+            (level() as ServerLevel).playSound(
+                null,
+                this.blockPosition(),
+                SoundEvents.ITEM_BREAK,
+                SoundSource.NEUTRAL,
+                1.0f,
+                1.0f
+            )
         }
         dispose()
     }
 
-    private fun dispose(discard: Boolean = false) {
+    override fun dispose(discard: Boolean) {
         target.removeTag("mob_mincer")
-        if (discard) {
-            this.discard()
-        } else {
-            this.kill()
-        }
+        super.dispose(discard)
     }
 
     override fun hurt(source: DamageSource, amount: Float): Boolean {
@@ -250,7 +202,6 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
         if (entity is Player) {
             return this.hurt(damageSources().playerAttack(entity), 0.0f)
         }
-
         return false
     }
 
@@ -263,23 +214,34 @@ class MobMincerEntity(level: Level) : SmoothMotionEntity(MOB_MINCER.get(), level
     }
 
     override fun readAdditionalSaveData(compound: CompoundTag) {
-        if (compound.hasUUID("Target")) {
-            this.targetUUID = compound.getUUID("Target")
+        super.readAdditionalSaveData(compound)
+        if (compound.contains("SourceStack")) {
+            this.initSourceItem(ItemStack.of(compound.getCompound("SourceStack")))
+        } else {
+            dispose(true)
         }
     }
 
     override fun addAdditionalSaveData(compound: CompoundTag) {
-        compound.putUUID("Target", target.uuid)
+        super.addAdditionalSaveData(compound)
+        compound.put("SourceStack", sourceStack.save(CompoundTag()))
     }
 
     override fun saveAdditionalSpawnData(buf: FriendlyByteBuf) {
-        buf.writeInt(target.id)
+        super.saveAdditionalSpawnData(buf)
+        buf.writeItem(sourceStack)
     }
 
     override fun loadAdditionalSpawnData(buf: FriendlyByteBuf) {
-        val targetId = buf.readInt()
-        this.target = level().getEntity(targetId) as Mob
+        super.loadAdditionalSpawnData(buf)
+        this.initSourceItem(buf.readItem())
+    }
+
+    override fun containerChanged(container: Container) {
+    }
+
+    override fun openCustomInventoryScreen(player: Player) {
+        if (!(level() as Level).isClientSide) {
+        }
     }
 }
-
-

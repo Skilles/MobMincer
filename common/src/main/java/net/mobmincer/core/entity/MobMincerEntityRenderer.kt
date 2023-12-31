@@ -20,9 +20,6 @@ import kotlin.math.atan2
 class MobMincerEntityRenderer(context: EntityRendererProvider.Context) : EntityRenderer<MobMincerEntity>(context) {
     private val model = MobMincerModel(context.bakeLayer(MobMincerModel.LAYER_LOCATION))
 
-    private val MAP_ICONS_LOCATION = ResourceLocation("textures/map/map_icons.png")
-    private val MAP_ICONS: RenderType = RenderType.text(MAP_ICONS_LOCATION)
-
     override fun render(entity: MobMincerEntity, entityYaw: Float, partialTicks: Float, poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int) {
 
         if (entity.isErrored) {
@@ -76,7 +73,7 @@ class MobMincerEntityRenderer(context: EntityRendererProvider.Context) : EntityR
         poseStack.mulPose(quaternion)
 
         val matrix4f2 = poseStack.last().pose()
-        val vertexConsumer2: VertexConsumer = buffer.getBuffer(MAP_ICONS)
+        val vertexConsumer2: VertexConsumer = buffer.getBuffer(Companion.MAP_ICONS)
         val b: Byte = MapDecoration.Type.RED_X.icon
         val g = (b % 16 + 0).toFloat() / 16.0f
         val h = (b / 16 + 0).toFloat() / 16.0f
@@ -117,5 +114,7 @@ class MobMincerEntityRenderer(context: EntityRendererProvider.Context) : EntityR
 
     companion object {
         val TEXTURE_LOCATION = ResourceLocation(MobMincer.MOD_ID, "textures/item/mob_mincer.png")
+        private val MAP_ICONS_LOCATION = ResourceLocation("textures/map/map_icons.png")
+        private val MAP_ICONS: RenderType = RenderType.text(MAP_ICONS_LOCATION)
     }
 }

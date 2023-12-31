@@ -17,25 +17,12 @@ import net.mobmincer.core.registry.MincerEntities
 class MobMincerItem(properties: Properties) : Item(properties) {
     override fun interactLivingEntity(stack: ItemStack, player: Player, interactionTarget: LivingEntity, usedHand: InteractionHand): InteractionResult {
         when {
-            usedHand != InteractionHand.MAIN_HAND -> {
-                return InteractionResult.PASS
-            }
-
-            player.level().isClientSide -> {
-                return InteractionResult.PASS
-            }
-
-            interactionTarget.isAlive && interactionTarget is Mob -> {
-                if (LootFactoryCache.hasLoot(interactionTarget) && interactionTarget.addTag("mob_mincer")) {
+            usedHand == InteractionHand.MAIN_HAND && !player.level().isClientSide && interactionTarget.isAlive && interactionTarget is Mob -> {
+                val hasSilkTouch = EnchantmentHelper.hasSilkTouch(stack)
+                if (LootFactoryCache.hasLoot(interactionTarget, hasSilkTouch) && interactionTarget.addTag("mob_mincer")) {
                     val mobMincerEntity = MincerEntities.MOB_MINCER.get().create(player.level())
                     if (mobMincerEntity != null) {
-                        mobMincerEntity.initialize(
-                            interactionTarget,
-                            stack.maxDamage - stack.damageValue,
-                            stack.maxDamage,
-                            LootFactoryCache.getLootFactory(interactionTarget),
-                            EnchantmentHelper.getEnchantments(stack)
-                        )
+                        mobMincerEntity.initialize(interactionTarget, stack.copy())
                         player.level().addFreshEntity(mobMincerEntity)
                         stack.shrink(1)
                     }
