@@ -25,10 +25,12 @@ import net.minecraft.world.item.enchantment.Enchantment
 import net.minecraft.world.item.enchantment.EnchantmentHelper
 import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.level.Level
+import net.mobmincer.core.attachment.AttachmentHolder
 import net.mobmincer.core.config.MobMincerConfig
 import net.mobmincer.core.loot.LootFactory
 import net.mobmincer.core.loot.LootFactoryCache
 import net.mobmincer.core.registry.MincerEntities.MOB_MINCER
+import net.mobmincer.core.registry.MincerItems
 
 class MobMincerEntity(level: Level) :
     WearableEntity(
@@ -47,6 +49,7 @@ class MobMincerEntity(level: Level) :
     private lateinit var lootFactory: LootFactory
     private lateinit var itemEnchantments: Map<Enchantment, Int>
     lateinit var sourceStack: ItemStack
+    private lateinit var attachmentHolder: AttachmentHolder
 
     var isErrored: Boolean
         get() = entityData.get(IS_ERRORED)
@@ -59,22 +62,28 @@ class MobMincerEntity(level: Level) :
 
     val idleAnimationState = AnimationState()
 
-    fun initialize(
+    fun spawn(
         target: Mob,
         sourceStack: ItemStack,
+        level: ServerLevel,
     ) {
+        require(!level.isClientSide) { "Mob mincer entity must be spawned on the server" }
+        require(sourceStack.`is`(MincerItems.MOB_MINCER.get())) { "Source stack must be a mob mincer item" }
         super.initialize(target)
-        this.setPos(target.x, target.y + target.bbHeight, target.z)
-
-        this.initSourceItem(sourceStack)
+        this.initSourceItem(sourceStack.copy())
+        this.attachmentHolder = AttachmentHolder(this)
+        level.addFreshEntity(this)
+        sourceStack.shrink(1)
     }
 
     private fun initSourceItem(sourceStack: ItemStack) {
         this.durability = sourceStack.maxDamage - sourceStack.damageValue
         this.itemEnchantments = EnchantmentHelper.getEnchantments(sourceStack)
         this.sourceStack = sourceStack
-        val killedByPlayer = itemEnchantments.containsKey(Enchantments.SILK_TOUCH)
-        this.lootFactory = LootFactoryCache.getLootFactory(target as Mob, killedByPlayer)
+        if (!this.level().isClientSide) {
+            val killedByPlayer = itemEnchantments.containsKey(Enchantments.SILK_TOUCH)
+            this.lootFactory = LootFactoryCache.getLootFactory(target as Mob, killedByPlayer, itemEnchantments.getOrDefault(Enchantments.MOB_LOOTING, 0))
+        }
     }
 
     companion object {
@@ -108,7 +117,7 @@ class MobMincerEntity(level: Level) :
             if (dropTargetLoot()) {
                 isErrored = false
                 target.hurt(
-                    damageSources().thorns(this),
+                    damageSources().indirectMagic(this, this),
                     target.maxHealth * MobMincerConfig.CONFIG.mobDamagePercent.get().toFloat()
                 )
                 takeDurabilityDamage()
@@ -150,11 +159,14 @@ class MobMincerEntity(level: Level) :
         if (loot.isEmpty) {
             return false
         }
-        val lootItem = loot.firstOrNull { it.count > 0 }
-        lootItem?.let {
-            it.count = 1 * (1 + itemEnchantments.getOrDefault(Enchantments.MOB_LOOTING, 0))
-            target.spawnAtLocation(it)
-        }
+        loot.filter { it.count > 0 }
+            .randomOrNull()
+            ?.let {
+                if (!itemEnchantments.containsKey(Enchantments.MOB_LOOTING)) {
+                    it.count = 1
+                }
+                this.spawnAtLocation(it)
+            }
         return true
     }
 
@@ -176,12 +188,12 @@ class MobMincerEntity(level: Level) :
                 1.0f
             )
         }
-        dispose()
+        destroy()
     }
 
-    override fun dispose(discard: Boolean) {
+    override fun destroy(discard: Boolean) {
         target.removeTag("mob_mincer")
-        super.dispose(discard)
+        super.destroy(discard)
     }
 
     override fun hurt(source: DamageSource, amount: Float): Boolean {
@@ -218,7 +230,7 @@ class MobMincerEntity(level: Level) :
         if (compound.contains("SourceStack")) {
             this.initSourceItem(ItemStack.of(compound.getCompound("SourceStack")))
         } else {
-            dispose(true)
+            destroy(true)
         }
     }
 

@@ -1,5 +1,6 @@
 package net.mobmincer.core.item
 
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.LivingEntity
@@ -15,24 +16,23 @@ import net.mobmincer.core.registry.MincerEntities
  * A mob mincer item that can be placed on a mob. Over time, the mob will be "minced" and will drop loot until it dies.
  */
 class MobMincerItem(properties: Properties) : Item(properties) {
-    override fun interactLivingEntity(stack: ItemStack, player: Player, interactionTarget: LivingEntity, usedHand: InteractionHand): InteractionResult {
-        when {
-            usedHand == InteractionHand.MAIN_HAND && !player.level().isClientSide && interactionTarget.isAlive && interactionTarget is Mob -> {
-                val hasSilkTouch = EnchantmentHelper.hasSilkTouch(stack)
-                if (LootFactoryCache.hasLoot(interactionTarget, hasSilkTouch) && interactionTarget.addTag("mob_mincer")) {
-                    val mobMincerEntity = MincerEntities.MOB_MINCER.get().create(player.level())
-                    if (mobMincerEntity != null) {
-                        mobMincerEntity.initialize(interactionTarget, stack.copy())
-                        player.level().addFreshEntity(mobMincerEntity)
-                        stack.shrink(1)
-                    }
-                    return InteractionResult.SUCCESS
-                }
-                return InteractionResult.FAIL
+    override fun interactLivingEntity(
+        stack: ItemStack,
+        player: Player,
+        interactionTarget: LivingEntity,
+        usedHand: InteractionHand
+    ): InteractionResult {
+        if (usedHand == InteractionHand.MAIN_HAND && !player.level().isClientSide && interactionTarget.isAlive && interactionTarget is Mob) {
+            val hasSilkTouch = EnchantmentHelper.hasSilkTouch(stack)
+            if (LootFactoryCache.hasLoot(interactionTarget, hasSilkTouch) && interactionTarget.addTag("mob_mincer")) {
+                MincerEntities.MOB_MINCER.get().create(
+                    player.level()
+                )?.spawn(interactionTarget, stack, player.level() as ServerLevel)
+                return InteractionResult.SUCCESS
             }
-
-            else -> return InteractionResult.PASS
+            return InteractionResult.FAIL
         }
+        return InteractionResult.PASS
     }
 
     override fun getEnchantmentValue(): Int {

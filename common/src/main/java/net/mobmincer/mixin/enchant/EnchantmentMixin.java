@@ -1,4 +1,4 @@
-package net.mobmincer.mixin;
+package net.mobmincer.mixin.enchant;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.world.item.ItemStack;
@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 /**
  * Constrains the Mob Mincer to certain enchantments in the anvil. See {@link EnchantmentHelperMixin} for the enchanting table version.
+ * Also allows silk touch and looting to be compatible, since the original check is really for silk touch and fortune.
  */
 @Mixin(Enchantment.class)
 public class EnchantmentMixin {
@@ -21,5 +22,14 @@ public class EnchantmentMixin {
         }
 
         return this.equals(Enchantments.SILK_TOUCH) || this.equals(Enchantments.UNBREAKING) || this.equals(Enchantments.MOB_LOOTING);
+    }
+
+    @ModifyReturnValue(method = "isCompatibleWith(Lnet/minecraft/world/item/enchantment/Enchantment;)Z", at = @At(value = "RETURN"))
+    private boolean isCompatibleWith(boolean original, Enchantment other) {
+        // Allow silk touch and looting to be compatible (hopefully this has no unintended side effects)
+        if ((this.equals(Enchantments.SILK_TOUCH) && other.equals(Enchantments.MOB_LOOTING)) || (this.equals(Enchantments.MOB_LOOTING) && other.equals(Enchantments.SILK_TOUCH))) {
+            return true;
+        }
+        return original;
     }
 }

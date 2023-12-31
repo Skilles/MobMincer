@@ -1,4 +1,4 @@
-package net.mobmincer.mixin;
+package net.mobmincer.mixin.enchant;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;

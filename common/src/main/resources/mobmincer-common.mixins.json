@@ -4,10 +4,10 @@
   "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8",
   "mixins": [
-    "EnchantmentCategoryMixin",
-    "EnchantmentHelperMixin",
-    "EnchantmentMixin",
-    "ItemMixin"
+    "ItemMixin",
+    "enchant.EnchantmentCategoryMixin",
+    "enchant.EnchantmentHelperMixin",
+    "enchant.EnchantmentMixin"
   ],
   "injectors": {
     "defaultRequire": 1

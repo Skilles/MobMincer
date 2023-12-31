@@ -1,5 +1,6 @@
 package net.mobmincer
 
+import dev.architectury.event.events.common.LifecycleEvent
 import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry
 import dev.architectury.registry.client.level.entity.EntityRendererRegistry
 import net.fabricmc.api.EnvType
@@ -23,6 +24,8 @@ object MobMincer {
         MincerTabs.register()
         MincerItems.register()
         MincerEntities.register()
+
+        LifecycleEvent.SERVER_LEVEL_UNLOAD.register(FakePlayer::unload)
     }
 
     @JvmStatic

@@ -1,4 +1,4 @@
-package net.mobmincer.mixin;
+package net.mobmincer.mixin.enchant;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.world.item.Item;

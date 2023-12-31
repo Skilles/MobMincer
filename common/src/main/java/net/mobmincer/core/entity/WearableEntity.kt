@@ -43,14 +43,14 @@ abstract class WearableEntity(entityType: EntityType<*>, level: Level) :
             AABB.ofSize(this.position(), 1.0, 1.0, 1.0)
         ) { entity -> entity.uuid.equals(targetUUID) }
         if (candidates.isEmpty() || candidates[0] !is Mob) {
-            dispose(true)
+            destroy(true)
         } else {
             this.target = candidates[0] as Mob
             this.tick()
         }
     }
 
-    protected open fun dispose(discard: Boolean = false) {
+    protected open fun destroy(discard: Boolean = false) {
         if (discard) {
             this.discard()
         } else {
@@ -101,7 +101,7 @@ abstract class WearableEntity(entityType: EntityType<*>, level: Level) :
         if (compound.hasUUID("Target") && compound.contains("SourceStack")) {
             this.targetUUID = compound.getUUID("Target")
         } else {
-            dispose(true)
+            destroy(true)
         }
     }
 
