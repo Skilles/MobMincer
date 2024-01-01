@@ -10,8 +10,18 @@ import java.util.*
 class AttachmentHolder(private val mobMincer: MobMincerEntity) {
     private val attachments: MutableMap<Attachments, AttachmentInstance> = EnumMap(Attachments::class.java)
 
-    fun addAttachment(attachment: Attachments) {
-        AttachmentRegistry.get(attachment)?.let { this.attachments.put(attachment, it.create()) }
+    private fun addAttachment(attachment: Attachments) {
+        AttachmentRegistry.get(
+            attachment
+        )?.let {
+            this.attachments.put(
+                attachment,
+                it.create(mobMincer).let { instance ->
+                    instance.onAttach()
+                    instance
+                }
+            )
+        }
     }
 
     fun removeAttachment(attachment: Attachments) {
@@ -20,6 +30,10 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
 
     fun hasAttachment(attachment: Attachments): Boolean {
         return this.attachments.containsKey(attachment)
+    }
+
+    fun getAttachment(attachment: Attachments): AttachmentInstance? {
+        return this.attachments[attachment]
     }
 
     fun tryAddAttachment(item: Item): Boolean {
@@ -33,20 +47,20 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
     }
 
     fun onSpawn() {
-        this.attachments.values.forEach { it.onSpawn(mobMincer) }
+        this.attachments.values.forEach { it.onSpawn() }
     }
 
     fun onDeath() {
-        this.attachments.values.forEach { it.onDeath(mobMincer) }
+        this.attachments.values.forEach { it.onDeath() }
     }
 
     fun onMince(dealtDamage: Float) {
-        this.attachments.values.forEach { it.onMince(mobMincer, dealtDamage) }
+        this.attachments.values.forEach { it.onMince(dealtDamage) }
     }
 
     fun onInteract(player: Player) {
         this.attachments.values.sortedByDescending(AttachmentInstance::getInteractionPriority).forEach {
-            it.onInteract(mobMincer, player)
+            it.onInteract(player)
         }
     }
 
@@ -67,10 +81,9 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
         tag.forEach { attachmentTag ->
             attachmentTag as CompoundTag
             val attachment = Attachments.valueOf(attachmentTag.getString("type"))
-            val instance = AttachmentRegistry.get(attachment)?.create()
-            instance?.deserialize(attachmentTag.getCompound("data"), mobMincer)
-            if (instance != null) {
-                this.attachments[attachment] = instance
+            AttachmentRegistry.get(attachment)?.create(mobMincer)?.let {
+                it.deserialize(attachmentTag.getCompound("data"), mobMincer)
+                this.attachments[attachment] = it
             }
         }
     }

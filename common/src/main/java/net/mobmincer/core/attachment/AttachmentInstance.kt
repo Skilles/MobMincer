@@ -4,15 +4,17 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Player
 import net.mobmincer.core.entity.MobMincerEntity
 
-abstract class AttachmentInstance(val type: MobMincerAttachment<*>) {
+abstract class AttachmentInstance(val type: MobMincerAttachment<*>, protected val mincer: MobMincerEntity) {
 
-    open fun onSpawn(entity: MobMincerEntity) {}
+    open fun onAttach() {}
 
-    open fun onDeath(entity: MobMincerEntity) {}
+    open fun onSpawn() {}
 
-    open fun onMince(entity: MobMincerEntity, dealtDamage: Float) {}
+    open fun onDeath() {}
 
-    open fun onInteract(entity: MobMincerEntity, player: Player) {}
+    open fun onMince(dealtDamage: Float) {}
+
+    open fun onInteract(player: Player) {}
 
     open fun serialize(tag: CompoundTag) {
 

@@ -1,12 +1,10 @@
 package net.mobmincer.core.attachment
 
+import net.minecraft.client.Minecraft
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.sounds.SoundEvents
-import net.minecraft.world.Container
-import net.minecraft.world.ContainerListener
-import net.minecraft.world.SimpleContainer
-import net.minecraft.world.SimpleMenuProvider
+import net.minecraft.world.*
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.ChestMenu
 import net.minecraft.world.item.ItemStack
@@ -14,31 +12,37 @@ import net.minecraft.world.level.block.Blocks
 import net.mobmincer.core.entity.MobMincerEntity
 import kotlin.random.Random
 
-class StorageAttachment(type: MobMincerAttachment<StorageAttachment>) : AttachmentInstance(type), ContainerListener {
+class StorageAttachment(type: MobMincerAttachment<StorageAttachment>, mincer: MobMincerEntity) :
+    AttachmentInstance(
+        type,
+        mincer
+    ),
+    ContainerListener {
 
     var inventory: SimpleContainer = createInventory()
 
-    override fun onDeath(entity: MobMincerEntity) {
-        if (entity.level().isClientSide) {
-            return
+    override fun onAttach() {
+        if (mincer.level().isClientSide) {
+            Minecraft.getInstance().player?.let { playChestEquipsSound(it) }
         }
-        // Drop items
-        for (i in 0 until this.inventory.containerSize) {
-            val itemStack: ItemStack = this.inventory.getItem(i)
-            if (itemStack.isEmpty) continue
-            entity.spawnAtLocation(itemStack)
-        }
-        entity.spawnAtLocation(Blocks.CHEST)
     }
 
-    override fun onInteract(entity: MobMincerEntity, player: Player) {
+    override fun onDeath() {
+        if (mincer.level().isClientSide) {
+            return
+        }
+        Containers.dropContents(mincer.level(), mincer.blockPosition(), this.inventory)
+        mincer.spawnAtLocation(Blocks.CHEST)
+    }
+
+    override fun onInteract(player: Player) {
         if (player.level().isClientSide) {
             return
         }
         player.openMenu(
             SimpleMenuProvider(
                 { id, inventory, _: Player -> ChestMenu.threeRows(id, inventory, this.inventory) },
-                entity.displayName
+                mincer.displayName
             )
         )
     }
@@ -72,18 +76,25 @@ class StorageAttachment(type: MobMincerAttachment<StorageAttachment>) : Attachme
     }
 
     private fun createInventory(): SimpleContainer {
-        val inventory = SimpleContainer(INVENTORY_SIZE)
+        val inventory = object : SimpleContainer(INVENTORY_SIZE) {
+            override fun stillValid(player: Player): Boolean {
+                return mincer.isAlive
+            }
+        }
         inventory.addListener(this)
         this.containerChanged(inventory)
         return inventory
     }
 
-    protected fun playChestEquipsSound(player: Player) {
-        player.playSound(SoundEvents.DONKEY_CHEST, 1.0f, (Random.nextFloat() - Random.nextFloat()) * 0.2f + 1.0f)
+    private fun playChestEquipsSound(player: Player) {
+        player.playSound(
+            SoundEvents.DONKEY_CHEST,
+            1.0f,
+            (Random.nextFloat() - Random.nextFloat()) * 0.2f + 1.0f
+        )
     }
 
-    override fun containerChanged(container: Container) {
-    }
+    override fun containerChanged(container: Container) {}
 
     fun hasInventoryChanged(inventory: Container): Boolean {
         return this.inventory !== inventory

@@ -11,15 +11,12 @@ import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.Container
-import net.minecraft.world.ContainerListener
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.entity.AnimationState
 import net.minecraft.world.entity.Entity
-import net.minecraft.world.entity.HasCustomInventoryScreen
 import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
@@ -29,6 +26,7 @@ import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.level.Level
 import net.mobmincer.core.attachment.AttachmentHolder
 import net.mobmincer.core.attachment.Attachments
+import net.mobmincer.core.attachment.StorageAttachment
 import net.mobmincer.core.config.MobMincerConfig
 import net.mobmincer.core.loot.LootFactory
 import net.mobmincer.core.loot.LootFactoryCache
@@ -39,9 +37,7 @@ class MobMincerEntity(level: Level) :
     WearableEntity(
         MOB_MINCER.get(),
         level
-    ),
-    ContainerListener,
-    HasCustomInventoryScreen {
+    ) {
 
     var currentMinceTick = 0
 
@@ -76,6 +72,10 @@ class MobMincerEntity(level: Level) :
         super.initialize(target)
         level.addFreshEntity(this)
         sourceStack.shrink(1)
+    }
+
+    fun hasAttachment(attachment: Attachments): Boolean {
+        return attachmentHolder.hasAttachment(attachment)
     }
 
     private fun initSourceItem(sourceStack: ItemStack) {
@@ -171,7 +171,14 @@ class MobMincerEntity(level: Level) :
                 if (!itemEnchantments.containsKey(Enchantments.MOB_LOOTING)) {
                     it.count = 1
                 }
-                this.spawnAtLocation(it)
+                attachmentHolder.getAttachment(Attachments.STORAGE)?.let { attachment ->
+                    attachment as StorageAttachment
+                    if (attachment.inventory.canAddItem(it)) {
+                        attachment.inventory.addItem(it)
+                    } else {
+                        this.spawnAtLocation(it)
+                    }
+                } ?: this.spawnAtLocation(it)
             }
         return true
     }
@@ -223,10 +230,11 @@ class MobMincerEntity(level: Level) :
             // We are holding an item, so lets try to add it as an attachment
             if (attachmentHolder.tryAddAttachment(player.mainHandItem.item)) {
                 player.mainHandItem.shrink(1)
+                return InteractionResult.sidedSuccess((this.level() as Level).isClientSide)
             }
         }
 
-        return InteractionResult.sidedSuccess((this.level() as Level).isClientSide)
+        return InteractionResult.FAIL
     }
 
     override fun isPickable(): Boolean {
@@ -274,17 +282,5 @@ class MobMincerEntity(level: Level) :
         super.loadAdditionalSpawnData(buf)
         this.initSourceItem(buf.readItem())
         attachmentHolder.onSpawn()
-    }
-
-    override fun containerChanged(container: Container) {
-    }
-
-    override fun openCustomInventoryScreen(player: Player) {
-        if (!(level() as Level).isClientSide) {
-        }
-    }
-
-    fun hasAttachment(attachment: Attachments): Boolean {
-        return attachmentHolder.hasAttachment(attachment)
     }
 }
