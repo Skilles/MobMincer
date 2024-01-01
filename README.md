@@ -54,11 +54,15 @@ Right-click the Mob Mincer with the attachment in your hand to attach it
   unbreakingLevel. Default: 6
 * `mobDamagePercent` - The percentage of health the mob takes when minced. Default: 0.1
 
+### Disclaimer
+
+The Mob Mincer can be used on any mob that has a loot table, but some mobs have special conditions (eg. slimes only dropping slime balls when they are the smallest size). This will be fixed in a later
+release along with drops customization.
+
 ### Planned features
 
-- [ ] Ability to automate
-- [ ] More enchantments
-- [ ] Attachments
+- [ ] Better automation
+- [ ] Support for more mobs
 - [ ] More configuration
 - [ ] Suggestions welcome!
 
