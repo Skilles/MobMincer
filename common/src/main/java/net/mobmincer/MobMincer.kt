@@ -5,8 +5,8 @@ import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry
 import dev.architectury.registry.client.level.entity.EntityRendererRegistry
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.mobmincer.core.entity.MobMincerEntityRenderer
-import net.mobmincer.core.entity.MobMincerModel
+import net.mobmincer.client.model.MobMincerModel
+import net.mobmincer.client.render.MobMincerEntityRenderer
 import net.mobmincer.core.registry.MincerEntities
 import net.mobmincer.core.registry.MincerItems
 import net.mobmincer.core.registry.MincerTabs

@@ -4,10 +4,10 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.resources.ResourceLocation
+import net.mobmincer.client.render.MobMincerEntityRenderer
 import net.mobmincer.compat.jade.ComponentProviderUtils.appendTooltipData
 import net.mobmincer.compat.jade.ComponentProviderUtils.getTooltipComponents
 import net.mobmincer.core.entity.MobMincerEntity
-import net.mobmincer.core.entity.MobMincerEntityRenderer
 import net.mobmincer.core.registry.MincerEntities.MOB_MINCER
 import snownee.jade.api.EntityAccessor
 import snownee.jade.api.IEntityComponentProvider
