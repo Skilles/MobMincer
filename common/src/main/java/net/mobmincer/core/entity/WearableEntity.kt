@@ -26,15 +26,25 @@ abstract class WearableEntity(entityType: EntityType<*>, level: Level) :
         this.target = target
         this.targetUUID = target.uuid
         this.setPos(target.x, target.y + target.bbHeight, target.z)
+        onTargetBind()
     }
 
-    override fun tick() {
+    final override fun tick() {
         if (!this::target.isInitialized) {
             rebindTarget()
             return
         }
         updatePosition()
+        doTick()
         super.tick()
+    }
+
+    protected open fun doTick() {
+        // NO-OP
+    }
+
+    protected open fun onTargetBind() {
+        // NO-OP
     }
 
     private fun rebindTarget() {
@@ -46,6 +56,7 @@ abstract class WearableEntity(entityType: EntityType<*>, level: Level) :
             destroy(true)
         } else {
             this.target = candidates[0] as Mob
+            onTargetBind()
             this.tick()
         }
     }

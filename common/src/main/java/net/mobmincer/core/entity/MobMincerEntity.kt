@@ -13,6 +13,8 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.Container
 import net.minecraft.world.ContainerListener
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.InteractionResult
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.entity.AnimationState
@@ -26,6 +28,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper
 import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.level.Level
 import net.mobmincer.core.attachment.AttachmentHolder
+import net.mobmincer.core.attachment.Attachments
 import net.mobmincer.core.config.MobMincerConfig
 import net.mobmincer.core.loot.LootFactory
 import net.mobmincer.core.loot.LootFactoryCache
@@ -49,7 +52,7 @@ class MobMincerEntity(level: Level) :
     private lateinit var lootFactory: LootFactory
     private lateinit var itemEnchantments: Map<Enchantment, Int>
     lateinit var sourceStack: ItemStack
-    private lateinit var attachmentHolder: AttachmentHolder
+    private val attachmentHolder = AttachmentHolder(this)
 
     var isErrored: Boolean
         get() = entityData.get(IS_ERRORED)
@@ -69,9 +72,8 @@ class MobMincerEntity(level: Level) :
     ) {
         require(!level.isClientSide) { "Mob mincer entity must be spawned on the server" }
         require(sourceStack.`is`(MincerItems.MOB_MINCER.get())) { "Source stack must be a mob mincer item" }
-        super.initialize(target)
         this.initSourceItem(sourceStack.copy())
-        this.attachmentHolder = AttachmentHolder(this)
+        super.initialize(target)
         level.addFreshEntity(this)
         sourceStack.shrink(1)
     }
@@ -80,6 +82,9 @@ class MobMincerEntity(level: Level) :
         this.durability = sourceStack.maxDamage - sourceStack.damageValue
         this.itemEnchantments = EnchantmentHelper.getEnchantments(sourceStack)
         this.sourceStack = sourceStack
+    }
+
+    override fun onTargetBind() {
         if (!this.level().isClientSide) {
             val killedByPlayer = itemEnchantments.containsKey(Enchantments.SILK_TOUCH)
             this.lootFactory = LootFactoryCache.getLootFactory(target as Mob, killedByPlayer, itemEnchantments.getOrDefault(Enchantments.MOB_LOOTING, 0))
@@ -92,12 +97,11 @@ class MobMincerEntity(level: Level) :
         private val IS_ERRORED = SynchedEntityData.defineId(MobMincerEntity::class.java, EntityDataSerializers.BOOLEAN)
     }
 
-    override fun tick() {
+    override fun doTick() {
         if (this.level().isClientSide) {
             idleAnimationState.animateWhen(target.isAlive, this.tickCount)
         }
         mainTick()
-        super.tick()
     }
 
     private fun mainTick() {
@@ -116,10 +120,12 @@ class MobMincerEntity(level: Level) :
         if (++currentMinceTick >= MAX_MINCE_TICK) {
             if (dropTargetLoot()) {
                 isErrored = false
+                val damage = MobMincerConfig.CONFIG.mobDamagePercent.get().toFloat() * target.maxHealth
                 target.hurt(
                     damageSources().indirectMagic(this, this),
-                    target.maxHealth * MobMincerConfig.CONFIG.mobDamagePercent.get().toFloat()
+                    damage
                 )
+                attachmentHolder.onMince(damage)
                 takeDurabilityDamage()
                 level.sendParticles(
                     ParticleTypes.HAPPY_VILLAGER, this.x, this.y + this.bbHeight, this.z,
@@ -193,6 +199,7 @@ class MobMincerEntity(level: Level) :
 
     override fun destroy(discard: Boolean) {
         target.removeTag("mob_mincer")
+        attachmentHolder.onDeath()
         super.destroy(discard)
     }
 
@@ -204,6 +211,22 @@ class MobMincerEntity(level: Level) :
             dropAsItem()
         }
         return true
+    }
+
+    override fun interact(player: Player, hand: InteractionHand): InteractionResult {
+        if (!player.isShiftKeyDown) {
+            attachmentHolder.onInteract(player)
+            return InteractionResult.sidedSuccess((this.level() as Level).isClientSide)
+        }
+
+        if (!player.mainHandItem.isEmpty && player.isShiftKeyDown) {
+            // We are holding an item, so lets try to add it as an attachment
+            if (attachmentHolder.tryAddAttachment(player.mainHandItem.item)) {
+                player.mainHandItem.shrink(1)
+            }
+        }
+
+        return InteractionResult.sidedSuccess((this.level() as Level).isClientSide)
     }
 
     override fun isPickable(): Boolean {
@@ -227,8 +250,10 @@ class MobMincerEntity(level: Level) :
 
     override fun readAdditionalSaveData(compound: CompoundTag) {
         super.readAdditionalSaveData(compound)
-        if (compound.contains("SourceStack")) {
+        if (compound.contains("SourceStack") && compound.contains("Attachments")) {
             this.initSourceItem(ItemStack.of(compound.getCompound("SourceStack")))
+            attachmentHolder.fromTag(compound.getList("Attachments", 10))
+            attachmentHolder.onSpawn()
         } else {
             destroy(true)
         }
@@ -237,6 +262,7 @@ class MobMincerEntity(level: Level) :
     override fun addAdditionalSaveData(compound: CompoundTag) {
         super.addAdditionalSaveData(compound)
         compound.put("SourceStack", sourceStack.save(CompoundTag()))
+        compound.put("Attachments", attachmentHolder.toTag())
     }
 
     override fun saveAdditionalSpawnData(buf: FriendlyByteBuf) {
@@ -247,6 +273,7 @@ class MobMincerEntity(level: Level) :
     override fun loadAdditionalSpawnData(buf: FriendlyByteBuf) {
         super.loadAdditionalSpawnData(buf)
         this.initSourceItem(buf.readItem())
+        attachmentHolder.onSpawn()
     }
 
     override fun containerChanged(container: Container) {
@@ -255,5 +282,9 @@ class MobMincerEntity(level: Level) :
     override fun openCustomInventoryScreen(player: Player) {
         if (!(level() as Level).isClientSide) {
         }
+    }
+
+    fun hasAttachment(attachment: Attachments): Boolean {
+        return attachmentHolder.hasAttachment(attachment)
     }
 }

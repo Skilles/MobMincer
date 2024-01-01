@@ -1,8 +1,12 @@
 package net.mobmincer.core.attachment
 
-import net.mobmincer.core.entity.MobMincerEntity
+class MobMincerAttachment<T : AttachmentInstance>(private val factory: AttachmentFactory<T>) {
 
-abstract class MobMincerAttachment(mincer: MobMincerEntity) {
+    fun create(): T {
+        return this.factory.create(this)
+    }
 
-
+    fun interface AttachmentFactory<T : AttachmentInstance> {
+        fun create(attachment: MobMincerAttachment<T>): T
+    }
 }
