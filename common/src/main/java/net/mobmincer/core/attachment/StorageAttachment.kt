@@ -8,7 +8,6 @@ import net.minecraft.world.*
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.ChestMenu
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.level.block.Blocks
 import net.mobmincer.core.entity.MobMincerEntity
 import kotlin.random.Random
 
@@ -32,7 +31,7 @@ class StorageAttachment(type: MobMincerAttachment<StorageAttachment>, mincer: Mo
             return
         }
         Containers.dropContents(mincer.level(), mincer.blockPosition(), this.inventory)
-        mincer.spawnAtLocation(Blocks.CHEST)
+        super.onDeath()
     }
 
     override fun onInteract(player: Player) {

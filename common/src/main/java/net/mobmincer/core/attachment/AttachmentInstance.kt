@@ -10,7 +10,9 @@ abstract class AttachmentInstance(val type: MobMincerAttachment<*>, protected va
 
     open fun onSpawn() {}
 
-    open fun onDeath() {}
+    open fun onDeath() {
+        mincer.spawnAtLocation(type.item)
+    }
 
     open fun onMince(dealtDamage: Float) {}
 

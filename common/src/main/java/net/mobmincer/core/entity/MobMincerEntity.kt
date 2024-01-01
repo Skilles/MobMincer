@@ -40,15 +40,13 @@ class MobMincerEntity(level: Level) :
     ) {
 
     var currentMinceTick = 0
-
     var maxMinceTick: Int = MobMincerConfig.CONFIG.maxMinceTick.get()
-
     var durability = 0
 
-    private lateinit var lootFactory: LootFactory
+    private lateinit var lootFactory: LootFactory // not initialized on client
     private lateinit var itemEnchantments: Map<Enchantment, Int>
     lateinit var sourceStack: ItemStack
-    private val attachmentHolder = AttachmentHolder(this)
+    private val attachments = AttachmentHolder(this)
 
     var isErrored: Boolean
         get() = entityData.get(IS_ERRORED)
@@ -75,7 +73,7 @@ class MobMincerEntity(level: Level) :
     }
 
     fun hasAttachment(attachment: Attachments): Boolean {
-        return attachmentHolder.hasAttachment(attachment)
+        return attachments.hasAttachment(attachment)
     }
 
     private fun initSourceItem(sourceStack: ItemStack) {
@@ -125,7 +123,7 @@ class MobMincerEntity(level: Level) :
                     damageSources().indirectMagic(this, this),
                     damage
                 )
-                attachmentHolder.onMince(damage)
+                attachments.onMince(damage)
                 takeDurabilityDamage()
                 level.sendParticles(
                     ParticleTypes.HAPPY_VILLAGER, this.x, this.y + this.bbHeight, this.z,
@@ -171,7 +169,7 @@ class MobMincerEntity(level: Level) :
                 if (!itemEnchantments.containsKey(Enchantments.MOB_LOOTING)) {
                     it.count = 1
                 }
-                attachmentHolder.getAttachment(Attachments.STORAGE)?.let { attachment ->
+                attachments.getAttachment(Attachments.STORAGE)?.let { attachment ->
                     attachment as StorageAttachment
                     if (attachment.inventory.canAddItem(it)) {
                         attachment.inventory.addItem(it)
@@ -206,7 +204,7 @@ class MobMincerEntity(level: Level) :
 
     override fun destroy(discard: Boolean) {
         target.removeTag("mob_mincer")
-        attachmentHolder.onDeath()
+        attachments.onDeath()
         super.destroy(discard)
     }
 
@@ -222,13 +220,13 @@ class MobMincerEntity(level: Level) :
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult {
         if (!player.isShiftKeyDown) {
-            attachmentHolder.onInteract(player)
+            attachments.onInteract(player)
             return InteractionResult.sidedSuccess((this.level() as Level).isClientSide)
         }
 
         if (!player.mainHandItem.isEmpty && player.isShiftKeyDown) {
             // We are holding an item, so lets try to add it as an attachment
-            if (attachmentHolder.tryAddAttachment(player.mainHandItem.item)) {
+            if (attachments.tryAddAttachment(player.mainHandItem.item)) {
                 player.mainHandItem.shrink(1)
                 return InteractionResult.sidedSuccess((this.level() as Level).isClientSide)
             }
@@ -260,8 +258,8 @@ class MobMincerEntity(level: Level) :
         super.readAdditionalSaveData(compound)
         if (compound.contains("SourceStack") && compound.contains("Attachments")) {
             this.initSourceItem(ItemStack.of(compound.getCompound("SourceStack")))
-            attachmentHolder.fromTag(compound.getList("Attachments", 10))
-            attachmentHolder.onSpawn()
+            attachments.fromTag(compound.getList("Attachments", 10))
+            attachments.onSpawn()
         } else {
             destroy(true)
         }
@@ -270,7 +268,7 @@ class MobMincerEntity(level: Level) :
     override fun addAdditionalSaveData(compound: CompoundTag) {
         super.addAdditionalSaveData(compound)
         compound.put("SourceStack", sourceStack.save(CompoundTag()))
-        compound.put("Attachments", attachmentHolder.toTag())
+        compound.put("Attachments", attachments.toTag())
     }
 
     override fun saveAdditionalSpawnData(buf: FriendlyByteBuf) {
@@ -281,6 +279,6 @@ class MobMincerEntity(level: Level) :
     override fun loadAdditionalSpawnData(buf: FriendlyByteBuf) {
         super.loadAdditionalSpawnData(buf)
         this.initSourceItem(buf.readItem())
-        attachmentHolder.onSpawn()
+        attachments.onSpawn()
     }
 }
