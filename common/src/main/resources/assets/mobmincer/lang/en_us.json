@@ -7,5 +7,11 @@
   "mobmincer.waila.tooltip.durability": "Durability: %d",
   "mobmincer.waila.tooltip.progress": "%d%%",
   "mobmincer.waila.tooltip.errored": "Invalid Mob",
-  "config.jade.plugin_mobmincer.mob_mincer": "Mob Mincer"
+  "config.jade.plugin_mobmincer.mob_mincer": "Mob Mincer",
+  "mobmincer.config.maxMinceTick": "Max Mince Tick",
+  "mobmincer.config.baseDurability": "Base Durability",
+  "mobmincer.config.unbreakingBound": "Unbreaking Bound",
+  "mobmincer.config.mobDamagePercent": "Mob Damage Percent",
+  "mobmincer.config.coloredMobs": "Colored Mobs",
+  "mobmincer.config.allowDispensing": "Allow Dispensing"
 }

@@ -26,12 +26,11 @@ class StorageAttachment(type: MobMincerAttachment<StorageAttachment>, mincer: Mo
         }
     }
 
-    override fun onDeath() {
-        if (mincer.level().isClientSide) {
-            return
+    override fun onDeath(reason: MobMincerEntity.DestroyReason): Boolean {
+        if (!mincer.level().isClientSide) {
+            Containers.dropContents(mincer.level(), mincer.blockPosition(), this.inventory)
         }
-        Containers.dropContents(mincer.level(), mincer.blockPosition(), this.inventory)
-        super.onDeath()
+        return super.onDeath(reason)
     }
 
     override fun onInteract(player: Player) {

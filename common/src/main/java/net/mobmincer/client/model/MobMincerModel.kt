@@ -63,17 +63,17 @@ class MobMincerModel(private val root: ModelPart) : HierarchicalModel<MobMincerE
         spreader.visible = false
         feeder.visible = false
         pinkTop.visible = false
-        if (entity.hasAttachment(Attachments.STORAGE)) {
+        if (entity.attachments.hasAttachment(Attachments.STORAGE)) {
             chest.visible = true
         }
-        if (entity.hasAttachment(Attachments.PACIFIER)) {
+        if (entity.attachments.hasAttachment(Attachments.PACIFIER)) {
             defaultTop.visible = false
             pinkTop.visible = true
         }
-        if (entity.hasAttachment(Attachments.SPREADER)) {
+        if (entity.attachments.hasAttachment(Attachments.SPREADER)) {
             spreader.visible = true
         }
-        if (entity.hasAttachment(Attachments.FEEDER)) {
+        if (entity.attachments.hasAttachment(Attachments.FEEDER)) {
             feeder.visible = true
         }
     }

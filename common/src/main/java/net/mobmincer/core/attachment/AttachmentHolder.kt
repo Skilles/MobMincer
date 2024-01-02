@@ -50,8 +50,8 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
         this.attachments.values.forEach { it.onSpawn() }
     }
 
-    fun onDeath() {
-        this.attachments.values.forEach { it.onDeath() }
+    fun onDeath(reason: MobMincerEntity.DestroyReason): Boolean {
+        return this.attachments.values.any { it.onDeath(reason) }
     }
 
     fun onMince(dealtDamage: Float) {
@@ -62,6 +62,10 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
         this.attachments.values.sortedByDescending(AttachmentInstance::getInteractionPriority).forEach {
             it.onInteract(player)
         }
+    }
+
+    fun onAttach() {
+        this.attachments.values.forEach { it.onAttach() }
     }
 
     fun toTag(): ListTag {

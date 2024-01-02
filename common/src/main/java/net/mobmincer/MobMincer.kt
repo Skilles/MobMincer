@@ -10,9 +10,9 @@ import net.mobmincer.client.render.MobMincerEntityRenderer
 import net.mobmincer.core.registry.MincerEntities
 import net.mobmincer.core.registry.MincerItems
 import net.mobmincer.core.registry.MincerTabs
+import net.mobmincer.network.MincerNetwork
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
 
 object MobMincer {
     const val MOD_ID: String = "mobmincer"
@@ -33,5 +33,7 @@ object MobMincer {
     fun initClient() {
         EntityRendererRegistry.register(MincerEntities.MOB_MINCER, MobMincerEntityRenderer.Provider())
         EntityModelLayerRegistry.register(MobMincerModel.LAYER_LOCATION, MobMincerModel::createBodyLayer)
+
+        MincerNetwork.registerClientRecievers()
     }
 }

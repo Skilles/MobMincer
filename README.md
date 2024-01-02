@@ -38,13 +38,14 @@ Enchant the Mob Mincer with an enchantment table or anvil
 
 #### Attachments
 
-Right-click the Mob Mincer with the attachment in your hand to attach it
+Shift + right-click the Mob Mincer with the attachment in your hand to attach it. If the mincer breaks it will drop any attachments.
 
-* Storage - Chest - Stores the drops in the mincer instead of dropping them on the ground
-* Pacifier - Chorus Fruit - Disables the mob's AI
-* Feeder - Enchanted Golden Apple - Feeds the mob to heal it after mincing
-* Spreader - Sculk Catalyst - Duplicates and attaches to two nearby mobs once the attached mob dies (only one will drop the loot)
-* ~~Umbrella - Prevents the mob from burning in sunlight~~ *Planned*
+| **Name** | **Item**               | **Description**                                                                             |
+|----------|------------------------|---------------------------------------------------------------------------------------------|
+| Storage  | Chest                  | Stores the drops in the mincer instead of dropping them on the ground. Right click to open. |
+| Pacifier | Chorus Fruit           | Disables the mob's AI.                                                                      |
+| Feeder   | Enchanted Golden Apple | Feeds the mob to heal it after mincing. Percentage healed can be configured.                |
+| Spreader | Sculk Catalyst         | Attaches to another mob if the minced mob dies.                                             |
 
 ### Configuration
 
@@ -52,18 +53,23 @@ Right-click the Mob Mincer with the attachment in your hand to attach it
 * `maxMinceTick` - The amount of ticks that pass between minces. Soulspeed scales this down. Default: 500
 * `unbreakingBound` - The bound used for the RNG when calculating unbreaking. Chance to ignore durability: (1 / bound) *
   unbreakingLevel. Default: 6
-* `mobDamagePercent` - The percentage of health the mob takes when minced. Default: 0.1
+* `mobDamagePercent` - The percentage (0 - 1.0) of health the mob takes when minced. Default: 0.1
+* `feederHealPercent` - The percentage (0 - 1.0) of damage healed from the feeder attachment. Default: 1
+* `coloredMobs` - Whether mobs should be colored based on their current health. Default: true
+* `allowDispensing` - Whether the Mob Mincer can be attached from a dispenser. Default: true
 
 ### Disclaimer
 
-The Mob Mincer can be used on any mob that has a loot table, but some mobs have special conditions (eg. slimes only dropping slime balls when they are the smallest size). This will be fixed in a later
-release along with drops customization.
+* The Mob Mincer can be used on any mob that has a loot table, but some mobs have special conditions (eg. slimes only dropping slime balls when they are the smallest size). This will be fixed in a
+  later
+  release along with more drop customization.
+* Not every mince will produce a drop, though this chance can be increased with looting. Without looting, you are limited to one drop per mince.
 
 ### Planned features
 
-- [ ] Better automation
 - [ ] Support for more mobs
 - [ ] More configuration
+- [ ] More attachments
 - [ ] Suggestions welcome!
 
 ### Dependencies
@@ -71,6 +77,7 @@ release along with drops customization.
 #### Both
 
 * [Architectury API](https://www.curseforge.com/minecraft/mc-mods/architectury-api)
+* [Forge Config Screens](https://www.curseforge.com/minecraft/mc-mods/config-menus-forge) (Optional)
 
 #### Fabric
 

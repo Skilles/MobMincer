@@ -17,6 +17,7 @@ import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.entity.AnimationState
 import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
@@ -32,10 +33,12 @@ import net.mobmincer.core.loot.LootFactory
 import net.mobmincer.core.loot.LootFactoryCache
 import net.mobmincer.core.registry.MincerEntities.MOB_MINCER
 import net.mobmincer.core.registry.MincerItems
+import net.mobmincer.network.MincerNetwork
+import java.util.*
 
-class MobMincerEntity(level: Level) :
+open class MobMincerEntity(type: EntityType<*>, level: Level) :
     WearableEntity(
-        MOB_MINCER.get(),
+        type,
         level
     ) {
 
@@ -46,7 +49,7 @@ class MobMincerEntity(level: Level) :
     private lateinit var lootFactory: LootFactory // not initialized on client
     private lateinit var itemEnchantments: Map<Enchantment, Int>
     lateinit var sourceStack: ItemStack
-    private val attachments = AttachmentHolder(this)
+    val attachments = AttachmentHolder(this)
 
     var isErrored: Boolean
         get() = entityData.get(IS_ERRORED)
@@ -59,23 +62,6 @@ class MobMincerEntity(level: Level) :
 
     val idleAnimationState = AnimationState()
 
-    fun spawn(
-        target: Mob,
-        sourceStack: ItemStack,
-        level: ServerLevel,
-    ) {
-        require(!level.isClientSide) { "Mob mincer entity must be spawned on the server" }
-        require(sourceStack.`is`(MincerItems.MOB_MINCER.get())) { "Source stack must be a mob mincer item" }
-        this.initSourceItem(sourceStack.copy())
-        super.initialize(target)
-        level.addFreshEntity(this)
-        sourceStack.shrink(1)
-    }
-
-    fun hasAttachment(attachment: Attachments): Boolean {
-        return attachments.hasAttachment(attachment)
-    }
-
     private fun initSourceItem(sourceStack: ItemStack) {
         this.durability = sourceStack.maxDamage - sourceStack.damageValue
         this.itemEnchantments = EnchantmentHelper.getEnchantments(sourceStack)
@@ -83,9 +69,19 @@ class MobMincerEntity(level: Level) :
     }
 
     override fun onTargetBind() {
+        this.target.addTag("mob_mincer")
         if (!this.level().isClientSide) {
             val killedByPlayer = itemEnchantments.containsKey(Enchantments.SILK_TOUCH)
             this.lootFactory = LootFactoryCache.getLootFactory(target as Mob, killedByPlayer, itemEnchantments.getOrDefault(Enchantments.MOB_LOOTING, 0))
+        }
+        attachments.onSpawn()
+    }
+
+    fun changeTarget(target: Mob) {
+        this.target.removeTag("mob_mincer")
+        this.initialize(target)
+        if (!this.level().isClientSide) {
+            MincerNetwork.updateClientMincerTarget(this)
         }
     }
 
@@ -93,6 +89,25 @@ class MobMincerEntity(level: Level) :
         private const val MAX_MINCE_TICK = 100
 
         private val IS_ERRORED = SynchedEntityData.defineId(MobMincerEntity::class.java, EntityDataSerializers.BOOLEAN)
+
+        fun spawn(
+            target: Mob,
+            sourceStack: ItemStack,
+            level: Level,
+        ): MobMincerEntity? {
+            require(!level.isClientSide) { "Mob mincer entity must be spawned on the server" }
+            require(sourceStack.`is`(MincerItems.MOB_MINCER.get())) { "Source stack must be a mob mincer item" }
+            val entity = MOB_MINCER.get().create(level) ?: return null
+            entity.initSourceItem(sourceStack.copy())
+            entity.initialize(target)
+            level.addFreshEntity(entity)
+            sourceStack.shrink(1)
+            return entity
+        }
+
+        fun canAttach(target: Mob, sourceStack: ItemStack): Boolean {
+            return LootFactoryCache.hasLoot(target, EnchantmentHelper.hasSilkTouch(sourceStack)) && !target.tags.contains("mob_mincer")
+        }
     }
 
     override fun doTick() {
@@ -109,7 +124,7 @@ class MobMincerEntity(level: Level) :
             if (target.isAlive) {
                 tickMince(this.level() as ServerLevel)
             } else {
-                dropAsItem()
+                dropAsItem(true)
             }
         }
     }
@@ -154,38 +169,58 @@ class MobMincerEntity(level: Level) :
             return
         }
         if (--durability <= 0) {
-            dropAsItem()
+            dropAsItem(false)
         }
     }
 
     private fun dropTargetLoot(): Boolean {
-        val loot = lootFactory.generateLoot()
-        if (loot.isEmpty) {
-            return false
-        }
-        loot.filter { it.count > 0 }
-            .randomOrNull()
-            ?.let {
-                if (!itemEnchantments.containsKey(Enchantments.MOB_LOOTING)) {
-                    it.count = 1
-                }
-                attachments.getAttachment(Attachments.STORAGE)?.let { attachment ->
-                    attachment as StorageAttachment
-                    if (attachment.inventory.canAddItem(it)) {
-                        attachment.inventory.addItem(it)
-                    } else {
-                        this.spawnAtLocation(it)
-                    }
-                } ?: this.spawnAtLocation(it)
+        val loot = generateLoot() ?: return false
+        loot.ifPresent {
+            if (!itemEnchantments.containsKey(Enchantments.MOB_LOOTING)) {
+                it.count = 1
             }
+            attachments.getAttachment(Attachments.STORAGE)?.let { attachment ->
+                attachment as StorageAttachment
+                if (attachment.inventory.canAddItem(it)) {
+                    attachment.inventory.addItem(it)
+                } else {
+                    this.spawnAtLocation(it)
+                }
+            } ?: this.spawnAtLocation(it)
+        }
         return true
     }
 
-    private fun dropAsItem() {
+    private fun generateLoot(): Optional<ItemStack>? {
+        val loot = lootFactory.generateLoot()
+        if (loot.isEmpty) {
+            return null
+        }
+        return Optional.ofNullable(
+            loot
+                .filter { it.count > 0 }
+                .randomOrNull()
+                ?.let {
+                    when {
+                        !itemEnchantments.containsKey(Enchantments.MOB_LOOTING) -> {
+                            it.count = 1
+                        }
+                    }
+                    it
+                }
+        )
+    }
+
+    private fun dropAsItem(killed: Boolean) {
         if (this.isRemoved || level().isClientSide) {
             return
         }
+
         if (durability > 0) {
+            if (killed && attachments.hasAttachment(Attachments.SPREADER)) {
+                destroy(DestroyReason.TARGET_KILLED)
+                return
+            }
             val itemStack = sourceStack
             itemStack.damageValue = itemStack.maxDamage - durability
             this.spawnAtLocation(itemStack)
@@ -199,23 +234,37 @@ class MobMincerEntity(level: Level) :
                 1.0f
             )
         }
-        destroy()
+        destroy(if (killed) DestroyReason.TARGET_KILLED else DestroyReason.BROKEN)
     }
 
-    override fun destroy(discard: Boolean) {
-        target.removeTag("mob_mincer")
-        attachments.onDeath()
-        super.destroy(discard)
+    enum class DestroyReason {
+        DISCARD,
+        TARGET_KILLED,
+        BROKEN
     }
 
+    private fun destroy(reason: DestroyReason = DestroyReason.DISCARD) {
+        if (!attachments.onDeath(reason)) {
+            this.destroy(reason == DestroyReason.DISCARD)
+        }
+    }
     override fun hurt(source: DamageSource, amount: Float): Boolean {
         if (this.isInvulnerableTo(source)) {
             return false
         }
         if (source.`is`(DamageTypes.PLAYER_ATTACK)) {
-            dropAsItem()
+            dropAsItem(false)
         }
         return true
+    }
+
+    override fun remove(reason: RemovalReason) {
+        target.removeTag("mob_mincer")
+        super.remove(reason)
+    }
+
+    override fun onClientRemoval() {
+        target.removeTag("mob_mincer")
     }
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult {
@@ -279,6 +328,6 @@ class MobMincerEntity(level: Level) :
     override fun loadAdditionalSpawnData(buf: FriendlyByteBuf) {
         super.loadAdditionalSpawnData(buf)
         this.initSourceItem(buf.readItem())
-        attachments.onSpawn()
+        this.target.addTag("mob_mincer")
     }
 }
