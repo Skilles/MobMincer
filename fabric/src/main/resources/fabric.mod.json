@@ -8,13 +8,13 @@
     "Skilles"
   ],
   "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/mobmincer",
+    "homepage": "https://modrinth.com/mod/mob-mincer",
     "sources": "https://github.com/Skilles/MobMincer",
     "issues": "https://github.com/Skilles/MobMincer/issues",
     "wiki": "https://skilles.gitbook.io/mobmincer/"
   },
   "license": "MIT",
-  "icon": "assets/mobmincer/icon.png",
+  "icon": "icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [

@@ -48,6 +48,11 @@ class MobMincerConfig private constructor(builder: ModConfigSpec.Builder) {
         private val specPair: Pair<MobMincerConfig, ModConfigSpec> =
             ModConfigSpec.Builder().configure(::MobMincerConfig)
 
+        // To allow consuming the config without neoforge dependency
+        fun <T> getValue(path: String): T {
+            return specPair.right.get(path)
+        }
+
         val CONFIG: MobMincerConfig = specPair.left
         val SPEC: ModConfigSpec = specPair.right
     }

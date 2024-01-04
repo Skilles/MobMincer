@@ -14,6 +14,4 @@ dependencies {
     modApi("dev.architectury:architectury:${rootProject.property("architectury_version")}")
 
     api("fuzs.forgeconfigapiport:forgeconfigapiport-common:${rootProject.property("forge_config_version")}")
-
-    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.property("mixin_extras_version")}")!!)
 }

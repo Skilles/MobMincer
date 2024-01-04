@@ -6,6 +6,7 @@ import net.minecraft.core.dispenser.BlockSource
 import net.minecraft.core.dispenser.OptionalDispenseItemBehavior
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
+import net.minecraft.util.Mth
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.LivingEntity
@@ -19,6 +20,7 @@ import net.minecraft.world.level.block.DispenserBlock
 import net.minecraft.world.phys.AABB
 import net.mobmincer.core.config.MobMincerConfig
 import net.mobmincer.core.entity.MobMincerEntity
+import kotlin.math.max
 
 /**
  * A mob mincer item that can be placed on a mob. Over time, the mob will be "minced" and will drop loot until it dies.
@@ -50,6 +52,17 @@ class MobMincerItem(properties: Properties) : Item(properties) {
 
     override fun getEnchantmentValue(): Int {
         return 1
+    }
+
+    override fun getBarWidth(stack: ItemStack): Int {
+        val maxDamage = MobMincerConfig.CONFIG.baseDurability.get()
+        return Math.round(13.0f - stack.damageValue.toFloat() * 13.0f / maxDamage.toFloat())
+    }
+
+    override fun getBarColor(stack: ItemStack): Int {
+        val maxDamage = MobMincerConfig.CONFIG.baseDurability.get()
+        val f = max(0.0, ((maxDamage - stack.damageValue.toFloat()) / maxDamage).toDouble()).toFloat()
+        return Mth.hsvToRgb(f / 3.0f, 1.0f, 1.0f)
     }
 
     companion object {

@@ -61,7 +61,6 @@ tasks.processResources {
                 "group" to rootProject.property("maven_group"),
                 "version" to project.version,
 
-                "mod_id" to rootProject.property("mod_id"),
                 "minecraft_version" to rootProject.property("minecraft_version"),
                 "architectury_version" to rootProject.property("architectury_version"),
                 "kotlin_for_forge_version" to rootProject.property("kotlin_for_forge_version")

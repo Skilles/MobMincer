@@ -1,5 +1,5 @@
 modLoader = "kotlinforforge"
-loaderVersion = "[1,)"
+loaderVersion = "[4.7,)"
 issueTrackerURL = "https://github.com/Skilles/MobMincer/issues"
 license = "MIT"
 
@@ -11,7 +11,7 @@ authors = "Skilles"
 description = '''
 Harvest mobs over time.
 '''
-logoFile = "assets/mobmincer/icon.png"
+logoFile = "icon.png"
 
 [[mixins]]
 config = "mobmincer-common.mixins.json"
@@ -21,14 +21,14 @@ config = "mobmincer.mixins.json"
 [[dependencies.mobmincer]]
 modId = "neoforge"
 mandatory = true
-versionRange = "[20,)"
+versionRange = "[20.2,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.mobmincer]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.20.1,)"
+versionRange = "[1.20.2,)"
 ordering = "NONE"
 side = "BOTH"
 
@@ -36,5 +36,12 @@ side = "BOTH"
 modId = "architectury"
 mandatory = true
 versionRange = "[9.1.12,)"
-ordering = "AFTER"
+ordering = "BEFORE"
+side = "BOTH"
+
+[[dependencies.mobmincer]]
+modId = "kotlinforforge"
+mandatory = true
+versionRange = "[1.5.31,)"
+ordering = "BEFORE"
 side = "BOTH"
