@@ -1,17 +1,21 @@
+
 import groovy.lang.Closure
 import io.github.pacifistmc.forgix.plugin.ForgixMergeExtension
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 
 plugins {
-    id("java")
-    kotlin("jvm") version "2.0.0-Beta2"
-    kotlin("plugin.serialization") version "2.0.0-Beta2"
+    java
+    kotlin("jvm") version "1.9.22"
+    kotlin("plugin.serialization") version "1.9.22"
     id("architectury-plugin") version "3.4-SNAPSHOT"
     id("dev.architectury.loom") version "1.4-SNAPSHOT" apply false
-    id("com.github.johnrengelman.shadow") version "8.1.1" apply false
-    id("io.github.pacifistmc.forgix") version "1.2.6"
-    id("io.github.detekt.gradle.compiler-plugin") version "1.23.4"
+    id("com.github.johnrengelman.shadow") version "8.1.+" apply false
+    id("io.github.pacifistmc.forgix") version "1.2.+"
+    id("io.github.detekt.gradle.compiler-plugin") version "1.+"
+    id("me.shedaniel.unified-publishing") version "0.1.+"
 }
+
+apply(plugin = "me.shedaniel.unified-publishing")
 
 dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.4")
@@ -29,9 +33,11 @@ forgix {
     outputDir = "build/libs/merged-${rootProject.property("minecraft_version")}"
 
     @Suppress("UNCHECKED_CAST")
-    custom(closureOf<ForgixMergeExtension.CustomContainer> {
-        projectName = "neoforge"
-    } as Closure<ForgixMergeExtension.CustomContainer>)
+    custom(
+        closureOf<ForgixMergeExtension.CustomContainer> {
+            projectName = "neoforge"
+        } as Closure<ForgixMergeExtension.CustomContainer>
+    )
 }
 
 detekt {
@@ -40,7 +46,9 @@ detekt {
 }
 
 subprojects {
-    apply(plugin = "dev.architectury.loom")
+    apply {
+        plugin("dev.architectury.loom")
+    }
 
     val loom = project.extensions.getByName<LoomGradleExtensionAPI>("loom")
 
@@ -49,10 +57,23 @@ subprojects {
     dependencies {
         "minecraft"("com.mojang:minecraft:${rootProject.property("minecraft_version")}")
         // Use mojmap with ParchmentMC
-        "mappings"(loom.layered {
-            officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-${rootProject.property("minecraft_version")}:${rootProject.property("parchment_version")}@zip")
-        })
+        "mappings"(
+            loom.layered {
+                officialMojangMappings()
+                parchment(
+                    "org.parchmentmc.data:parchment-${
+                        rootProject.property(
+                            "minecraft_version"
+                        )
+                    }:${rootProject.property("parchment_version")}@zip"
+                )
+            }
+        )
+        implementation(
+            annotationProcessor(
+                "io.github.llamalad7:mixinextras-common:${rootProject.property("mixin_extras_version")}"
+            )!!
+        )
     }
 
     repositories {
@@ -64,9 +85,13 @@ subprojects {
             name = "TerraformersMC"
             url = uri("https://maven.terraformersmc.com/")
         }
-        maven {
-            url = uri("https://www.cursemaven.com")
-            content {
+        exclusiveContent {
+            forRepository {
+                maven {
+                    url = uri("https://www.cursemaven.com")
+                }
+            }
+            filter {
                 includeGroup("curse.maven")
             }
         }
@@ -74,10 +99,11 @@ subprojects {
 }
 
 allprojects {
-    apply(plugin = "java")
-    apply(plugin = "kotlin")
-    apply(plugin = "architectury-plugin")
-    apply(plugin = "maven-publish")
+    apply {
+        plugin("java")
+        plugin("kotlin")
+        plugin("architectury-plugin")
+    }
 
     base.archivesName.set(rootProject.property("archives_base_name").toString())
     version = rootProject.property("mod_version").toString()
@@ -97,6 +123,7 @@ allprojects {
     tasks.withType(JavaCompile::class.java) {
         options.release.set(17)
         options.encoding = "UTF-8"
+        options.isFork = true
     }
 
     kotlin.target.compilations.all {
@@ -107,4 +134,42 @@ allprojects {
     java {
         withSourcesJar()
     }
+}
+
+unifiedPublishing {
+    project {
+        gameVersions = rootProject.property("enabled_versions").toString().split(",")
+        gameLoaders = rootProject.property("enabled_platforms").toString().split(",")
+        version = rootProject.property("mod_version").toString()
+        displayName = "Mob Mincer v${version.get()}"
+        changelog = File("changelogs/${rootProject.property("mod_version")}.md").readText()
+        debugMode = true
+
+        mainPublication.set(File("${forgix.outputDir}/${forgix.mergedJarName}"))
+
+        curseforge {
+            token = System.getenv("CF_TOKEN")
+            id = rootProject.property("curseforge_id").toString()
+        }
+
+        modrinth {
+            token = System.getenv("MODRINTH_TOKEN")
+            id = rootProject.property("modrinth_id").toString()
+        }
+
+        relations {
+            depends {
+                curseforge = "architectury-api"
+                modrinth = "architectury-api"
+            }
+        }
+    }
+}
+
+val buildAll = tasks.register("buildAll") {
+    dependsOn(tasks.clean, tasks.build, tasks.mergeJars)
+}
+
+tasks.publishUnified {
+    dependsOn(buildAll)
 }
