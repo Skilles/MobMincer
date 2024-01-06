@@ -1,0 +1,10 @@
+{
+  "homepage": "https://modrinth.com/mod/mob-mincer",
+  "1.20.2": {
+    "1.0.0": "Initial release"
+  },
+  "promos": {
+    "1.20.2-latest": "1.0.0",
+    "1.20.2-recommended": "1.0.0"
+  }
+}
