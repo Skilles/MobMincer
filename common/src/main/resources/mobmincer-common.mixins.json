@@ -7,11 +7,15 @@
     "ItemEntityMixin",
     "ItemMixin",
     "enchant.EnchantmentCategoryMixin",
-    "enchant.EnchantmentHelperMixin",
-    "enchant.EnchantmentMixin"
+    "enchant.EnchantmentMixin",
+    "loot.LootItemAccessor",
+    "loot.LootPoolAccessor",
+    "loot.LootTableAccessor",
+    "loot.MixinPlayerManager"
   ],
   "client": [
-    "LivingEntityRendererMixin"
+    "LivingEntityRendererMixin",
+    "loot.MixinClientConnection"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -30,7 +30,7 @@ import net.mobmincer.core.attachment.Attachments
 import net.mobmincer.core.attachment.StorageAttachment
 import net.mobmincer.core.config.MobMincerConfig
 import net.mobmincer.core.loot.LootFactory
-import net.mobmincer.core.loot.LootFactoryCache
+import net.mobmincer.core.loot.LootLookup
 import net.mobmincer.core.registry.MincerEntities.MOB_MINCER
 import net.mobmincer.core.registry.MincerItems
 import net.mobmincer.network.MincerNetwork
@@ -72,7 +72,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
         this.target.addTag("mob_mincer")
         if (!this.level().isClientSide) {
             val killedByPlayer = itemEnchantments.containsKey(Enchantments.SILK_TOUCH)
-            this.lootFactory = LootFactoryCache.getLootFactory(target as Mob, killedByPlayer, itemEnchantments.getOrDefault(Enchantments.MOB_LOOTING, 0))
+            this.lootFactory = LootFactory.create(target, killedByPlayer, itemEnchantments.getOrDefault(Enchantments.MOB_LOOTING, 0))
         }
         attachments.onSpawn()
     }
@@ -106,7 +106,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
         }
 
         fun canAttach(target: Mob, sourceStack: ItemStack): Boolean {
-            return LootFactoryCache.hasLoot(target, EnchantmentHelper.hasSilkTouch(sourceStack)) && !target.tags.contains("mob_mincer")
+            return LootLookup.hasLoot(target, EnchantmentHelper.hasSilkTouch(sourceStack)) && !target.tags.contains(ROOT_TAG)
         }
     }
 
