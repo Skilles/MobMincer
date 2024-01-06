@@ -1,4 +1,4 @@
-package net.mobmincer.forge.compat.jade
+package net.mobmincer.compat.jade
 
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component

@@ -1,10 +1,13 @@
 package net.mobmincer.forge.compat.jade
 
+import net.mobmincer.compat.jade.MobMincerComponentProvider
 import net.mobmincer.core.entity.MobMincerEntity
 import snownee.jade.api.IWailaClientRegistration
 import snownee.jade.api.IWailaCommonRegistration
 import snownee.jade.api.IWailaPlugin
+import snownee.jade.api.WailaPlugin
 
+@WailaPlugin
 class MobMincerPlugin : IWailaPlugin {
     override fun register(registration: IWailaCommonRegistration) {
         registration.registerEntityDataProvider(
