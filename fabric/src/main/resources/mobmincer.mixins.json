@@ -1,10 +1,12 @@
 {
   "required": true,
-  "package": "net.mobmincer.mixin.fabric",
+  "package": "net.mobmincer.fabric.mixin",
   "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8",
   "client": [],
-  "mixins": [],
+  "mixins": [
+    "enchant.EnchantmentHelperMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
