@@ -85,6 +85,10 @@ subprojects {
             name = "TerraformersMC"
             url = uri("https://maven.terraformersmc.com/")
         }
+        maven {
+            name = "Jared's maven"
+            url = uri("https://maven.blamejared.com/")
+        }
         exclusiveContent {
             forRepository {
                 maven {

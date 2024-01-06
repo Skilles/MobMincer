@@ -34,6 +34,12 @@
         "adapter": "kotlin",
         "value": "net.mobmincer.fabriclike.compat.jade.MobMincerPlugin"
       }
+    ],
+    "jei_mod_plugin": [
+      {
+        "adapter": "kotlin",
+        "value": "net.mobmincer.compat.jei.MobMincerJeiPlugin"
+      }
     ]
   },
   "mixins": [

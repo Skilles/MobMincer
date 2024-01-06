@@ -23,5 +23,7 @@ dependencies {
 
     modImplementation("curse.maven:jade-324717:${rootProject.property("jade_version_fabric")}")
 
-    modImplementation("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${rootProject.property("forge_config_version")}")
+    modImplementation(
+        "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${rootProject.property("forge_config_version")}"
+    )
 }
