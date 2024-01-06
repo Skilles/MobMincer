@@ -147,7 +147,7 @@ unifiedPublishing {
         version = rootProject.property("mod_version").toString()
         displayName = "Mob Mincer v${version.get()}"
         changelog = File("changelogs/${rootProject.property("mod_version")}.md").readText()
-        debugMode = true
+        //debugMode = true
 
         mainPublication.set(File("${forgix.outputDir}/${forgix.mergedJarName}"))
 
