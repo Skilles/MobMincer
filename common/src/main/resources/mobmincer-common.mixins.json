@@ -6,6 +6,7 @@
   "mixins": [
     "ItemEntityMixin",
     "ItemMixin",
+    "LivingEntityMixin",
     "enchant.EnchantmentCategoryMixin",
     "enchant.EnchantmentMixin",
     "loot.LootItemAccessor",

@@ -44,6 +44,11 @@ class MobMincerConfig private constructor(builder: ModConfigSpec.Builder) {
         .translation("mobmincer.config.allowDispensing")
         .define("allowDispensing", true)
 
+    val allowKillLoot: ModConfigSpec.BooleanValue = builder
+        .comment("Whether the mob should still drop loot when it dies after it has been minced at least once")
+        .translation("mobmincer.config.allowKillLoot")
+        .define("allowKillLoot", false)
+
     companion object {
         private val specPair: Pair<MobMincerConfig, ModConfigSpec> =
             ModConfigSpec.Builder().configure(::MobMincerConfig)

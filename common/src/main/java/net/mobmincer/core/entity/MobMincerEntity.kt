@@ -69,7 +69,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
     }
 
     override fun onTargetBind() {
-        this.target.addTag("mob_mincer")
+        this.target.addTag(ROOT_TAG)
         if (!this.level().isClientSide) {
             val killedByPlayer = itemEnchantments.containsKey(Enchantments.SILK_TOUCH)
             this.lootFactory = LootFactory.create(target, killedByPlayer, itemEnchantments.getOrDefault(Enchantments.MOB_LOOTING, 0))
@@ -78,7 +78,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
     }
 
     fun changeTarget(target: Mob) {
-        this.target.removeTag("mob_mincer")
+        this.target.removeTag(ROOT_TAG)
         this.initialize(target)
         if (!this.level().isClientSide) {
             MincerNetwork.updateClientMincerTarget(this)
@@ -89,6 +89,9 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
         private const val MAX_MINCE_TICK = 100
 
         private val IS_ERRORED = SynchedEntityData.defineId(MobMincerEntity::class.java, EntityDataSerializers.BOOLEAN)
+
+        const val ROOT_TAG = "mobmincer"
+        const val TAG_SKIP_LOOT = "${ROOT_TAG}:skip_loot"
 
         fun spawn(
             target: Mob,
@@ -187,6 +190,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
                     this.spawnAtLocation(it)
                 }
             } ?: this.spawnAtLocation(it)
+            target.addTag(TAG_SKIP_LOOT)
         }
         return true
     }
@@ -259,12 +263,12 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
     }
 
     override fun remove(reason: RemovalReason) {
-        target.removeTag("mob_mincer")
+        target.removeTag(ROOT_TAG)
         super.remove(reason)
     }
 
     override fun onClientRemoval() {
-        target.removeTag("mob_mincer")
+        target.removeTag(ROOT_TAG)
     }
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult {
@@ -328,6 +332,6 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
     override fun loadAdditionalSpawnData(buf: FriendlyByteBuf) {
         super.loadAdditionalSpawnData(buf)
         this.initSourceItem(buf.readItem())
-        this.target.addTag("mob_mincer")
+        this.target.addTag(ROOT_TAG)
     }
 }

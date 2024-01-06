@@ -58,6 +58,7 @@ Shift + right-click the Mob Mincer with the attachment in your hand to attach it
 * `feederHealPercent` - The percentage (0 - 1.0) of damage healed from the feeder attachment. Default: 1
 * `coloredMobs` - Whether mobs should be colored based on their current health. Default: true
 * `allowDispensing` - Whether the Mob Mincer can be attached from a dispenser. Default: true
+* `allowKillDrop` - Whether the mob should still drop loot when it dies after it has been minced at least once. Default: false
 
 ### Disclaimer
 
