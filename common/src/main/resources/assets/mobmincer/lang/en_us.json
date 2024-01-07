@@ -13,5 +13,6 @@
   "mobmincer.config.unbreakingBound": "Unbreaking Bound",
   "mobmincer.config.mobDamagePercent": "Mob Damage Percent",
   "mobmincer.config.coloredMobs": "Colored Mobs",
-  "mobmincer.config.allowDispensing": "Allow Dispensing"
+  "mobmincer.config.allowDispensing": "Allow Dispensing",
+  "mobmincer.jei.category.title": "Mob Mincer"
 }
