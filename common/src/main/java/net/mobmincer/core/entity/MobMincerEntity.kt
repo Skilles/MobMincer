@@ -198,6 +198,10 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
     }
 
     private fun generateLoot(): Optional<ItemStack>? {
+        val dropChance = MobMincerConfig.CONFIG.dropChance.get()
+        if (random.nextDouble() > dropChance) {
+            return null
+        }
         val loot = lootFactory.generateLoot()
         if (loot.isEmpty) {
             return null

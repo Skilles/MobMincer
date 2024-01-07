@@ -49,6 +49,11 @@ class MobMincerConfig private constructor(builder: ModConfigSpec.Builder) {
         .translation("mobmincer.config.allowKillLoot")
         .define("allowKillLoot", false)
 
+    val dropChance: ModConfigSpec.DoubleValue = builder
+        .comment("The chance for the mob to drop loot when mincing")
+        .translation("mobmincer.config.dropChance")
+        .defineInRange("dropChance", 1.0, 0.0, 1.0)
+
     companion object {
         private val specPair: Pair<MobMincerConfig, ModConfigSpec> =
             ModConfigSpec.Builder().configure(::MobMincerConfig)
