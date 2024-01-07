@@ -7,7 +7,6 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.mobmincer.client.model.MobMincerModel
 import net.mobmincer.client.render.MobMincerEntityRenderer
-import net.mobmincer.core.loot.SpawnEggLookup
 import net.mobmincer.core.registry.MincerEntities
 import net.mobmincer.core.registry.MincerItems
 import net.mobmincer.core.registry.MincerTabs
@@ -28,10 +27,6 @@ object MobMincer {
 
         LifecycleEvent.SERVER_LEVEL_UNLOAD.register {
             FakePlayer.unload(it)
-        }
-
-        LifecycleEvent.SETUP.register {
-            SpawnEggLookup.setup()
         }
 
         // LootEvent.MODIFY_LOOT_TABLE.register(LootFactoryCache::loadAll)

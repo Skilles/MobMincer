@@ -5,6 +5,9 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.level.storage.loot.LootTable
 import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * Used to lookup loot tables for entities. On the server, this can be used to generate loot for entities.
+ */
 object LootLookup {
     private val ID_TO_LOOT: MutableMap<ResourceLocation, LootStack> =
         ConcurrentHashMap<ResourceLocation, LootStack>()
