@@ -23,13 +23,13 @@ class LootStackImpl(private val table: LootTable, entries: List<LootStack.LootSt
         emptyList()
     } else {
         backingList.subList(playerOnlyIndex, backingList.size)
-    }.map { ItemStack(it.item) }
+    }.map { it.item }
 
     override val nonPlayerOnly: List<ItemStack> = if (playerOnlyIndex == -1) {
         backingList
     } else {
         backingList.subList(0, playerOnlyIndex)
-    }.map { ItemStack(it.item) }
+    }.map { it.item }
 
     override fun generateServerLoot(entity: LivingEntity, includePlayerLoot: Boolean, lootingLevel: Int): ObjectArrayList<ItemStack> {
         val level = entity.level() as ServerLevel

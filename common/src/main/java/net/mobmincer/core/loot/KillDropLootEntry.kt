@@ -2,12 +2,11 @@ package net.mobmincer.core.loot
 
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
 import net.minecraft.world.item.SpawnEggItem
 
 data class KillDropLootEntry(private val entityType: EntityType<*>) {
-    val spawnEgg: ItemStack
-        get() = ItemStack(SpawnEggItem.byId(entityType) ?: Items.BARRIER)
+    val spawnEgg: ItemStack?
+        get() = SpawnEggItem.byId(entityType)?.let { ItemStack(it) }
 
     private val outputs: LootStack = LootStack.from(entityType.defaultLootTable)
 

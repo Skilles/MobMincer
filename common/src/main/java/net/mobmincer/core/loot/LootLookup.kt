@@ -21,7 +21,7 @@ object LootLookup {
     }
 
     fun hasLoot(entity: LivingEntity, killedByPlayer: Boolean): Boolean {
-        return hasLoot(entity.lootTable) && (!killedByPlayer || ID_TO_LOOT[entity.lootTable]!!.playerOnly.isNotEmpty())
+        return hasLoot(entity.lootTable) && (killedByPlayer || ID_TO_LOOT[entity.lootTable]!!.nonPlayerOnly.isNotEmpty())
     }
 
     fun get(identifier: ResourceLocation): LootStack? {

@@ -11,7 +11,6 @@ import mezz.jei.api.recipe.RecipeType
 import mezz.jei.api.recipe.category.IRecipeCategory
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
-import net.minecraft.locale.Language
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.ItemStack
@@ -21,6 +20,11 @@ import net.mobmincer.core.loot.LootLookup
 import net.mobmincer.core.registry.MincerItems
 
 class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategory<MobMincerRecipe> {
+
+    private val progressArrow: IDrawable = helpers.guiHelper.drawableBuilder(PROGRESS_SPRITE, 0, 0, 24, 16)
+        .setTextureSize(24, 17)
+        .buildAnimated(100, IDrawableAnimated.StartDirection.LEFT, false)
+
     companion object {
         const val HEIGHT = 60
         const val WIDTH = 75
@@ -67,20 +71,7 @@ class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategor
         val rowCount = dropRows.size
         val rowHeight = slotSize
         val totalRowHeight = rowHeight * rowCount + rowSpacing * (rowCount - 1) + slotSize
-        var currentY = (HEIGHT - totalRowHeight) / 2
-
-        val progressArrow = helpers.guiHelper.drawableBuilder(PROGRESS_SPRITE, 0, 0, 24, 16)
-            .setTextureSize(24, 17)
-            .buildAnimated(100, IDrawableAnimated.StartDirection.LEFT, false)
-
-        // Centering the spawn egg slot at the top
-        val spawnEggX = (WIDTH - slotSize) / 2
-        builder.addSlot(RecipeIngredientRole.RENDER_ONLY, spawnEggX, 6)
-            .setSlotName("spawn_egg")
-            .addItemStack(outputs.spawnEgg)
-
-        // Adjust Y position for the first row
-        currentY += slotSize + rowSpacing
+        var currentY = (HEIGHT - totalRowHeight) / 2 + slotSize + rowSpacing + 3
         val rowWidth = slotSize * 2 + progressArrow.width
         val startX = (WIDTH - rowWidth) / 2
 
@@ -123,13 +114,22 @@ class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategor
     override fun draw(recipe: MobMincerRecipe, recipeSlotsView: IRecipeSlotsView, guiGraphics: GuiGraphics, mouseX: Double, mouseY: Double) {
         val minecraft = Minecraft.getInstance()
 
+        val centerTextX = (WIDTH - minecraft.font.width(recipe.entityType.description)) / 2
+        val centerItemX = (WIDTH - 16) / 2
         guiGraphics.drawString(
             minecraft.font,
-            Language.getInstance().getVisualOrder(recipe.entityType.description),
-            (WIDTH - minecraft.font.width(recipe.entityType.description)) / 2,
+            recipe.entityType.description,
+            centerTextX,
             0,
-            -0x1000000,
+            0x404040,
             false
         )
+        recipe.lootEntry.spawnEgg?.let {
+            guiGraphics.renderFakeItem(
+                it,
+                centerItemX,
+                7
+            )
+        }
     }
 }
