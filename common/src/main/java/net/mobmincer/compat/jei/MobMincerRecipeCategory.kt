@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.Enchantments
-import net.mobmincer.MobMincer
 import net.mobmincer.core.loot.LootLookup
 import net.mobmincer.core.registry.MincerItems
 
@@ -35,11 +34,11 @@ class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategor
     }
 
     override fun getRecipeType(): RecipeType<MobMincerRecipe> {
-        return RecipeType.create(MobMincer.MOD_ID, "mob_mincer", MobMincerRecipe::class.java)
+        return MobMincerRecipe.TYPE
     }
 
     override fun getTitle(): Component {
-        return Component.translatable("mob_mincer.jei.category.title")
+        return Component.translatable("mobmincer.jei.category.title")
     }
 
     override fun getBackground(): IDrawable {
@@ -74,6 +73,11 @@ class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategor
         var currentY = (HEIGHT - totalRowHeight) / 2 + slotSize + rowSpacing + 3
         val rowWidth = slotSize * 2 + progressArrow.width
         val startX = (WIDTH - rowWidth) / 2
+
+        outputs.spawnEgg?.let {
+            builder.addInvisibleIngredients(RecipeIngredientRole.INPUT)
+                .addItemStack(it)
+        }
 
         for ((i, row) in dropRows.withIndex()) {
             val mincerStack = ItemStack(MincerItems.MOB_MINCER)

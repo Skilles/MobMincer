@@ -14,5 +14,10 @@
   "mobmincer.config.mobDamagePercent": "Mob Damage Percent",
   "mobmincer.config.coloredMobs": "Colored Mobs",
   "mobmincer.config.allowDispensing": "Allow Dispensing",
-  "mobmincer.jei.category.title": "Mob Mincer"
+  "mobmincer.jei.category.title": "Mob Mincer",
+  "mobmincer.attachment.storage": "Storage",
+  "mobmincer.attachment.feeder": "Feeder",
+  "mobmincer.attachment.pacifier": "Pacifier",
+  "mobmincer.attachment.spreader": "Spreader",
+  "mobmincer.jei.info.header": "Attachments (Shift + Right Click)"
 }

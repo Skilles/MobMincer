@@ -43,7 +43,7 @@ interface LootStack : List<LootStack.LootStackEntry> {
                 val entries: List<LootPoolEntryContainer> = (pool as LootPoolAccessor).entries
                 for (entry in entries) {
                     if (entry is LootItem) {
-                        stackEntries.add(createEntry(entry, pool))
+                        createEntry(entry, pool)?.let { stackEntries.add(it) }
                     }
                 }
             }
@@ -53,7 +53,7 @@ interface LootStack : List<LootStack.LootStackEntry> {
         private fun createEntry(
             item: LootItem,
             pool: LootPool
-        ): LootStackEntry = LootStackEntry(item.getStack(), pool.isPlayerOnly())
+        ): LootStackEntry? = item.getStack()?.let { LootStackEntry(it, pool.isPlayerOnly()) }
     }
 
     data class LootStackEntry(val item: ItemStack, val playerOnly: Boolean)

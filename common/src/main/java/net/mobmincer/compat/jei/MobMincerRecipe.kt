@@ -15,7 +15,7 @@ class MobMincerRecipe(val entityType: EntityType<*>) {
     companion object {
         val TYPE: RecipeType<MobMincerRecipe> = RecipeType.create(
             MobMincer.MOD_ID,
-            "mob_mincer",
+            "mobmincer",
             MobMincerRecipe::class.java
         )
     }

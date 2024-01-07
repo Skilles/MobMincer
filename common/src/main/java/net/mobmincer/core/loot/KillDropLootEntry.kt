@@ -5,8 +5,9 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.SpawnEggItem
 
 data class KillDropLootEntry(private val entityType: EntityType<*>) {
+    private val spawnEggLazy = lazy { SpawnEggItem.byId(entityType)?.let { ItemStack(it) } }
     val spawnEgg: ItemStack?
-        get() = SpawnEggItem.byId(entityType)?.let { ItemStack(it) }
+        get() = spawnEggLazy.value
 
     private val outputs: LootStack = LootStack.from(entityType.defaultLootTable)
 

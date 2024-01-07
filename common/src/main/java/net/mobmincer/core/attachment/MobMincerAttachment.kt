@@ -3,7 +3,7 @@ package net.mobmincer.core.attachment
 import net.minecraft.network.chat.Component
 import net.mobmincer.core.entity.MobMincerEntity
 
-class MobMincerAttachment<T : AttachmentInstance>(type: Attachments, private val factory: AttachmentFactory<T>) {
+class MobMincerAttachment<T : AttachmentInstance>(type: Attachments, private val factory: AttachmentFactory<T>, val name: Component) {
     val item = type.item
 
     fun create(mincer: MobMincerEntity): T {
@@ -20,7 +20,11 @@ class MobMincerAttachment<T : AttachmentInstance>(type: Attachments, private val
         }
 
         fun build(): MobMincerAttachment<T> {
-            return MobMincerAttachment(type, factory)
+            return MobMincerAttachment(
+                type,
+                factory,
+                name ?: Component.translatable("mobmincer.attachment.${type.name.lowercase()}")
+            )
         }
 
         companion object {

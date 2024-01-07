@@ -26,4 +26,12 @@ internal object AttachmentRegistry {
     fun get(attachment: Attachments): MobMincerAttachment<*>? {
         return attachments[attachment]
     }
+
+    fun getName(attachment: MobMincerAttachment<*>): String {
+        return attachments.entries.first { it.value == attachment }.key.name
+    }
+
+    fun getEntries(): Set<Map.Entry<Attachments, MobMincerAttachment<*>>> {
+        return attachments.entries
+    }
 }
