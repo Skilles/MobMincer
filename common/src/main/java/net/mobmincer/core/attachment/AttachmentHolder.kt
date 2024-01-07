@@ -5,23 +5,17 @@ import net.minecraft.nbt.ListTag
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
 import net.mobmincer.core.entity.MobMincerEntity
+import net.mobmincer.util.EncodingUtils.getOrCreateTag
 import java.util.*
 
 class AttachmentHolder(private val mobMincer: MobMincerEntity) {
     private val attachments: MutableMap<Attachments, AttachmentInstance> = EnumMap(Attachments::class.java)
 
-    private fun addAttachment(attachment: Attachments) {
-        AttachmentRegistry.get(
-            attachment
-        )?.let {
-            this.attachments.put(
-                attachment,
-                it.create(mobMincer).let { instance ->
-                    instance.onAttach()
-                    instance
-                }
-            )
-        }
+    private fun addAttachment(attachment: Attachments): AttachmentInstance? {
+        return AttachmentRegistry.get(attachment)
+            ?.create(mobMincer)
+            ?.also(AttachmentInstance::onAttach)
+            ?.also { instance -> this.attachments[attachment] = instance }
     }
 
     fun removeAttachment(attachment: Attachments) {
@@ -51,7 +45,18 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
     }
 
     fun onDeath(reason: MobMincerEntity.DestroyReason): Boolean {
-        return this.attachments.values.any { it.onDeath(reason) }
+        val stackTag = mobMincer.sourceStack.getOrCreateTagElement("MobMincer")
+        val newTag = ListTag()
+        var stopMincerDeath = false
+        this.attachments.entries.forEach {
+            val thisTag = CompoundTag()
+            thisTag.putString("Type", it.key.name)
+            it.value.toTag()?.let { tag -> thisTag.put("Data", tag) }
+            newTag.add(thisTag)
+            stopMincerDeath = it.value.onDeath(reason)
+        }
+        stackTag.put("Attachments", newTag)
+        return stopMincerDeath
     }
 
     fun onMince(dealtDamage: Float) {
@@ -65,10 +70,22 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
     }
 
     fun onAttach() {
-        this.attachments.values.forEach { it.onAttach() }
+        require(attachments.isEmpty()) { "Attachments already exist" }
+        this.mobMincer.sourceStack.getOrCreateTagElement(
+            "MobMincer"
+        ).getOrCreateTag("Attachments", ListTag::class.java).forEach { tag ->
+            tag as CompoundTag
+            val name = tag.getString("Type")
+            val data = tag.getCompound("Data")
+            val attachment = addAttachment(Attachments.valueOf(name))
+            attachment?.let {
+                it.fromTag(data)
+                it.onAttach()
+            } ?: error("Failed to add attachment $name from item")
+        }
     }
 
-    fun toTag(): ListTag {
+    fun toEntityTag(): ListTag {
         val tag = ListTag()
         this.attachments.forEach { (attachment, instance) ->
             val baseTag = CompoundTag()
@@ -81,7 +98,7 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
         return tag
     }
 
-    fun fromTag(tag: ListTag) {
+    fun fromEntityTag(tag: ListTag) {
         tag.forEach { attachmentTag ->
             attachmentTag as CompoundTag
             val attachment = Attachments.valueOf(attachmentTag.getString("type"))

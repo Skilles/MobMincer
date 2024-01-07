@@ -11,7 +11,9 @@ abstract class AttachmentInstance(val type: MobMincerAttachment<*>, protected va
     open fun onSpawn() {}
 
     open fun onDeath(reason: MobMincerEntity.DestroyReason): Boolean {
-        mincer.spawnAtLocation(type.item)
+        if (reason != MobMincerEntity.DestroyReason.REMOVED) {
+            mincer.spawnAtLocation(type.item)
+        }
 
         return false
     }
@@ -21,6 +23,14 @@ abstract class AttachmentInstance(val type: MobMincerAttachment<*>, protected va
     open fun onInteract(player: Player) {}
 
     open fun serialize(tag: CompoundTag) {
+
+    }
+
+    open fun toTag(): CompoundTag? {
+        return null
+    }
+
+    open fun fromTag(tag: CompoundTag) {
 
     }
 

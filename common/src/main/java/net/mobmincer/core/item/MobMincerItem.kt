@@ -1,9 +1,11 @@
 package net.mobmincer.core.item
 
+import net.minecraft.ChatFormatting
 import net.minecraft.core.Direction
 import net.minecraft.core.Position
 import net.minecraft.core.dispenser.BlockSource
 import net.minecraft.core.dispenser.OptionalDispenseItemBehavior
+import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.util.Mth
@@ -15,9 +17,12 @@ import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.DispenserBlock
 import net.minecraft.world.phys.AABB
+import net.mobmincer.core.attachment.AttachmentRegistry
+import net.mobmincer.core.attachment.Attachments
 import net.mobmincer.core.config.MobMincerConfig
 import net.mobmincer.core.entity.MobMincerEntity
 import kotlin.math.max
@@ -113,6 +118,27 @@ class MobMincerItem(properties: Properties) : Item(properties) {
                 level.addFreshEntity(itemEntity)
                 if (MobMincerConfig.CONFIG.allowDispensing.get()) {
                     itemEntity.addTag("mob_mincer:dispensed")
+                }
+            }
+        }
+    }
+
+    override fun appendHoverText(stack: ItemStack, level: Level?, tooltipComponents: MutableList<Component>, isAdvanced: TooltipFlag) {
+        if (!stack.hasTag()) {
+            return
+        }
+        val stackTag = stack.tag!!
+        if (stackTag.contains("MobMincer")) {
+            val tag = stackTag.getCompound("MobMincer")
+            if (tag.contains("Attachments")) {
+                val attachments = tag.getList("Attachments", 10)
+                tooltipComponents.add(Component.literal("Attachments:"))
+                for (i in 0 until attachments.size) {
+                    val attachment = attachments.getCompound(i)
+                    val type = Attachments.valueOf(attachment.getString("Type"))
+                    AttachmentRegistry.get(type)?.name?.let { name ->
+                        tooltipComponents.add(Component.literal("- ").append(name).withStyle(ChatFormatting.GRAY))
+                    }
                 }
             }
         }

@@ -15,10 +15,7 @@ import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageTypes
-import net.minecraft.world.entity.AnimationState
-import net.minecraft.world.entity.Entity
-import net.minecraft.world.entity.EntityType
-import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.*
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.Enchantment
@@ -68,6 +65,14 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
         this.sourceStack = sourceStack
     }
 
+    private fun initialize(target: LivingEntity, sourceStack: ItemStack, level: ServerLevel) {
+        initSourceItem(sourceStack.copy())
+        super.initialize(target)
+        sourceStack.shrink(1)
+        level.addFreshEntity(this)
+        attachments.onAttach()
+    }
+
     override fun onTargetBind() {
         this.target.addTag(ROOT_TAG)
         if (!this.level().isClientSide) {
@@ -79,7 +84,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
 
     fun changeTarget(target: Mob) {
         this.target.removeTag(ROOT_TAG)
-        this.initialize(target)
+        super.initialize(target)
         if (!this.level().isClientSide) {
             MincerNetwork.updateClientMincerTarget(this)
         }
@@ -101,10 +106,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
             require(!level.isClientSide) { "Mob mincer entity must be spawned on the server" }
             require(sourceStack.`is`(MincerItems.MOB_MINCER.get())) { "Source stack must be a mob mincer item" }
             val entity = MOB_MINCER.get().create(level) ?: return null
-            entity.initSourceItem(sourceStack.copy())
-            entity.initialize(target)
-            level.addFreshEntity(entity)
-            sourceStack.shrink(1)
+            entity.initialize(target, sourceStack, level as ServerLevel)
             return entity
         }
 
@@ -127,7 +129,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
             if (target.isAlive) {
                 tickMince(this.level() as ServerLevel)
             } else {
-                dropAsItem(true)
+                dropAsItem(DestroyReason.TARGET_KILLED)
             }
         }
     }
@@ -172,7 +174,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
             return
         }
         if (--durability <= 0) {
-            dropAsItem(false)
+            dropAsItem(DestroyReason.BROKEN)
         }
     }
 
@@ -204,30 +206,25 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
             loot
                 .filter { it.count > 0 }
                 .randomOrNull()
-                ?.let {
-                    when {
-                        !itemEnchantments.containsKey(Enchantments.MOB_LOOTING) -> {
-                            it.count = 1
-                        }
+                ?.also {
+                    if (!itemEnchantments.containsKey(Enchantments.MOB_LOOTING)) {
+                        it.count = 1
                     }
-                    it
                 }
         )
     }
 
-    private fun dropAsItem(killed: Boolean) {
+    private fun dropAsItem(reason: DestroyReason) {
         if (this.isRemoved || level().isClientSide) {
             return
         }
 
         if (durability > 0) {
-            if (killed && attachments.hasAttachment(Attachments.SPREADER)) {
-                destroy(DestroyReason.TARGET_KILLED)
+            if (reason == DestroyReason.TARGET_KILLED && attachments.hasAttachment(Attachments.SPREADER)) {
+                destroy(reason)
                 return
             }
-            val itemStack = sourceStack
-            itemStack.damageValue = itemStack.maxDamage - durability
-            this.spawnAtLocation(itemStack)
+            sourceStack.also { it.damageValue = it.maxDamage - durability }.also { spawnAtLocation(it) }
         } else {
             (level() as ServerLevel).playSound(
                 null,
@@ -238,12 +235,13 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
                 1.0f
             )
         }
-        destroy(if (killed) DestroyReason.TARGET_KILLED else DestroyReason.BROKEN)
+        destroy(reason)
     }
 
     enum class DestroyReason {
         DISCARD,
         TARGET_KILLED,
+        REMOVED,
         BROKEN
     }
 
@@ -257,7 +255,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
             return false
         }
         if (source.`is`(DamageTypes.PLAYER_ATTACK)) {
-            dropAsItem(false)
+            dropAsItem(DestroyReason.REMOVED)
         }
         return true
     }
@@ -311,7 +309,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
         super.readAdditionalSaveData(compound)
         if (compound.contains("SourceStack") && compound.contains("Attachments")) {
             this.initSourceItem(ItemStack.of(compound.getCompound("SourceStack")))
-            attachments.fromTag(compound.getList("Attachments", 10))
+            attachments.fromEntityTag(compound.getList("Attachments", 10))
             attachments.onSpawn()
         } else {
             destroy(true)
@@ -321,7 +319,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
     override fun addAdditionalSaveData(compound: CompoundTag) {
         super.addAdditionalSaveData(compound)
         compound.put("SourceStack", sourceStack.save(CompoundTag()))
-        compound.put("Attachments", attachments.toTag())
+        compound.put("Attachments", attachments.toEntityTag())
     }
 
     override fun saveAdditionalSpawnData(buf: FriendlyByteBuf) {
@@ -332,6 +330,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
     override fun loadAdditionalSpawnData(buf: FriendlyByteBuf) {
         super.loadAdditionalSpawnData(buf)
         this.initSourceItem(buf.readItem())
+        attachments.onAttach()
         this.target.addTag(ROOT_TAG)
     }
 }

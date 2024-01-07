@@ -15,7 +15,7 @@ import net.minecraft.world.level.storage.loot.LootTable
 import net.mobmincer.MobMincer
 import net.mobmincer.core.entity.MobMincerEntity
 import net.mobmincer.core.loot.LootLookup
-import net.mobmincer.util.JsonUtils
+import net.mobmincer.util.EncodingUtils.writeIdentifier
 import java.util.*
 import kotlin.math.min
 
@@ -96,7 +96,7 @@ object MincerNetwork {
                     NbtOps.INSTANCE,
                     table
                 ).result().ifPresentOrElse({
-                    JsonUtils.writeIdentifier(buf, identifier)
+                    buf.writeIdentifier(identifier)
                     buf.writeNbt(it)
                 }, {
                     MobMincer.logger.error("Failed to serialize loot table $identifier")
