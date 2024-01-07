@@ -151,14 +151,18 @@ unifiedPublishing {
 
         mainPublication.set(File("${forgix.outputDir}/${forgix.mergedJarName}"))
 
-        curseforge {
-            token = System.getenv("CF_TOKEN")
-            id = rootProject.property("curseforge_id").toString()
+        System.getenv("CF_TOKEN")?.let {
+            curseforge {
+                token = it
+                id = rootProject.property("curseforge_id").toString()
+            }
         }
 
-        modrinth {
-            token = System.getenv("MODRINTH_TOKEN")
-            id = rootProject.property("modrinth_id").toString()
+        System.getenv("MODRINTH_TOKEN")?.let {
+            modrinth {
+                token = it
+                id = rootProject.property("modrinth_id").toString()
+            }
         }
 
         relations {
