@@ -38,25 +38,25 @@ object MincerNetwork {
         }
 
         NetworkManager.registerReceiver(NetworkManager.s2c(), SEND_LOOT_DATA) { buf, context ->
-            // context.queue {
-            val size = buf.readInt()
-            for (i in 0 until size) {
-                val identifier = buf.readResourceLocation()
-                val receivedNbtData = buf.readNbt()
-                if (receivedNbtData != null) {
-                    val deserializeResult = LootTable.CODEC.parse(NbtOps.INSTANCE, receivedNbtData)
+            context.queue {
+                val size = buf.readInt()
+                for (i in 0 until size) {
+                    val identifier = buf.readResourceLocation()
+                    val receivedNbtData = buf.readNbt()
+                    if (receivedNbtData != null) {
+                        val deserializeResult = LootTable.CODEC.parse(NbtOps.INSTANCE, receivedNbtData)
 
-                    if (deserializeResult.result().isPresent) {
-                        val receivedLootTable = deserializeResult.result().get()
-                        // Use the deserialized LootTable
-                        LootLookup.set(identifier, receivedLootTable)
-                    } else {
-                        // Handle deserialization failure
-                        MobMincer.logger.error("Failed to deserialize loot table $identifier")
+                        if (deserializeResult.result().isPresent) {
+                            val receivedLootTable = deserializeResult.result().get()
+                            // Use the deserialized LootTable
+                            LootLookup.set(identifier, receivedLootTable)
+                        } else {
+                            // Handle deserialization failure
+                            MobMincer.logger.error("Failed to deserialize loot table $identifier")
+                        }
                     }
                 }
             }
-            // }
         }
     }
 
@@ -92,14 +92,12 @@ object MincerNetwork {
                 val identifier = names[j]
                 val table = lootManager.getLootTable(identifier)
                 LootLookup.set(identifier, table)
-                val result = LootTable.CODEC.encodeStart(
+                LootTable.CODEC.encodeStart(
                     NbtOps.INSTANCE,
                     table
-                ).result()
-
-                result.ifPresentOrElse({
+                ).result().ifPresentOrElse({
                     JsonUtils.writeIdentifier(buf, identifier)
-                    buf.writeNbt(result.get())
+                    buf.writeNbt(it)
                 }, {
                     MobMincer.logger.error("Failed to serialize loot table $identifier")
                 })
