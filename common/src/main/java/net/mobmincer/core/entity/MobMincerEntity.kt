@@ -88,8 +88,6 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
     }
 
     companion object {
-        private const val MAX_MINCE_TICK = 100
-
         private val IS_ERRORED = SynchedEntityData.defineId(MobMincerEntity::class.java, EntityDataSerializers.BOOLEAN)
 
         const val ROOT_TAG = "mobmincer"
@@ -132,7 +130,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
     }
 
     private fun tickMince(level: ServerLevel) {
-        if (++currentMinceTick >= MAX_MINCE_TICK) {
+        if (++currentMinceTick >= MobMincerConfig.CONFIG.maxMinceTick.get()) {
             if (dropTargetLoot()) {
                 isErrored = false
                 val damage = MobMincerConfig.CONFIG.mobDamagePercent.get().toFloat() * target.maxHealth
