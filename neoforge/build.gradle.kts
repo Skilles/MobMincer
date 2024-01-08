@@ -20,6 +20,8 @@ val shadowCommon: Configuration by configurations.creating
 val developmentNeoForge: Configuration by configurations.getting
 
 configurations {
+    common
+    shadowCommon
     compileOnly.configure { extendsFrom(common) }
     runtimeOnly.configure { extendsFrom(common) }
     developmentNeoForge.extendsFrom(common)
@@ -49,9 +51,10 @@ dependencies {
     implementation("thedarkcolour:kotlinforforge-neoforge:${rootProject.property("kotlin_for_forge_version")}")
 
     modImplementation("curse.maven:jade-324717:${rootProject.property("jade_version_neoforge")}")
-    modLocalRuntime(
-        "mezz.jei:jei-${rootProject.property("minecraft_version")}-forge:${rootProject.property("jei_version")}"
+    modRuntimeOnly(
+        "me.shedaniel:RoughlyEnoughItems-neoforge:${rootProject.property("rei_version")}"
     )
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-neoforge:${rootProject.property("rei_version")}")
 }
 
 tasks.processResources {

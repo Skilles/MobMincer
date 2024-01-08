@@ -2,22 +2,24 @@ package net.mobmincer.compat.jei
 
 import mezz.jei.api.IModPlugin
 import mezz.jei.api.JeiPlugin
+import mezz.jei.api.recipe.RecipeType
 import mezz.jei.api.registration.IRecipeCatalystRegistration
 import mezz.jei.api.registration.IRecipeCategoryRegistration
 import mezz.jei.api.registration.IRecipeRegistration
 import net.minecraft.ChatFormatting
-import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.entity.MobCategory
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.Enchantments
 import net.mobmincer.MobMincer
+import net.mobmincer.compat.jeirei.MobMincerCategory
 import net.mobmincer.core.attachment.AttachmentRegistry
+import net.mobmincer.core.loot.KillDropLootEntry
 import net.mobmincer.core.registry.MincerItems
 
 @JeiPlugin
 class MobMincerJeiPlugin : IModPlugin {
+
     override fun getPluginUid(): ResourceLocation {
         return ResourceLocation(MobMincer.MOD_ID, "jei_plugin")
     }
@@ -27,7 +29,6 @@ class MobMincerJeiPlugin : IModPlugin {
     }
 
     override fun registerRecipes(registration: IRecipeRegistration) {
-        val recipes = mutableListOf<MobMincerRecipe>()
         val infoEntries = AttachmentRegistry.getEntries().map { (key, value) ->
             value.name.copy().withStyle(ChatFormatting.DARK_AQUA).append(
                 key.item.description.copy().append(
@@ -41,19 +42,19 @@ class MobMincerJeiPlugin : IModPlugin {
             *infoEntries
         )
 
-        BuiltInRegistries.ENTITY_TYPE.forEach {
-            if (it.category != MobCategory.MISC) {
-                recipes.add(MobMincerRecipe(it))
-            }
-        }
-        registration.addRecipes(MobMincerRecipe.TYPE, recipes)
+
+        registration.addRecipes(LOOT_TYPE, KillDropLootEntry.createAll())
     }
 
     override fun registerRecipeCatalysts(registration: IRecipeCatalystRegistration) {
         val mincerStack = ItemStack(MincerItems.MOB_MINCER)
-        registration.addRecipeCatalyst(mincerStack, MobMincerRecipe.TYPE)
+        registration.addRecipeCatalyst(mincerStack, LOOT_TYPE)
         val enchantedStack = mincerStack.copy()
         enchantedStack.enchant(Enchantments.SILK_TOUCH, 1)
-        registration.addRecipeCatalyst(enchantedStack, MobMincerRecipe.TYPE)
+        registration.addRecipeCatalyst(enchantedStack, LOOT_TYPE)
+    }
+
+    companion object {
+        val LOOT_TYPE: RecipeType<KillDropLootEntry> = RecipeType(MobMincerCategory.ID, KillDropLootEntry::class.java)
     }
 }

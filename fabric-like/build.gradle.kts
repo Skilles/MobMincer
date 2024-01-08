@@ -26,4 +26,7 @@ dependencies {
     modImplementation(
         "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${rootProject.property("forge_config_version")}"
     )
+    modRuntimeOnly(
+        "me.shedaniel:RoughlyEnoughItems-fabric:${rootProject.property("rei_version")}"
+    )
 }

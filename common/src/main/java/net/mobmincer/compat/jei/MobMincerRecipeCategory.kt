@@ -15,10 +15,12 @@ import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.Enchantments
+import net.mobmincer.compat.jeirei.MobMincerCategory
+import net.mobmincer.core.loot.KillDropLootEntry
 import net.mobmincer.core.loot.LootLookup
 import net.mobmincer.core.registry.MincerItems
 
-class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategory<MobMincerRecipe> {
+class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategory<KillDropLootEntry> {
 
     private val progressArrow: IDrawable = helpers.guiHelper.drawableBuilder(PROGRESS_SPRITE, 0, 0, 24, 16)
         .setTextureSize(24, 17)
@@ -33,25 +35,17 @@ class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategor
         )
     }
 
-    override fun getRecipeType(): RecipeType<MobMincerRecipe> {
-        return MobMincerRecipe.TYPE
-    }
+    override fun getRecipeType(): RecipeType<KillDropLootEntry> = MobMincerJeiPlugin.LOOT_TYPE
 
-    override fun getTitle(): Component {
-        return Component.translatable("mobmincer.jei.category.title")
-    }
+    override fun getTitle(): Component = MobMincerCategory.TITLE
 
-    override fun getBackground(): IDrawable {
-        return helpers.guiHelper.createBlankDrawable(WIDTH, HEIGHT)
-    }
+    override fun getBackground(): IDrawable = helpers.guiHelper.createBlankDrawable(WIDTH, HEIGHT)
 
-    override fun getIcon(): IDrawable {
-        return helpers.guiHelper.createDrawableItemStack(ItemStack(MincerItems.MOB_MINCER))
-    }
+    override fun getIcon(): IDrawable = helpers.guiHelper.createDrawableItemStack(ItemStack(MincerItems.MOB_MINCER))
 
-    override fun setRecipe(builder: IRecipeLayoutBuilder, recipe: MobMincerRecipe, focuses: IFocusGroup) {
-        val outputs = recipe.lootEntry
+    override fun isHandled(recipe: KillDropLootEntry): Boolean = LootLookup.hasLoot(recipe.lootTable)
 
+    override fun setRecipe(builder: IRecipeLayoutBuilder, recipe: KillDropLootEntry, focuses: IFocusGroup) {
         // Constants for slot dimensions and spacing
         val slotSize = 18
         val slotSpacing = 18
@@ -60,11 +54,11 @@ class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategor
         // Calculating rows and their spacing
         val dropRows = mutableListOf<List<ItemStack>>()
         var playerDropsIndex = -1
-        if (outputs.nonPlayerDrops.isNotEmpty()) {
-            dropRows.add(outputs.nonPlayerDrops)
+        if (recipe.nonPlayerDrops.isNotEmpty()) {
+            dropRows.add(recipe.nonPlayerDrops)
         }
-        if (outputs.playerDrops.isNotEmpty()) {
-            dropRows.add(outputs.playerDrops)
+        if (recipe.playerDrops.isNotEmpty()) {
+            dropRows.add(recipe.playerDrops)
             playerDropsIndex = dropRows.size - 1
         }
         val rowCount = dropRows.size
@@ -74,7 +68,7 @@ class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategor
         val rowWidth = slotSize * 2 + progressArrow.width
         val startX = (WIDTH - rowWidth) / 2
 
-        outputs.spawnEgg?.let {
+        recipe.spawnEgg?.let {
             builder.addInvisibleIngredients(RecipeIngredientRole.INPUT)
                 .addItemStack(it)
         }
@@ -111,11 +105,7 @@ class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategor
         }
     }
 
-    override fun isHandled(recipe: MobMincerRecipe): Boolean {
-        return LootLookup.hasLoot(recipe.location)
-    }
-
-    override fun draw(recipe: MobMincerRecipe, recipeSlotsView: IRecipeSlotsView, guiGraphics: GuiGraphics, mouseX: Double, mouseY: Double) {
+    override fun draw(recipe: KillDropLootEntry, recipeSlotsView: IRecipeSlotsView, guiGraphics: GuiGraphics, mouseX: Double, mouseY: Double) {
         val minecraft = Minecraft.getInstance()
 
         val centerTextX = (WIDTH - minecraft.font.width(recipe.entityType.description)) / 2
@@ -128,7 +118,7 @@ class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategor
             0x404040,
             false
         )
-        recipe.lootEntry.spawnEgg?.let {
+        recipe.spawnEgg?.let {
             guiGraphics.renderFakeItem(
                 it,
                 centerItemX,

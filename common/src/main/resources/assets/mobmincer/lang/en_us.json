@@ -7,6 +7,7 @@
   "mobmincer.waila.tooltip.durability": "Durability: %d",
   "mobmincer.waila.tooltip.progress": "%d%%",
   "mobmincer.waila.tooltip.errored": "Invalid Mob",
+  "mobmincer.waila.tooltip.attachments": "Attachments:",
   "config.jade.plugin_mobmincer.mob_mincer": "Mob Mincer",
   "mobmincer.config.maxMinceTick": "Max Mince Tick",
   "mobmincer.config.baseDurability": "Base Durability",
@@ -19,5 +20,6 @@
   "mobmincer.attachment.feeder": "Feeder",
   "mobmincer.attachment.pacifier": "Pacifier",
   "mobmincer.attachment.spreader": "Spreader",
-  "mobmincer.jei.info.header": "Attachments (Shift + Right Click)"
+  "mobmincer.jei.info.header": "Attachments (Shift + Right Click)",
+  "mobmincer.jei.tooltip.playerKilled": " (Player Killed)"
 }

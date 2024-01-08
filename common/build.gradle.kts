@@ -19,4 +19,5 @@ dependencies {
     modCompileOnlyApi(
         "mezz.jei:jei-${rootProject.property("minecraft_version")}-common-api:${rootProject.property("jei_version")}"
     )
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api:${rootProject.property("rei_version")}")
 }

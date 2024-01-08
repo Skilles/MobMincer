@@ -49,8 +49,11 @@ dependencies {
     // Fabric Kotlin
     modImplementation("net.fabricmc:fabric-language-kotlin:${rootProject.property("fabric_kotlin_version")}")
 
-    modLocalRuntime(
+    /*modLocalRuntime(
         "mezz.jei:jei-${rootProject.property("minecraft_version")}-fabric:${rootProject.property("jei_version")}"
+    )*/
+    modRuntimeOnly(
+        "me.shedaniel:RoughlyEnoughItems-fabric:${rootProject.property("rei_version")}"
     )
 }
 

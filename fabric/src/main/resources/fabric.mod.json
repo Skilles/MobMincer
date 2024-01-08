@@ -40,6 +40,12 @@
         "adapter": "kotlin",
         "value": "net.mobmincer.compat.jei.MobMincerJeiPlugin"
       }
+    ],
+    "rei_client": [
+      {
+        "adapter": "kotlin",
+        "value": "net.mobmincer.compat.rei.MobMincerReiPlugin"
+      }
     ]
   },
   "mixins": [

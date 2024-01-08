@@ -13,7 +13,7 @@ object LootLookup {
         ConcurrentHashMap<ResourceLocation, LootStack>()
 
     fun hasLoot(identifier: ResourceLocation): Boolean {
-        return ID_TO_LOOT[identifier] != LootStack.EMPTY
+        return (ID_TO_LOOT[identifier] ?: return false) != LootStack.EMPTY
     }
 
     fun hasLoot(entity: LivingEntity): Boolean {

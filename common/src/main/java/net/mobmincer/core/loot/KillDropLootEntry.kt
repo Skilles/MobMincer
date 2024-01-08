@@ -1,15 +1,17 @@
 package net.mobmincer.core.loot
 
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.SpawnEggItem
 
-data class KillDropLootEntry(private val entityType: EntityType<*>) {
+data class KillDropLootEntry(val entityType: EntityType<*>) {
     private val spawnEggLazy = lazy { SpawnEggItem.byId(entityType)?.let { ItemStack(it) } }
     val spawnEgg: ItemStack?
         get() = spawnEggLazy.value
 
-    private val outputs: LootStack = LootStack.from(entityType.defaultLootTable)
+    private val outputs: LootStack = LootStack.from(lootTable)
 
     val playerDrops: List<ItemStack>
         get() = outputs.playerOnly
@@ -25,4 +27,13 @@ data class KillDropLootEntry(private val entityType: EntityType<*>) {
 
     val isEmpty: Boolean
         get() = outputs.isEmpty()
+
+    val lootTable: ResourceLocation
+        get() = entityType.defaultLootTable
+
+    companion object {
+        fun createAll(): List<KillDropLootEntry> = BuiltInRegistries.ENTITY_TYPE
+            .filter { LootLookup.hasLoot(it.defaultLootTable) }
+            .map { KillDropLootEntry(it) }
+    }
 }
