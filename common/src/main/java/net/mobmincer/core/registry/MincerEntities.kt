@@ -23,7 +23,12 @@ object MincerEntities {
         ).clientTrackingRange(10)
     }
 
-    private fun <T : Entity> registerEntity(id: String, entityFactory: EntityType.EntityFactory<T>, category: MobCategory, properties: Function<EntityType.Builder<T>, EntityType.Builder<T>>): RegistrySupplier<EntityType<T>> {
+    private fun <T : Entity> registerEntity(
+        id: String,
+        entityFactory: EntityType.EntityFactory<T>,
+        category: MobCategory,
+        properties: Function<EntityType.Builder<T>, EntityType.Builder<T>>
+    ): RegistrySupplier<EntityType<T>> {
         return ENTITIES.register(id) { properties.apply(EntityType.Builder.of(entityFactory, category)).build(id) }
     }
 

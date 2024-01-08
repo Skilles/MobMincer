@@ -21,9 +21,9 @@ import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.DispenserBlock
 import net.minecraft.world.phys.AABB
-import net.mobmincer.core.attachment.AttachmentRegistry
+import net.mobmincer.common.AttachmentRegistry
+import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.core.attachment.Attachments
-import net.mobmincer.core.config.MobMincerConfig
 import net.mobmincer.core.entity.MobMincerEntity
 import kotlin.math.max
 

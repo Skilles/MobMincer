@@ -2,7 +2,7 @@ package net.mobmincer.core.attachment
 
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
-import net.mobmincer.core.config.MobMincerConfig
+import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.core.entity.MobMincerEntity
 
 class FeederAttachment(type: MobMincerAttachment<*>, mincer: MobMincerEntity) : AttachmentInstance(type, mincer) {

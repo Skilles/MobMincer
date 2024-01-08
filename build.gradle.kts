@@ -39,7 +39,7 @@ forgix {
         } as Closure<ForgixMergeExtension.CustomContainer>
     )
 
-    removeDuplicate(group)
+    removeDuplicate("$group.common")
 }
 
 detekt {

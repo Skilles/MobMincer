@@ -4,7 +4,7 @@ import fuzs.forgeconfigapiport.api.config.v3.ForgeConfigRegistry
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.mobmincer.MobMincer
-import net.mobmincer.core.config.MobMincerConfig
+import net.mobmincer.common.config.MobMincerConfig
 import net.neoforged.fml.config.ModConfig
 
 object MobMincerFabricLike {

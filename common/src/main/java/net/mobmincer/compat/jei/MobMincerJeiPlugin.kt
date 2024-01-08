@@ -12,8 +12,8 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.Enchantments
 import net.mobmincer.MobMincer
+import net.mobmincer.common.AttachmentRegistry
 import net.mobmincer.compat.jeirei.MobMincerCategory
-import net.mobmincer.core.attachment.AttachmentRegistry
 import net.mobmincer.core.loot.KillDropLootEntry
 import net.mobmincer.core.registry.MincerItems
 
@@ -32,7 +32,7 @@ class MobMincerJeiPlugin : IModPlugin {
         val infoEntries = AttachmentRegistry.getEntries().map { (key, value) ->
             value.name.copy().withStyle(ChatFormatting.DARK_AQUA).append(
                 key.item.description.copy().append(
-                " - "
+                    " - "
                 )
             ) as Component
         }.toTypedArray()

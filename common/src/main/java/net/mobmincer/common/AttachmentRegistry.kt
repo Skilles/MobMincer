@@ -1,5 +1,6 @@
-package net.mobmincer.core.attachment
+package net.mobmincer.common
 
+import net.mobmincer.core.attachment.*
 import java.util.*
 
 internal object AttachmentRegistry {

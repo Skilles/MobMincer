@@ -22,10 +22,9 @@ import net.minecraft.world.item.enchantment.Enchantment
 import net.minecraft.world.item.enchantment.EnchantmentHelper
 import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.level.Level
-import net.mobmincer.core.attachment.AttachmentHolder
+import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.core.attachment.Attachments
 import net.mobmincer.core.attachment.StorageAttachment
-import net.mobmincer.core.config.MobMincerConfig
 import net.mobmincer.core.loot.LootFactory
 import net.mobmincer.core.loot.LootLookup
 import net.mobmincer.core.registry.MincerEntities.MOB_MINCER
@@ -45,7 +44,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
     private lateinit var lootFactory: LootFactory // not initialized on client
     private lateinit var itemEnchantments: Map<Enchantment, Int>
     lateinit var sourceStack: ItemStack
-    val attachments = AttachmentHolder(this)
+    val attachments = net.mobmincer.core.attachment.AttachmentHolder(this)
 
     var isErrored: Boolean
         get() = entityData.get(IS_ERRORED)
@@ -251,6 +250,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
             this.destroy(reason == DestroyReason.DISCARD)
         }
     }
+
     override fun hurt(source: DamageSource, amount: Float): Boolean {
         if (this.isInvulnerableTo(source)) {
             return false

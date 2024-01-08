@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
+import net.mobmincer.common.AttachmentRegistry
 import net.mobmincer.core.entity.MobMincerEntity
 import net.mobmincer.util.EncodingUtils.getOrCreateTag
 import java.util.*

@@ -11,8 +11,8 @@ import me.shedaniel.rei.api.common.util.EntryStacks
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.Enchantments
+import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.compat.jeirei.MobMincerCategory
-import net.mobmincer.core.config.MobMincerConfig
 import net.mobmincer.core.registry.MincerItems
 
 class MobMincerDisplayCategory : DisplayCategory<MobMincerDisplay> {

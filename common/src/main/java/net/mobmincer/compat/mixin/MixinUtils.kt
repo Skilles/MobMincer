@@ -4,7 +4,7 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.enchantment.Enchantment
 import net.minecraft.world.item.enchantment.Enchantments
-import net.mobmincer.core.config.MobMincerConfig
+import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.core.entity.MobMincerEntity
 import net.mobmincer.core.registry.MincerItems.MOB_MINCER
 

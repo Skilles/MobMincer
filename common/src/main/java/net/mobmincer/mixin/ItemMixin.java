@@ -2,7 +2,7 @@ package net.mobmincer.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.world.item.Item;
-import net.mobmincer.core.config.MobMincerConfig;
+import net.mobmincer.common.config.MobMincerConfig;
 import net.mobmincer.core.item.MobMincerItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

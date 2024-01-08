@@ -1,7 +1,7 @@
 package net.mobmincer.forge
 
 import net.mobmincer.MobMincer
-import net.mobmincer.core.config.MobMincerConfig
+import net.mobmincer.common.config.MobMincerConfig
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.fml.ModLoadingContext
 import net.neoforged.fml.common.Mod
