@@ -1,4 +1,4 @@
-package net.mobmincer.forge.compat.jade
+package net.mobmincer.neoforge.compat.jade
 
 import net.mobmincer.core.entity.MobMincerEntity
 import snownee.jade.api.IWailaClientRegistration

@@ -1,4 +1,4 @@
-package net.mobmincer.forge
+package net.mobmincer.neoforge
 
 import net.mobmincer.MobMincer
 import net.mobmincer.common.config.MobMincerConfig

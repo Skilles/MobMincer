@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
- * This mixin for {@link net.minecraft.world.item.Item} is used to modify the max durability of {@link MobMincerItem} post registration. If this was forge, we could just override this.
+ * This mixin for {@link net.minecraft.world.item.Item} is used to modify the max durability of {@link MobMincerItem} post registration. If this was neoforge, we could just override this.
  */
 @Mixin(Item.class)
 public abstract class ItemMixin {

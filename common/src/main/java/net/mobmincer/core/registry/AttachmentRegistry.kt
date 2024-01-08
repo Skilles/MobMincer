@@ -3,7 +3,7 @@ package net.mobmincer.core.registry
 import net.mobmincer.core.attachment.*
 import java.util.*
 
-internal object AttachmentRegistry {
+object AttachmentRegistry {
     private val attachments: MutableMap<Attachments, MobMincerAttachment<*>> = EnumMap(Attachments::class.java)
 
     val STORAGE: MobMincerAttachment<StorageAttachment> =

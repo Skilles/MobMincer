@@ -1,4 +1,4 @@
-package net.mobmincer.forge
+package net.mobmincer.neoforge
 
 import com.mojang.authlib.GameProfile
 import net.minecraft.client.resources.language.I18n

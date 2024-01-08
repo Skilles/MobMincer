@@ -1,4 +1,4 @@
-package net.mobmincer.forge.mixin.enchant;
+package net.mobmincer.neoforge.mixin.enchant;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.world.item.ItemStack;

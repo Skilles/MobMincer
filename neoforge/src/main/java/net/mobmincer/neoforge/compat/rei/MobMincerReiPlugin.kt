@@ -1,4 +1,4 @@
-package net.mobmincer.forge.compat.rei
+package net.mobmincer.neoforge.compat.rei
 
 
 import me.shedaniel.rei.forge.REIPluginClient
