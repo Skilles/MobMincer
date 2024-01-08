@@ -38,6 +38,8 @@ forgix {
             projectName = "neoforge"
         } as Closure<ForgixMergeExtension.CustomContainer>
     )
+
+    removeDuplicate(group)
 }
 
 detekt {
@@ -121,7 +123,7 @@ allprojects {
     }
 
     dependencies {
-        compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
+        compileOnly("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
     }
 
     tasks.withType(JavaCompile::class.java) {
