@@ -1,4 +1,4 @@
-package net.mobmincer.common
+package net.mobmincer.core.registry
 
 import net.mobmincer.core.attachment.*
 import java.util.*

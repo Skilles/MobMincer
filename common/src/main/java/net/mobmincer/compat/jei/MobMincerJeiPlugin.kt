@@ -12,9 +12,9 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.Enchantments
 import net.mobmincer.MobMincer
-import net.mobmincer.common.AttachmentRegistry
 import net.mobmincer.compat.jeirei.MobMincerCategory
 import net.mobmincer.core.loot.KillDropLootEntry
+import net.mobmincer.core.registry.AttachmentRegistry
 import net.mobmincer.core.registry.MincerItems
 
 @JeiPlugin
