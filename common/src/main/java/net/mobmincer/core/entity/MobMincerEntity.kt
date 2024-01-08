@@ -33,7 +33,7 @@ import net.mobmincer.core.registry.MincerItems
 import net.mobmincer.network.MincerNetwork
 import java.util.*
 
-open class MobMincerEntity(type: EntityType<*>, level: Level) :
+class MobMincerEntity(type: EntityType<*>, level: Level) :
     WearableEntity(
         type,
         level
@@ -41,7 +41,6 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
 
     var currentMinceTick = 0
     var maxMinceTick: Int = MobMincerConfig.CONFIG.maxMinceTick.get()
-    var durability = 0
 
     private lateinit var lootFactory: LootFactory // not initialized on client
     private lateinit var itemEnchantments: Map<Enchantment, Int>
@@ -60,7 +59,6 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
     val idleAnimationState = AnimationState()
 
     private fun initSourceItem(sourceStack: ItemStack) {
-        this.durability = sourceStack.maxDamage - sourceStack.damageValue
         this.itemEnchantments = EnchantmentHelper.getEnchantments(sourceStack)
         this.sourceStack = sourceStack
     }
@@ -173,7 +171,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
         if (this.random.nextInt(MobMincerConfig.CONFIG.unbreakingBound.get()) < itemEnchantments.getOrDefault(Enchantments.UNBREAKING, 0)) {
             return
         }
-        if (--durability <= 0) {
+        if (++sourceStack.damageValue >= sourceStack.maxDamage) {
             dropAsItem(DestroyReason.BROKEN)
         }
     }
@@ -198,8 +196,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
     }
 
     private fun generateLoot(): Optional<ItemStack>? {
-        val dropChance = MobMincerConfig.CONFIG.dropChance.get()
-        if (random.nextDouble() > dropChance) {
+        if (random.nextDouble() > MobMincerConfig.CONFIG.dropChance.get()) {
             return null
         }
         val loot = lootFactory.generateLoot()
@@ -223,12 +220,12 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
             return
         }
 
-        if (durability > 0) {
+        if (sourceStack.damageValue < sourceStack.maxDamage) {
             if (reason == DestroyReason.TARGET_KILLED && attachments.hasAttachment(Attachments.SPREADER)) {
                 destroy(reason)
                 return
             }
-            sourceStack.also { it.damageValue = it.maxDamage - durability }.also { spawnAtLocation(it) }
+            sourceStack.also { spawnAtLocation(it) }
         } else {
             (level() as ServerLevel).playSound(
                 null,
@@ -245,7 +242,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
     enum class DestroyReason {
         DISCARD,
         TARGET_KILLED,
-        REMOVED,
+        UNEQUIPPED,
         BROKEN
     }
 
@@ -259,7 +256,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
             return false
         }
         if (source.`is`(DamageTypes.PLAYER_ATTACK)) {
-            dropAsItem(DestroyReason.REMOVED)
+            dropAsItem(DestroyReason.UNEQUIPPED)
         }
         return true
     }
@@ -311,7 +308,8 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
 
     override fun readAdditionalSaveData(compound: CompoundTag) {
         super.readAdditionalSaveData(compound)
-        if (compound.contains("SourceStack") && compound.contains("Attachments")) {
+        if (compound.contains("SourceStack") && compound.contains("Attachments") && compound.contains("CurrentMinceTick")) {
+            currentMinceTick = compound.getInt("CurrentMinceTick")
             this.initSourceItem(ItemStack.of(compound.getCompound("SourceStack")))
             attachments.fromEntityTag(compound.getList("Attachments", 10))
             attachments.onSpawn()
@@ -324,6 +322,7 @@ open class MobMincerEntity(type: EntityType<*>, level: Level) :
         super.addAdditionalSaveData(compound)
         compound.put("SourceStack", sourceStack.save(CompoundTag()))
         compound.put("Attachments", attachments.toEntityTag())
+        compound.putInt("CurrentMinceTick", currentMinceTick)
     }
 
     override fun saveAdditionalSpawnData(buf: FriendlyByteBuf) {

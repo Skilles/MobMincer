@@ -11,7 +11,7 @@ abstract class AttachmentInstance(val type: MobMincerAttachment<*>, protected va
     open fun onSpawn() {}
 
     open fun onDeath(reason: MobMincerEntity.DestroyReason): Boolean {
-        if (reason != MobMincerEntity.DestroyReason.REMOVED) {
+        if (reason != MobMincerEntity.DestroyReason.UNEQUIPPED) {
             mincer.spawnAtLocation(type.item)
         }
 

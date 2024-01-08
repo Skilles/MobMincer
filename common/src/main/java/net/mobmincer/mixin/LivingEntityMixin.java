@@ -12,6 +12,6 @@ public abstract class LivingEntityMixin {
 
     @ModifyReturnValue(method = "shouldDropLoot()Z", at = @At(value = "RETURN"))
     private boolean shouldDropLoot(boolean original) {
-        return MixinUtils.INSTANCE.canDropLoot(original, (LivingEntity) (Object) this);
+        return MixinUtils.canDropLoot(original, (LivingEntity) (Object) this);
     }
 }

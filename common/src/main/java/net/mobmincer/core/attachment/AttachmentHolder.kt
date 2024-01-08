@@ -45,18 +45,23 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
     }
 
     fun onDeath(reason: MobMincerEntity.DestroyReason): Boolean {
-        val stackTag = mobMincer.sourceStack.getOrCreateTagElement("MobMincer")
-        val newTag = ListTag()
-        var stopMincerDeath = false
-        this.attachments.entries.forEach {
-            val thisTag = CompoundTag()
-            thisTag.putString("Type", it.key.name)
-            it.value.toTag()?.let { tag -> thisTag.put("Data", tag) }
-            newTag.add(thisTag)
-            stopMincerDeath = it.value.onDeath(reason)
+        val addTag = reason == MobMincerEntity.DestroyReason.UNEQUIPPED
+        if (addTag) {
+            val stackTag = mobMincer.sourceStack.getOrCreateTagElement("MobMincer")
+            val newTag = ListTag()
+            var stopMincerDeath = false
+            this.attachments.entries.forEach {
+                val thisTag = CompoundTag()
+                thisTag.putString("Type", it.key.name)
+                it.value.toTag()?.let { tag -> thisTag.put("Data", tag) }
+                newTag.add(thisTag)
+                stopMincerDeath = it.value.onDeath(reason)
+            }
+            stackTag.put("Attachments", newTag)
+            return stopMincerDeath
+        } else {
+            return this.attachments.values.any { it.onDeath(reason) }
         }
-        stackTag.put("Attachments", newTag)
-        return stopMincerDeath
     }
 
     fun onMince(dealtDamage: Float) {

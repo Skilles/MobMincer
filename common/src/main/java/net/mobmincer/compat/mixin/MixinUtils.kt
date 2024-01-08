@@ -10,6 +10,7 @@ import net.mobmincer.core.registry.MincerItems.MOB_MINCER
 
 object MixinUtils {
 
+    @JvmStatic
     fun canEnchant(original: Boolean, item: Item, enchantment: Enchantment): Boolean {
         if (item != MOB_MINCER.get()) {
             return original
@@ -18,6 +19,7 @@ object MixinUtils {
         return enchantment == Enchantments.UNBREAKING || enchantment == Enchantments.SILK_TOUCH || enchantment == Enchantments.MOB_LOOTING
     }
 
+    @JvmStatic
     fun canDropLoot(original: Boolean, entity: LivingEntity): Boolean {
         if (MobMincerConfig.CONFIG.allowKillLoot.get()) {
             return original
