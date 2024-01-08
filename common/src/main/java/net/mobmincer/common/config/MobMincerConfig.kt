@@ -31,7 +31,7 @@ class MobMincerConfig private constructor(builder: ModConfigSpec.Builder) {
     val feederHealPercent: ModConfigSpec.DoubleValue = builder
         .comment("The percent of damage healed using the feeder attachment")
         .translation("mobmincer.config.feederHealPercent")
-        .defineInRange("mobDamagePercent", 1.0, 0.0, 1.0)
+        .defineInRange("feederHealPercent", 1.0, 0.0, 1.0)
 
     val coloredMobs: ModConfigSpec.BooleanValue = builder
         .comment("Whether or not to color the mobs based on their health when equipped with a mob mincer")
