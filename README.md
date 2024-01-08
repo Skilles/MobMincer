@@ -59,21 +59,21 @@ Shift + right-click the Mob Mincer with the attachment in your hand to attach it
 * `coloredMobs` - Whether mobs should be colored based on their current health. Default: true
 * `allowDispensing` - Whether the Mob Mincer can be attached from a dispenser. Default: true
 * `allowKillDrop` - Whether the mob should still drop loot when it dies after it has been minced at least once. Default: false
+* `dropChance` - The chance (0 - 1.0) that dropping loot is skipped. Default: 1
 
 ### Disclaimer
 
 * The Mob Mincer can be used on any mob that has a loot table, but some mobs have special conditions (eg. slimes only dropping slime balls when they are the smallest size). This will be fixed in a
   later
   release along with more drop customization.
-* Not every mince will produce a drop, though this chance can be increased with looting. Without looting, you are limited to one drop per mince.
+* Just like with killing a mob, not every mince will produce a drop, though you can improve this with looting. Without looting, you are limited to one drop per mince.
 * If you cannot attach a mob mincer to a mob that drops loot, try enchanting it with Silk touch to allow for player drops.
 * Certain mods may make this too overpowered. Future configuration options will allow for more customization.
 
 ### Planned features
 
-- [ ] Support for more mobs
 - [ ] More configuration
-- [ ] More attachments
+- [ ] More attachments/modifiers
 - [ ] Suggestions welcome!
 
 ### Dependencies
@@ -92,7 +92,7 @@ Shift + right-click the Mob Mincer with the attachment in your hand to attach it
 
 * [Kotlin for Forge](https://www.curseforge.com/minecraft/mc-mods/kotlin-for-forge)
 
-*Support for [Jade](https://www.curseforge.com/minecraft/mc-mods/jade) (WAILA) included*
+*Support for [Jade](https://www.curseforge.com/minecraft/mc-mods/jade), JEI, and REI included*
 
 ### Issues
 
