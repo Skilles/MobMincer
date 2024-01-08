@@ -39,6 +39,13 @@ forgix {
         } as Closure<ForgixMergeExtension.CustomContainer>
     )
 
+    fabric(
+        closureOf<ForgixMergeExtension.FabricContainer> {
+            projectName = "fabric"
+        } as Closure<ForgixMergeExtension.FabricContainer>
+    )
+
+
     removeDuplicate("$group.common")
 }
 
