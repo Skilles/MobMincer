@@ -108,4 +108,7 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
             }
         }
     }
+
+    val values: Collection<AttachmentInstance>
+        get() = this.attachments.values
 }

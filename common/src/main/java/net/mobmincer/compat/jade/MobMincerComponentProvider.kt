@@ -3,6 +3,7 @@ package net.mobmincer.compat.jade
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
+import net.minecraft.network.chat.contents.TranslatableContents
 import net.minecraft.resources.ResourceLocation
 import net.mobmincer.client.render.MobMincerEntityRenderer
 import net.mobmincer.compat.jade.ComponentProviderUtils.appendTooltipData
@@ -28,31 +29,34 @@ object MobMincerComponentProvider : IEntityComponentProvider, IServerDataProvide
         if (!serverData.isEmpty) {
             for ((i, contents) in getTooltipComponents(serverData).withIndex()) {
                 val component = MutableComponent.create(contents)
-                if (contents.key.endsWith("progress")) {
-                    val progress = contents.args[0] as Float
-                    val style = SimpleProgressStyle()
-                    style.autoTextColor = false
-                    style.textColor = Color.hex("#B2BEB5").toInt()
-                    style.color = Color.hex("#00A36C").toInt()
-                    style.color2 = Color.hex("#355E3B").toInt()
-                    val boxStyle = BoxStyle.GradientBorder.DEFAULT_VIEW_GROUP.clone()
-                    boxStyle.roundCorner = true
-                    boxStyle.borderWidth = 2f
-                    val progressComponent = ProgressElement(
-                        progress,
-                        Component.literal("${(progress * 100).toInt()}%"),
-                        style,
-                        boxStyle,
-                        false
-                    )
-                    tooltip.add(i + 1, progressComponent)
-                } else if (contents.key.endsWith("durability")) {
-                    val (health, maxHealth) = contents.args
-                    val healthComponent = HealthElement(maxHealth as Int / 2f, health as Int / 2f)
-                    tooltip.add(i + 1, healthComponent)
-                } else {
-                    tooltip.add(i + 1, component)
+                if (contents is TranslatableContents) {
+                    if (contents.key.endsWith("progress")) {
+                        val progress = contents.args[0] as Float
+                        val style = SimpleProgressStyle()
+                        style.autoTextColor = false
+                        style.textColor = Color.hex("#B2BEB5").toInt()
+                        style.color = Color.hex("#00A36C").toInt()
+                        style.color2 = Color.hex("#355E3B").toInt()
+                        val boxStyle = BoxStyle.GradientBorder.DEFAULT_VIEW_GROUP.clone()
+                        boxStyle.roundCorner = true
+                        boxStyle.borderWidth = 2f
+                        val progressComponent = ProgressElement(
+                            progress,
+                            Component.literal("${(progress * 100).toInt()}%"),
+                            style,
+                            boxStyle,
+                            false
+                        )
+                        tooltip.add(i + 1, progressComponent)
+                        return
+                    } else if (contents.key.endsWith("durability")) {
+                        val (health, maxHealth) = contents.args
+                        val healthComponent = HealthElement(maxHealth as Int / 2f, health as Int / 2f)
+                        tooltip.add(i + 1, healthComponent)
+                        return
+                    }
                 }
+                tooltip.add(i + 1, component)
             }
         }
     }
