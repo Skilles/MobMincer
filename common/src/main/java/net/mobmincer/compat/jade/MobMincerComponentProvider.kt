@@ -48,12 +48,12 @@ object MobMincerComponentProvider : IEntityComponentProvider, IServerDataProvide
                             false
                         )
                         tooltip.add(i + 1, progressComponent)
-                        return
+                        continue
                     } else if (contents.key.endsWith("durability")) {
                         val (health, maxHealth) = contents.args
                         val healthComponent = HealthElement(maxHealth as Int / 2f, health as Int / 2f)
                         tooltip.add(i + 1, healthComponent)
-                        return
+                        continue
                     }
                 }
                 tooltip.add(i + 1, component)
