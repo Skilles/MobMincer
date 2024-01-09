@@ -2,7 +2,6 @@ package net.mobmincer.compat.jade
 
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.contents.TranslatableContents
 import net.minecraft.resources.ResourceLocation
 import net.mobmincer.client.render.MobMincerEntityRenderer
@@ -27,8 +26,8 @@ object MobMincerComponentProvider : IEntityComponentProvider, IServerDataProvide
     override fun appendTooltip(tooltip: ITooltip, accessor: EntityAccessor, config: IPluginConfig) {
         val serverData = accessor.serverData
         if (!serverData.isEmpty) {
-            for ((i, contents) in getTooltipComponents(serverData).withIndex()) {
-                val component = MutableComponent.create(contents)
+            for ((i, component) in getTooltipComponents(serverData).withIndex()) {
+                val contents = component.contents
                 if (contents is TranslatableContents) {
                     if (contents.key.endsWith("progress")) {
                         val progress = contents.args[0] as Float

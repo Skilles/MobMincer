@@ -3,9 +3,7 @@ package net.mobmincer.compat.jade
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.nbt.StringTag
-import net.minecraft.network.chat.ComponentContents
-import net.minecraft.network.chat.contents.LiteralContents
-import net.minecraft.network.chat.contents.TranslatableContents
+import net.minecraft.network.chat.Component
 import net.mobmincer.core.entity.MobMincerEntity
 
 object ComponentProviderUtils {
@@ -22,33 +20,29 @@ object ComponentProviderUtils {
         compound.put("Attachments", attachmentsTag)
     }
 
-    fun getTooltipComponents(data: CompoundTag): List<ComponentContents> {
-        val components = mutableListOf<ComponentContents>()
+    fun getTooltipComponents(data: CompoundTag): List<Component> {
+        val components = mutableListOf<Component>()
         components.add(
-            TranslatableContents(
+            Component.translatable(
                 "mobmincer.waila.tooltip.durability",
-                null,
-                arrayOf(data.getInt("Durability"), data.getInt("MaxDurability"))
+                data.getInt("Durability"),
+                data.getInt("MaxDurability")
             )
         )
         val errored = data.getBoolean("Errored")
         if (errored) {
-            components.add(TranslatableContents("mobmincer.waila.tooltip.errored", null, arrayOf()))
+            components.add(Component.translatable("mobmincer.waila.tooltip.errored"))
         } else {
             components.add(
-                TranslatableContents(
-                    "mobmincer.waila.tooltip.progress",
-                    null,
-                    arrayOf(data.getFloat("Progress"))
-                )
+                Component.translatable("mobmincer.waila.tooltip.progress", data.getFloat("Progress"))
             )
         }
         val attachments = data.getList("Attachments", 8)
         if (!attachments.isEmpty()) {
-            components.add(TranslatableContents("mobmincer.waila.tooltip.attachments", null, arrayOf()))
+            components.add(Component.translatable("mobmincer.waila.tooltip.attachments"))
             attachments.forEach {
                 components.add(
-                    LiteralContents(" - ${it.asString}")
+                    Component.literal(" - ${it.asString}")
                 )
             }
         }
