@@ -1,5 +1,5 @@
 modLoader = "kotlinforforge"
-loaderVersion = "[4.7,)"
+loaderVersion = "[1.0,)"
 issueTrackerURL = "https://github.com/Skilles/MobMincer/issues"
 updateJSONURL = "https://raw.githubusercontent.com/Skilles/MobMincer/master/update.json"
 license = "MIT"
