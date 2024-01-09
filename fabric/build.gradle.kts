@@ -39,16 +39,17 @@ dependencies {
     shadowCommon(project(":common", "transformProductionFabric")){
         isTransitive = false
     }
-    common(project(":fabric-like", "namedElements")){
-        isTransitive = false
-    }
-    shadowCommon(project(":fabric-like", "transformProductionFabric")) {
-        isTransitive = false
-    }
+
+    modLocalRuntime("com.terraformersmc:modmenu:${rootProject.property("mod_menu_version")}")
+
+    modImplementation("curse.maven:jade-324717:${rootProject.property("jade_version_fabric")}")
 
     // Fabric Kotlin
     modImplementation("net.fabricmc:fabric-language-kotlin:${rootProject.property("fabric_kotlin_version")}")
 
+    modApi(
+        "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${rootProject.property("forge_config_version")}"
+    )
     /*modLocalRuntime(
         "mezz.jei:jei-${rootProject.property("minecraft_version")}-fabric:${rootProject.property("jei_version")}"
     )*/

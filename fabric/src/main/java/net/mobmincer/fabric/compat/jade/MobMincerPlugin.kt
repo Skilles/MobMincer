@@ -1,4 +1,4 @@
-package net.mobmincer.fabriclike.compat.jade
+package net.mobmincer.fabric.compat.jade
 
 import net.mobmincer.core.entity.MobMincerEntity
 import snownee.jade.api.IWailaClientRegistration

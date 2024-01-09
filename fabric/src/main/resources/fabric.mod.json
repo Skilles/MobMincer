@@ -32,7 +32,7 @@
     "jade": [
       {
         "adapter": "kotlin",
-        "value": "net.mobmincer.fabriclike.compat.jade.MobMincerPlugin"
+        "value": "net.mobmincer.fabric.compat.jade.MobMincerPlugin"
       }
     ],
     "jei_mod_plugin": [
