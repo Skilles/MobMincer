@@ -16,5 +16,9 @@ object MobMincerForge {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, MobMincerConfig.SPEC)
         MobMincer.init()
         runWhenOn(Dist.CLIENT) { MobMincer.initClient() }
+
+        /*LOADING_CONTEXT.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory::class.java) {
+            ConfigScreenHandler.ConfigScreenFactory { _, parent -> parent }
+        }*/
     }
 }
