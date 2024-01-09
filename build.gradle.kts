@@ -39,6 +39,7 @@ forgix {
         } as Closure<ForgixMergeExtension.CustomContainer>
     )
 
+    @Suppress("UNCHECKED_CAST")
     fabric(
         closureOf<ForgixMergeExtension.FabricContainer> {
             projectName = "fabric"
@@ -69,13 +70,16 @@ subprojects {
         "mappings"(
             loom.layered {
                 officialMojangMappings()
-                parchment(
-                    "org.parchmentmc.data:parchment-${
-                        rootProject.property(
-                            "minecraft_version"
-                        )
-                    }:${rootProject.property("parchment_version")}@zip"
-                )
+                val parchmentVersion = rootProject.property("parchment_version").toString()
+                if (parchmentVersion.isNotEmpty()) {
+                    parchment(
+                        "org.parchmentmc.data:parchment-${
+                            rootProject.property(
+                                "minecraft_version"
+                            )
+                        }:${parchmentVersion}@zip"
+                    )
+                }
             }
         )
         implementation(
