@@ -1,3 +1,4 @@
+/*
 package net.mobmincer.compat.jei
 
 import mezz.jei.api.IModPlugin
@@ -58,3 +59,4 @@ class MobMincerJeiPlugin : IModPlugin {
         val LOOT_TYPE: RecipeType<KillDropLootEntry> = RecipeType(MobMincerCategory.ID, KillDropLootEntry::class.java)
     }
 }
+*/

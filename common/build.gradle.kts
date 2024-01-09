@@ -16,8 +16,8 @@ dependencies {
     api("fuzs.forgeconfigapiport:forgeconfigapiport-common:${rootProject.property("forge_config_version")}")
 
     modCompileOnly("curse.maven:jade-324717:${rootProject.property("jade_version_fabric")}")
-    modCompileOnlyApi(
+    /*modCompileOnlyApi(
         "mezz.jei:jei-${rootProject.property("minecraft_version")}-common-api:${rootProject.property("jei_version")}"
-    )
+    )*/
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api:${rootProject.property("rei_version")}")
 }

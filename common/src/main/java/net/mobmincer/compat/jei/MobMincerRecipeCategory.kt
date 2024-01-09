@@ -1,3 +1,4 @@
+/*
 package net.mobmincer.compat.jei
 
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder
@@ -127,3 +128,4 @@ class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategor
         }
     }
 }
+*/
