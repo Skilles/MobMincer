@@ -131,6 +131,9 @@ class MobMincerItem(properties: Properties) : Item(properties) {
             val tag = stackTag.getCompound("MobMincer")
             if (tag.contains("Attachments")) {
                 val attachments = tag.getList("Attachments", 10)
+                if (attachments.isEmpty()) {
+                    return
+                }
                 tooltipComponents.add(Component.literal("Attachments:"))
                 for (i in 0 until attachments.size) {
                     val attachment = attachments.getCompound(i)

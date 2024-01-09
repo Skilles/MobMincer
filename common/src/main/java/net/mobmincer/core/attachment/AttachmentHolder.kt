@@ -58,7 +58,9 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
                 newTag.add(thisTag)
                 stopMincerDeath = it.value.onDeath(reason)
             }
-            stackTag.put("Attachments", newTag)
+            if (attachments.isNotEmpty()) {
+                stackTag.put("Attachments", newTag)
+            }
             return stopMincerDeath
         } else {
             return this.attachments.values.any { it.onDeath(reason) }
