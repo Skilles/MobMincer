@@ -3,7 +3,7 @@ package net.mobmincer.mixin;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
@@ -28,15 +28,15 @@ public abstract class ItemEntityMixin {
             var thisEntity = (ItemEntity) (Object) (this);
             if (!thisEntity.onGround() && thisEntity.getTags().contains("mob_mincer:dispensed")) {
                 AABB aABB = thisEntity.getBoundingBox().inflate(0.25, 0.25, 0.25);
-                List<Entity> list = thisEntity.level().getEntities(thisEntity, aABB, entity -> entity instanceof Mob && !entity.isRemoved());
+                List<Entity> list = thisEntity.level().getEntities(thisEntity, aABB, entity -> entity instanceof LivingEntity mob && !entity.isRemoved() && MobMincerEntity.Companion.canAttach(mob, item));
                 Entity touchedEntity = null;
                 for (Entity entity : list) {
                     touchedEntity = entity;
                     break;
                 }
                 if (touchedEntity != null) {
-                    var mob = (Mob) touchedEntity;
-                    if (!thisEntity.level().isClientSide && MobMincerEntity.Companion.canAttach(mob, item)) {
+                    var mob = (LivingEntity) touchedEntity;
+                    if (!thisEntity.level().isClientSide) {
                         MobMincerEntity.Companion.spawn(mob, item, thisEntity.level());
                         thisEntity.level().playSound(null, thisEntity.blockPosition(), SoundEvents.DONKEY_CHEST, SoundSource.NEUTRAL, 1.0F, 0.5F);
                     }

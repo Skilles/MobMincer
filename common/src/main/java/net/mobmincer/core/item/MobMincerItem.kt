@@ -12,7 +12,6 @@ import net.minecraft.util.Mth
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
@@ -37,7 +36,7 @@ class MobMincerItem(properties: Properties) : Item(properties) {
         interactionTarget: LivingEntity,
         usedHand: InteractionHand
     ): InteractionResult {
-        if (usedHand == InteractionHand.MAIN_HAND && !player.level().isClientSide && interactionTarget.isAlive && interactionTarget is Mob) {
+        if (usedHand == InteractionHand.MAIN_HAND && !player.level().isClientSide) {
             if (MobMincerEntity.canAttach(interactionTarget, stack)) {
                 MobMincerEntity.spawn(interactionTarget, stack, player.level() as ServerLevel)
                 player.level().playSound(
@@ -75,9 +74,9 @@ class MobMincerItem(properties: Properties) : Item(properties) {
             override fun execute(blockSource: BlockSource, item: ItemStack): ItemStack {
                 val blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING))
                 val list = blockSource.level().getEntitiesOfClass(
-                    Mob::class.java,
+                    LivingEntity::class.java,
                     AABB(blockPos)
-                ) { mob: Mob -> MobMincerEntity.canAttach(mob, item) }
+                ) { mob: LivingEntity -> MobMincerEntity.canAttach(mob, item) }
                 for (mob in list) {
                     MobMincerEntity.spawn(mob, item, blockSource.level())
                     this.isSuccess = true

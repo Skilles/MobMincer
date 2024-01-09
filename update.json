@@ -1,10 +1,12 @@
 {
   "homepage": "https://modrinth.com/mod/mob-mincer",
   "1.20.2": {
-    "1.0.0": "Initial release"
+    "1.0.0": "Initial release",
+    "1.0.1": "Fix Fabric crash on startup",
+    "1.0.2": "Bunch of bug fixes"
   },
   "promos": {
-    "1.20.2-latest": "1.0.0",
-    "1.20.2-recommended": "1.0.0"
+    "1.20.2-latest": "1.0.2",
+    "1.20.2-recommended": "1.0.2"
   }
 }

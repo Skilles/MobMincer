@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.level.storage.loot.LootDataType
 import net.minecraft.world.level.storage.loot.LootTable
 import net.mobmincer.MobMincer
@@ -32,7 +32,7 @@ object MincerNetwork {
                 val newTargetId = buf.readInt()
                 val level = context.player.level()
                 val mincer = level.getEntity(mincerId) as MobMincerEntity
-                val newTarget = level.getEntity(newTargetId) as Mob
+                val newTarget = level.getEntity(newTargetId) as LivingEntity
                 mincer.changeTarget(newTarget)
             }
         }

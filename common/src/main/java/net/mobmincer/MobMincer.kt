@@ -29,8 +29,6 @@ object MobMincer {
             FakePlayer.unload(it)
         }
 
-        // LootEvent.MODIFY_LOOT_TABLE.register(LootFactoryCache::loadAll)
-
         MincerNetwork.registerServerRecievers()
     }
 

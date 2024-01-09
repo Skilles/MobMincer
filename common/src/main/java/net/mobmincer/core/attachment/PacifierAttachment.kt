@@ -19,6 +19,16 @@ class PacifierAttachment(type: MobMincerAttachment<*>, mincer: MobMincerEntity) 
     }
 
     private fun setAi(enabled: Boolean) {
-        (mincer.target as Mob).isNoAi = !enabled
+        val target = mincer.target
+        val ridingMob = mincer.target.vehicle
+        if (ridingMob is Mob) {
+            ridingMob.isNoAi = !enabled
+        }
+        target.passengersAndSelf.forEach {
+            if (it is Mob) {
+                it.isNoAi = !enabled
+            }
+        }
+
     }
 }

@@ -2,7 +2,7 @@ package net.mobmincer.core.attachment
 
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.LivingEntity
 import net.mobmincer.core.entity.MobMincerEntity
 
 class SpreaderAttachment(type: MobMincerAttachment<*>, mincer: MobMincerEntity) : AttachmentInstance(type, mincer) {
@@ -16,10 +16,12 @@ class SpreaderAttachment(type: MobMincerAttachment<*>, mincer: MobMincerEntity) 
         val nearbyMobs = this.mincer.level().getEntitiesOfClass(
             this.mincer.target.javaClass,
             this.mincer.boundingBox.inflate(5.0)
-        ).filter { it.isAlive && !it.tags.contains("mob_mincer") }.sortedBy { it.distanceTo(this.mincer) }
+        )
+            .filter { MobMincerEntity.canAttach(it, mincer.sourceStack) }
+            .sortedBy { it.distanceTo(this.mincer) }
 
         if (nearbyMobs.isNotEmpty()) {
-            val mob = nearbyMobs[0] as Mob
+            val mob = nearbyMobs[0] as LivingEntity
             this.mincer.changeTarget(mob)
             this.mincer.level().playSound(
                 null,

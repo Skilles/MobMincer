@@ -26,6 +26,7 @@ To use the Mob Mincer, simply right-click on a mob with it in your hand. The min
 drops over time. The mincer works with any mob (even modded ones!), but it must have loot drops.  
 To remove the mincer, left-click the mincer attached to the mob.  
 The Mob Mincer has durability and will break after a certain amount of minces.
+You can even use a dispenser to attach a Mob Mincer.
 
 #### Enchantments
 
@@ -46,7 +47,7 @@ Shift + right-click the Mob Mincer with the attachment in your hand to attach it
 | Storage  | Chest                  | Stores the drops in the mincer instead of dropping them on the ground. Right click to open. |
 | Pacifier | Chorus Fruit           | Disables the mob's AI.                                                                      |
 | Feeder   | Enchanted Golden Apple | Feeds the mob to heal it after mincing. Percentage healed can be configured.                |
-| Spreader | Sculk Catalyst         | Attaches to another mob if the minced mob dies.                                             |
+| Spreader | Sculk Catalyst         | Attaches to another mob of the same type if the minced mob dies.                            |
 
 ### Configuration
 

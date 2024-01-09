@@ -46,7 +46,7 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
     }
 
     fun onDeath(reason: MobMincerEntity.DestroyReason): Boolean {
-        val addTag = reason == MobMincerEntity.DestroyReason.UNEQUIPPED
+        val addTag = reason != MobMincerEntity.DestroyReason.BROKEN
         if (addTag) {
             val stackTag = mobMincer.sourceStack.getOrCreateTagElement("MobMincer")
             val newTag = ListTag()

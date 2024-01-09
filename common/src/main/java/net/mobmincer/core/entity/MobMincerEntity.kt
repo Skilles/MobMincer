@@ -15,7 +15,10 @@ import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageTypes
-import net.minecraft.world.entity.*
+import net.minecraft.world.entity.AnimationState
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.Enchantment
@@ -79,7 +82,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
         attachments.onSpawn()
     }
 
-    fun changeTarget(target: Mob) {
+    fun changeTarget(target: LivingEntity) {
         this.target.removeTag(ROOT_TAG)
         super.initialize(target)
         if (!this.level().isClientSide) {
@@ -94,7 +97,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
         const val TAG_SKIP_LOOT = "${ROOT_TAG}:skip_loot"
 
         fun spawn(
-            target: Mob,
+            target: LivingEntity,
             sourceStack: ItemStack,
             level: Level,
         ): MobMincerEntity? {
@@ -105,8 +108,8 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
             return entity
         }
 
-        fun canAttach(target: Mob, sourceStack: ItemStack): Boolean {
-            return LootLookup.hasLoot(target, EnchantmentHelper.hasSilkTouch(sourceStack)) && !target.tags.contains(ROOT_TAG)
+        fun canAttach(target: LivingEntity, sourceStack: ItemStack): Boolean {
+            return !target.isBaby && target.isAlive && target.passengers.isEmpty() && LootLookup.hasLoot(target, EnchantmentHelper.hasSilkTouch(sourceStack)) && !target.tags.contains(ROOT_TAG)
         }
     }
 
@@ -168,7 +171,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
         if (this.random.nextInt(MobMincerConfig.CONFIG.unbreakingBound.get()) < itemEnchantments.getOrDefault(Enchantments.UNBREAKING, 0)) {
             return
         }
-        if (++sourceStack.damageValue >= sourceStack.maxDamage) {
+        if (++sourceStack.damageValue > sourceStack.maxDamage) {
             dropAsItem(DestroyReason.BROKEN)
         }
     }
@@ -217,13 +220,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
             return
         }
 
-        if (sourceStack.damageValue < sourceStack.maxDamage) {
-            if (reason == DestroyReason.TARGET_KILLED && attachments.hasAttachment(Attachments.SPREADER)) {
-                destroy(reason)
-                return
-            }
-            sourceStack.also { spawnAtLocation(it) }
-        } else {
+        if (sourceStack.damageValue > sourceStack.maxDamage) {
             (level() as ServerLevel).playSound(
                 null,
                 this.blockPosition(),
@@ -232,6 +229,8 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
                 1.0f,
                 1.0f
             )
+            destroy(DestroyReason.BROKEN)
+            return
         }
         destroy(reason)
     }
@@ -245,6 +244,9 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
 
     private fun destroy(reason: DestroyReason = DestroyReason.DISCARD) {
         if (!attachments.onDeath(reason)) {
+            if (reason != DestroyReason.BROKEN) {
+                spawnAtLocation(sourceStack)
+            }
             this.destroy(reason == DestroyReason.DISCARD)
         }
     }
@@ -310,7 +312,6 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
             currentMinceTick = compound.getInt("CurrentMinceTick")
             this.initSourceItem(ItemStack.of(compound.getCompound("SourceStack")))
             attachments.fromEntityTag(compound.getList("Attachments", 10))
-            attachments.onSpawn()
         } else {
             destroy(true)
         }

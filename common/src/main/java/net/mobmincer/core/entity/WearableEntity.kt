@@ -5,7 +5,6 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.entity.Mob
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.AABB
 import java.util.*
@@ -30,6 +29,10 @@ abstract class WearableEntity(entityType: EntityType<*>, level: Level) :
     }
 
     final override fun tick() {
+        if (!this::targetUUID.isInitialized) {
+            super.tick()
+            return
+        }
         if (!this::target.isInitialized) {
             rebindTarget()
             return
@@ -50,12 +53,12 @@ abstract class WearableEntity(entityType: EntityType<*>, level: Level) :
     private fun rebindTarget() {
         val candidates = level().getEntities(
             this,
-            AABB.ofSize(this.position(), 1.0, 1.0, 1.0)
+            AABB.ofSize(this.position(), 1.25, 1.5, 1.25)
         ) { entity -> entity.uuid.equals(targetUUID) }
-        if (candidates.isEmpty() || candidates[0] !is Mob) {
+        if (candidates.isEmpty() || candidates[0] !is LivingEntity) {
             destroy(true)
         } else {
-            this.target = candidates[0] as Mob
+            this.target = candidates[0] as LivingEntity
             onTargetBind()
             this.tick()
         }
@@ -125,6 +128,6 @@ abstract class WearableEntity(entityType: EntityType<*>, level: Level) :
     }
 
     override fun loadAdditionalSpawnData(buf: FriendlyByteBuf) {
-        this.target = level().getEntity(buf.readInt()) as Mob
+        this.target = level().getEntity(buf.readInt()) as LivingEntity
     }
 }
