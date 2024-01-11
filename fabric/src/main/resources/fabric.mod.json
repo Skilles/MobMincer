@@ -29,6 +29,12 @@
         "value": "net.mobmincer.fabric.MobMincerFabricClient"
       }
     ],
+    "fabric-datagen": [
+      {
+        "adapter": "kotlin",
+        "value": "net.mobmincer.fabric.data.MobMincerDataGenerator"
+      }
+    ],
     "jade": [
       {
         "adapter": "kotlin",

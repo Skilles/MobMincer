@@ -1,11 +1,13 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_ender_eye": {
+    "has_ink_sac": {
       "conditions": {
         "items": [
           {
-            "item": "minecraft:ender_eye"
+            "items": [
+              "minecraft:ink_sac"
+            ]
           }
         ]
       },
@@ -20,8 +22,8 @@
   },
   "requirements": [
     [
-      "has_ender_eye",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_ink_sac"
     ]
   ],
   "rewards": {

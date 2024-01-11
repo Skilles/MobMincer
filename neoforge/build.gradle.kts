@@ -10,9 +10,15 @@ architectury {
 loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
 
-    neoForge.apply {
-        enableModProvidedJavadoc.set(true)
-    }
+    /*val modId = rootProject.property("mod_id").toString()
+    val generatedResources = file("src/main/generated")
+    runs {
+        register("data") {
+            data()
+            programArgs("--all", "--mod", modId)
+            programArgs("--output", generatedResources.absolutePath)
+        }
+    }*/
 }
 
 val common: Configuration by configurations.creating

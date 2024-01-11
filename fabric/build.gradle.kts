@@ -13,8 +13,24 @@ architectury {
     fabric()
 }
 
+val generatedResources = file("../common/src/main/generated")
+
 loom {
     accessWidenerPath.set(project(":common").loom.accessWidenerPath)
+
+    val modId = rootProject.property("mod_id").toString()
+    runs {
+        register("data") {
+            server()
+            name = "Data Generation"
+
+            vmArg("-Dfabric-api.datagen")
+            vmArg("-Dfabric-api.datagen.output-dir=$generatedResources")
+            vmArg("-Dfabric-api.datagen.modid=$modId")
+
+            runDir("build/datagen")
+        }
+    }
 }
 
 val common: Configuration by configurations.creating
@@ -36,7 +52,7 @@ dependencies {
     common(project(":common", "namedElements")) {
         isTransitive = false
     }
-    shadowCommon(project(":common", "transformProductionFabric")){
+    shadowCommon(project(":common", "transformProductionFabric")) {
         isTransitive = false
     }
 
@@ -63,7 +79,8 @@ tasks.processResources {
     inputs.property("version", project.version)
 
     filesMatching("fabric.mod.json") {
-        expand(mapOf(
+        expand(
+            mapOf(
                 "group" to rootProject.property("maven_group"),
                 "version" to project.version,
 
@@ -71,7 +88,8 @@ tasks.processResources {
                 "minecraft_version" to rootProject.property("minecraft_version"),
                 "architectury_version" to rootProject.property("architectury_version"),
                 "fabric_kotlin_version" to rootProject.property("fabric_kotlin_version")
-        ))
+            )
+        )
     }
 }
 

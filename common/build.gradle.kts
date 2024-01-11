@@ -6,6 +6,14 @@ loom {
     accessWidenerPath.set(file("src/main/resources/mobmincer.accesswidener"))
 }
 
+sourceSets {
+    main {
+        resources {
+            srcDir(file("src/main/generated"))
+        }
+    }
+}
+
 dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader

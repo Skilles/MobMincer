@@ -46,7 +46,6 @@ forgix {
         } as Closure<ForgixMergeExtension.FabricContainer>
     )
 
-
     removeDuplicate("$group.common")
 }
 
@@ -64,6 +63,8 @@ subprojects {
 
     loom.silentMojangMappingsLicense()
 
+    loom.enableModProvidedJavadoc = true
+
     dependencies {
         "minecraft"("com.mojang:minecraft:${rootProject.property("minecraft_version")}")
         // Use mojmap with ParchmentMC
@@ -77,7 +78,7 @@ subprojects {
                             rootProject.property(
                                 "minecraft_version"
                             )
-                        }:${parchmentVersion}@zip"
+                        }:$parchmentVersion@zip"
                     )
                 }
             }
@@ -160,7 +161,7 @@ unifiedPublishing {
         version = rootProject.property("mod_version").toString()
         displayName = "Mob Mincer v${version.get()}"
         changelog = File("changelogs/${rootProject.property("mod_version")}.md").readText()
-        //debugMode = true
+        // debugMode = true
 
         mainPublication.set(File("${forgix.outputDir}/${forgix.mergedJarName}"))
 
