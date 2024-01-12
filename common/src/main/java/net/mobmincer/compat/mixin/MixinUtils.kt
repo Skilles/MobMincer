@@ -16,7 +16,11 @@ object MixinUtils {
             return original
         }
 
-        return enchantment == Enchantments.UNBREAKING || enchantment == Enchantments.SILK_TOUCH || enchantment == Enchantments.MOB_LOOTING
+        return enchantment == Enchantments.UNBREAKING ||
+                enchantment == Enchantments.SILK_TOUCH ||
+                enchantment == Enchantments.MOB_LOOTING ||
+                enchantment == Enchantments.MENDING ||
+                enchantment == Enchantments.SOUL_SPEED
     }
 
     @JvmStatic

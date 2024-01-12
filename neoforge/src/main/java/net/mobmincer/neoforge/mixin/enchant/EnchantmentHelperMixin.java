@@ -18,6 +18,6 @@ public class EnchantmentHelperMixin {
 
     @ModifyExpressionValue(method = "getAvailableEnchantmentResults(ILnet/minecraft/world/item/ItemStack;Z)Ljava/util/List;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/Enchantment;canApplyAtEnchantingTable(Lnet/minecraft/world/item/ItemStack;)Z"))
     private static boolean canEnchant(boolean original, @Local Item item, @Local Enchantment enchantment) {
-        return MixinUtils.INSTANCE.canEnchant(original, item, enchantment);
+        return MixinUtils.canEnchant(original, item, enchantment);
     }
 }

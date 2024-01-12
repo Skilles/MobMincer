@@ -26,6 +26,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper
 import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.level.Level
 import net.mobmincer.common.config.MobMincerConfig
+import net.mobmincer.core.attachment.AttachmentHolder
 import net.mobmincer.core.attachment.Attachments
 import net.mobmincer.core.attachment.StorageAttachment
 import net.mobmincer.core.loot.LootFactory
@@ -33,7 +34,9 @@ import net.mobmincer.core.loot.LootLookup
 import net.mobmincer.core.registry.MincerEntities.MOB_MINCER
 import net.mobmincer.core.registry.MincerItems
 import net.mobmincer.network.MincerNetwork
+import net.mobmincer.util.MathUtils
 import java.util.*
+import kotlin.math.roundToInt
 
 class MobMincerEntity(type: EntityType<*>, level: Level) :
     WearableEntity(
@@ -42,12 +45,15 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
     ) {
 
     var currentMinceTick = 0
-    var maxMinceTick: Int = MobMincerConfig.CONFIG.maxMinceTick.get()
+    var maxMinceTick: Int = 1000
+
+    var damageDealt: Float = 0.0f
 
     private lateinit var lootFactory: LootFactory // not initialized on client
     private lateinit var itemEnchantments: Map<Enchantment, Int>
+    private var hasMending: Boolean = false
     lateinit var sourceStack: ItemStack
-    val attachments = net.mobmincer.core.attachment.AttachmentHolder(this)
+    val attachments = AttachmentHolder(this)
 
     var isErrored: Boolean
         get() = entityData.get(IS_ERRORED)
@@ -63,6 +69,8 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
     private fun initSourceItem(sourceStack: ItemStack) {
         this.itemEnchantments = EnchantmentHelper.getEnchantments(sourceStack)
         this.sourceStack = sourceStack
+        this.maxMinceTick = MathUtils.getCalculatedMaxMinceTick(itemEnchantments.getOrDefault(Enchantments.SOUL_SPEED, 0))
+        this.hasMending = itemEnchantments.containsKey(Enchantments.MENDING)
     }
 
     private fun initialize(target: LivingEntity, sourceStack: ItemStack, level: ServerLevel) {
@@ -127,20 +135,33 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
             if (target.isAlive) {
                 tickMince(this.level() as ServerLevel)
             } else {
+                if (hasMending) {
+                    mendMincer()
+                }
                 dropAsItem(DestroyReason.TARGET_KILLED)
             }
         }
     }
 
+    private fun mendMincer() {
+        val repairAmount = damageDealt * MobMincerConfig.CONFIG.mendingRepairMultiplier.get()
+        if (repairAmount > 0) {
+            sourceStack.hurt(-repairAmount.roundToInt(), random, null)
+        }
+    }
+
     private fun tickMince(level: ServerLevel) {
-        if (++currentMinceTick >= MobMincerConfig.CONFIG.maxMinceTick.get()) {
+        if (++currentMinceTick >= maxMinceTick) {
             if (dropTargetLoot()) {
                 isErrored = false
                 val damage = MobMincerConfig.CONFIG.mobDamagePercent.get().toFloat() * target.maxHealth
-                target.hurt(
-                    damageSources().indirectMagic(this, this),
-                    damage
-                )
+                if (target.hurt(
+                        damageSources().indirectMagic(this, this),
+                        damage
+                    )
+                ) {
+                    damageDealt += damage
+                }
                 attachments.onMince(damage)
                 takeDurabilityDamage()
                 level.sendParticles(

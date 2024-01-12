@@ -72,6 +72,15 @@ dependencies {
     modRuntimeOnly(
         "me.shedaniel:RoughlyEnoughItems-fabric:${rootProject.property("rei_version")}"
     )
+
+    include(
+        modApi("teamreborn:energy:${rootProject.property("reborn_energy_version")}") {
+            exclude(
+                "net.fabricmc.fabric-api"
+            )
+            // isTransitive = false
+        }
+    )
 }
 
 tasks.processResources {

@@ -3,6 +3,7 @@ package net.mobmincer.network
 import dev.architectury.networking.NetworkManager
 import dev.architectury.utils.GameInstance
 import io.netty.buffer.Unpooled
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.NbtOps
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.resources.ResourceLocation
@@ -27,9 +28,9 @@ object MincerNetwork {
 
     fun registerClientRecievers() {
         NetworkManager.registerReceiver(NetworkManager.s2c(), CHANGE_TARGET) { buf, context ->
+            val mincerId = buf.readInt()
+            val newTargetId = buf.readInt()
             context.queue {
-                val mincerId = buf.readInt()
-                val newTargetId = buf.readInt()
                 val level = context.player.level()
                 val mincer = level.getEntity(mincerId) as MobMincerEntity
                 val newTarget = level.getEntity(newTargetId) as LivingEntity
@@ -38,22 +39,26 @@ object MincerNetwork {
         }
 
         NetworkManager.registerReceiver(NetworkManager.s2c(), SEND_LOOT_DATA) { buf, context ->
+            val packetData = HashMap<ResourceLocation, CompoundTag>()
+            val size = buf.readInt()
+            for (i in 0 until size) {
+                val identifier = buf.readResourceLocation()
+                val receivedNbtData = buf.readNbt()
+                receivedNbtData?.let {
+                    packetData[identifier] = it
+                }
+            }
             context.queue {
-                val size = buf.readInt()
-                for (i in 0 until size) {
-                    val identifier = buf.readResourceLocation()
-                    val receivedNbtData = buf.readNbt()
-                    if (receivedNbtData != null) {
-                        val deserializeResult = LootTable.CODEC.parse(NbtOps.INSTANCE, receivedNbtData)
+                packetData.forEach { (identifier, nbt) ->
+                    val deserializeResult = LootTable.CODEC.parse(NbtOps.INSTANCE, nbt)
 
-                        if (deserializeResult.result().isPresent) {
-                            val receivedLootTable = deserializeResult.result().get()
-                            // Use the deserialized LootTable
-                            LootLookup.set(identifier, receivedLootTable)
-                        } else {
-                            // Handle deserialization failure
-                            MobMincer.logger.error("Failed to deserialize loot table $identifier")
-                        }
+                    if (deserializeResult.result().isPresent) {
+                        val receivedLootTable = deserializeResult.result().get()
+                        // Use the deserialized LootTable
+                        LootLookup.set(identifier, receivedLootTable)
+                    } else {
+                        // Handle deserialization failure
+                        MobMincer.logger.error("Failed to deserialize loot table $identifier")
                     }
                 }
             }

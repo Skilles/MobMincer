@@ -6,14 +6,18 @@ import net.minecraft.core.registries.Registries
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.DispenserBlock
 import net.mobmincer.MobMincer.MOD_ID
+import net.mobmincer.core.item.MincerPowerProviderItem
 import net.mobmincer.core.item.MobMincerItem
 import java.util.function.Function
 
 object MincerItems {
     private val ITEMS: DeferredRegister<Item> = DeferredRegister.create(MOD_ID, Registries.ITEM)
     val MOB_MINCER: RegistrySupplier<Item> = registerItem(
-        "mob_mincer"
+        "mob_mincer",
+        ::MobMincerItem,
     ) { properties: Item.Properties -> properties.stacksTo(1).defaultDurability(100) }
+
+    val POWER_PROVIDER: RegistrySupplier<Item> = registerItem("mincer_power_provider", ::MincerPowerProviderItem)
 
     fun register() {
         MOB_MINCER.listen {
@@ -22,9 +26,15 @@ object MincerItems {
         ITEMS.register()
     }
 
-    private fun registerItem(id: String, properties: Function<Item.Properties, Item.Properties> = Function { properties: Item.Properties -> properties }): RegistrySupplier<Item> {
+    private fun registerItem(
+        id: String,
+        supplier: Function<Item.Properties, Item>,
+        properties: Function<Item.Properties, Item.Properties> = Function {
+            it
+        }
+    ): RegistrySupplier<Item> {
         return ITEMS.register(
             id
-        ) { MobMincerItem(properties.apply(Item.Properties().`arch$tab`(MincerTabs.CREATIVE_TAB))) }
+        ) { supplier.apply(properties.apply(Item.Properties().`arch$tab`(MincerTabs.CREATIVE_TAB))) }
     }
 }

@@ -16,7 +16,9 @@ object MincerTabs {
     val CREATIVE_TAB: RegistrySupplier<CreativeModeTab> = registerTab("mob_mincer", MincerItems.MOB_MINCER)
 
     private fun registerTab(id: String, icon: RegistrySupplier<Item>): RegistrySupplier<CreativeModeTab> {
-        return TABS.register(id) { CreativeTabRegistry.create(Component.translatable("itemGroup.$MOD_ID.$id")) { ItemStack(icon.get()) } }
+        return TABS.register(
+            id
+        ) { CreativeTabRegistry.create(Component.translatable("itemGroup.$MOD_ID.$id")) { ItemStack(icon.get()) } }
     }
 
     fun register() {

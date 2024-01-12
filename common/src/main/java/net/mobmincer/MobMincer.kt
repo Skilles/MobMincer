@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.mobmincer.client.model.MobMincerModel
 import net.mobmincer.client.render.MobMincerEntityRenderer
+import net.mobmincer.core.registry.MincerBlocks
 import net.mobmincer.core.registry.MincerEntities
 import net.mobmincer.core.registry.MincerItems
 import net.mobmincer.core.registry.MincerTabs
@@ -21,6 +22,7 @@ object MobMincer {
 
     @JvmStatic
     fun init() {
+        MincerBlocks.register()
         MincerTabs.register()
         MincerItems.register()
         MincerEntities.register()

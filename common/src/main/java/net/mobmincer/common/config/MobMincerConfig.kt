@@ -54,6 +54,20 @@ class MobMincerConfig private constructor(builder: ModConfigSpec.Builder) {
         .translation("mobmincer.config.dropChance")
         .defineInRange("dropChance", 1.0, 0.0, 1.0)
 
+    val soulSpeedMultiplier: ModConfigSpec.DoubleValue = builder
+        .comment(
+            "The multiplier for the max mince tick when soul speed is applied. maxMinceTick = configMax * (1 - multiplier) ^ soulSpeedLevel"
+        )
+        .translation("mobmincer.config.soulSpeedMultiplier")
+        .defineInRange("soulSpeedMultiplier", 0.2, 0.0, 1.0)
+
+    val mendingRepairMultiplier: ModConfigSpec.DoubleValue = builder
+        .comment(
+            "The multiplier for the amount of durability repaired when mending is applied. amountRepaired = damageDealt * multiplier"
+        )
+        .translation("mobmincer.config.mendingRepairMultiplier")
+        .defineInRange("mendingRepairMultiplier", 1.0, 0.0, 1.0)
+
     companion object {
         private val specPair: Pair<MobMincerConfig, ModConfigSpec> =
             ModConfigSpec.Builder().configure(::MobMincerConfig)
