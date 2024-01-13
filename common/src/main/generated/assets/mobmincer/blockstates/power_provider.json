@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "mobmincer:block/power_provider"
+    }
+  }
+}
