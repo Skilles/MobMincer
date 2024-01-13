@@ -5,10 +5,10 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant
 import net.minecraft.core.Direction
+import net.mobmincer.api.blockentity.SidedEnergyBlockEntity
 import net.mobmincer.energy.MMEnergyBlock
 import net.mobmincer.energy.MMEnergyStorage
 import net.mobmincer.energy.MMSidedEnergyStorage
-import net.mobmincer.energy.SidedEnergyBlockEntity
 import team.reborn.energy.api.EnergyStorage
 import kotlin.math.min
 

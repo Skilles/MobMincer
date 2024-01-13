@@ -18,7 +18,7 @@ import net.minecraft.world.item.enchantment.Enchantments
 import net.mobmincer.compat.jeirei.MobMincerCategory
 import net.mobmincer.core.loot.KillDropLootEntry
 import net.mobmincer.core.loot.LootLookup
-import net.mobmincer.core.registry.MincerItems
+import net.mobmincer.core.registry.MMContent
 
 class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategory<KillDropLootEntry> {
 
@@ -41,7 +41,7 @@ class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategor
 
     override fun getBackground(): IDrawable = helpers.guiHelper.createBlankDrawable(WIDTH, HEIGHT)
 
-    override fun getIcon(): IDrawable = helpers.guiHelper.createDrawableItemStack(ItemStack(MincerItems.MOB_MINCER))
+    override fun getIcon(): IDrawable = helpers.guiHelper.createDrawableItemStack(ItemStack(MMContent.MOB_MINCER_ITEM))
 
     override fun isHandled(recipe: KillDropLootEntry): Boolean = LootLookup.hasLoot(recipe.lootTable)
 
@@ -74,7 +74,7 @@ class MobMincerRecipeCategory(private val helpers: IJeiHelpers) : IRecipeCategor
         }
 
         for ((i, row) in dropRows.withIndex()) {
-            val mincerStack = ItemStack(MincerItems.MOB_MINCER)
+            val mincerStack = ItemStack(MMContent.MOB_MINCER_ITEM)
             val isPlayerDropsRow = i == playerDropsIndex
             if (isPlayerDropsRow) {
                 mincerStack.enchant(Enchantments.SILK_TOUCH, 1)

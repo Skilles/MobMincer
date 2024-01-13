@@ -3,10 +3,10 @@ package net.mobmincer.fabric
 import fuzs.forgeconfigapiport.api.config.v3.ForgeConfigRegistry
 import net.fabricmc.api.ModInitializer
 import net.mobmincer.MobMincer
+import net.mobmincer.api.blockentity.SidedEnergyBlockEntity
 import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.energy.MMChargableItem
 import net.mobmincer.energy.MMEnergyBlock
-import net.mobmincer.energy.SidedEnergyBlockEntity
 import net.neoforged.fml.config.ModConfig
 import team.reborn.energy.api.EnergyStorage
 import team.reborn.energy.api.base.SimpleEnergyItem

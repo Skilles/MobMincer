@@ -2,30 +2,25 @@ package net.mobmincer.core.block
 
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.network.chat.Component
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.util.RandomSource
-import net.minecraft.world.MenuProvider
-import net.minecraft.world.entity.player.Inventory
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.inventory.AbstractContainerMenu
-import net.minecraft.world.inventory.FurnaceMenu
-import net.minecraft.world.level.block.BaseEntityBlock
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityType
+import net.minecraft.world.level.block.SoundType
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.material.MapColor
+import net.mobmincer.api.block.BaseMachineBlock
+import net.mobmincer.api.blockentity.MachineGuiHandler
+import net.mobmincer.core.item.MincerPowerProviderItem
 import net.mobmincer.energy.MMEnergyBlock
-import java.util.function.Supplier
+import java.util.*
+import java.util.function.BiFunction
 
-class MincerPowerProviderBlock(properties: Properties) : BaseEntityBlock(properties), MMEnergyBlock, MenuProvider {
-
-    private lateinit var blockEntityType: Supplier<BlockEntityType<MincerPowerProviderBlockEntity>>
-
-    constructor(properties: Properties, blockEntitySupplier: Supplier<BlockEntityType<MincerPowerProviderBlockEntity>>) : this(
-        properties
-    ) {
-        this.blockEntityType = blockEntitySupplier
-    }
+class MincerPowerProviderBlock(blockEntityFactory: BiFunction<BlockPos, BlockState, MincerPowerProviderBlockEntity>) :
+    BaseMachineBlock<MincerPowerProviderBlockEntity, MincerPowerProviderItem>(
+        blockEntityFactory,
+        Properties.of()
+            .mapColor(MapColor.COLOR_BLUE)
+            .strength(5.0f, 6.0f)
+            .sound(SoundType.METAL)
+    ),
+    MMEnergyBlock {
 
     override fun getEnergyCapacity(): Long {
         return 10000
@@ -39,21 +34,11 @@ class MincerPowerProviderBlock(properties: Properties) : BaseEntityBlock(propert
         return 1000
     }
 
-    override fun tick(state: BlockState, level: ServerLevel, pos: BlockPos, random: RandomSource) {
-        val blockEntity = level.getBlockEntity(pos) as? MincerPowerProviderBlockEntity ?: return
-
-        blockEntity.chargeNearbyMincers()
+    override fun getGui(): MachineGuiHandler? {
+        TODO("Not yet implemented")
     }
 
-    override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {
-        return MincerPowerProviderBlockEntity(pos, state)
-    }
-
-    override fun createMenu(i: Int, inventory: Inventory, player: Player): AbstractContainerMenu {
-        return FurnaceMenu(i, inventory)
-    }
-
-    override fun getDisplayName(): Component {
-        return Component.translatable("gui.mobmincer.power_provider.title")
+    override fun getBlockItem(): Optional<MincerPowerProviderItem> {
+        return Optional.of(MincerPowerProviderItem(this))
     }
 }

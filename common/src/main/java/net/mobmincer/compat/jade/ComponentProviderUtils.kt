@@ -5,6 +5,9 @@ import net.minecraft.nbt.ListTag
 import net.minecraft.nbt.StringTag
 import net.minecraft.network.chat.Component
 import net.mobmincer.core.entity.MobMincerEntity
+import net.mobmincer.core.item.MobMincerType
+import net.mobmincer.core.item.MobMincerType.Companion.getMincerType
+import net.mobmincer.energy.EnergyUtil.getEnergyStorage
 
 object ComponentProviderUtils {
 
@@ -18,6 +21,12 @@ object ComponentProviderUtils {
             attachmentsTag.add(StringTag.valueOf(it.type.name.string))
         }
         compound.put("Attachments", attachmentsTag)
+        val type = this.sourceStack.getMincerType()
+        compound.putString("Type", type.name)
+        if (type == MobMincerType.POWERED) {
+            val storage = this.sourceStack.getEnergyStorage()
+            compound.putInt("Power", (storage.energy / storage.getEnergyCapacity()).toInt())
+        }
     }
 
     fun getTooltipComponents(data: CompoundTag): List<Component> {
@@ -45,6 +54,15 @@ object ComponentProviderUtils {
                     Component.literal(" - ${it.asString}")
                 )
             }
+        }
+        val type = MobMincerType.valueOf(data.getString("Type"))
+        if (type == MobMincerType.POWERED) {
+            components.add(
+                Component.translatable(
+                    "mobmincer.waila.tooltip.power",
+                    data.getInt("Power")
+                )
+            )
         }
         return components
     }

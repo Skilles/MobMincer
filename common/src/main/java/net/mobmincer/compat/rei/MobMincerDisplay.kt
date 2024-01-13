@@ -6,13 +6,13 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient
 import me.shedaniel.rei.api.common.util.EntryIngredients
 import net.minecraft.world.item.ItemStack
 import net.mobmincer.core.loot.KillDropLootEntry
-import net.mobmincer.core.registry.MincerItems
+import net.mobmincer.core.registry.MMContent
 
 class MobMincerDisplay(val lootEntry: KillDropLootEntry) : Display {
 
     override fun getInputEntries(): MutableList<EntryIngredient> {
         return mutableListOf(
-            EntryIngredients.ofItemStacks(listOf(ItemStack(MincerItems.MOB_MINCER), lootEntry.spawnEgg))
+            EntryIngredients.ofItemStacks(listOf(ItemStack(MMContent.MOB_MINCER_ITEM), lootEntry.spawnEgg))
         )
     }
 

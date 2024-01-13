@@ -7,14 +7,14 @@ import me.shedaniel.rei.api.common.util.EntryStacks
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.Enchantments
 import net.mobmincer.core.loot.KillDropLootEntry
-import net.mobmincer.core.registry.MincerItems
+import net.mobmincer.core.registry.MMContent
 
 open class MobMincerReiPlugin : REIClientPlugin {
 
     override fun registerCategories(registry: CategoryRegistry) {
         registry.add(MobMincerDisplayCategory())
 
-        val mincerStack = ItemStack(MincerItems.MOB_MINCER)
+        val mincerStack = ItemStack(MMContent.MOB_MINCER_ITEM)
         val enchantedStack = mincerStack.copy()
         enchantedStack.enchant(Enchantments.SILK_TOUCH, 1)
         registry.configure(MobMincerDisplayCategory.MOB_MINCER_CATEGORY) {

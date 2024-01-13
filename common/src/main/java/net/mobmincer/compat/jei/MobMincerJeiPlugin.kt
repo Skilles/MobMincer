@@ -15,7 +15,7 @@ import net.mobmincer.MobMincer
 import net.mobmincer.compat.jeirei.MobMincerCategory
 import net.mobmincer.core.loot.KillDropLootEntry
 import net.mobmincer.core.registry.AttachmentRegistry
-import net.mobmincer.core.registry.MincerItems
+import net.mobmincer.core.registry.MMContent
 
 @JeiPlugin
 class MobMincerJeiPlugin : IModPlugin {
@@ -37,7 +37,7 @@ class MobMincerJeiPlugin : IModPlugin {
             ) as Component
         }.toTypedArray()
         registration.addItemStackInfo(
-            ItemStack(MincerItems.MOB_MINCER),
+            ItemStack(MMContent.MOB_MINCER_ITEM),
             Component.translatable("mobmincer.jei.info.header"),
             *infoEntries
         )
@@ -47,7 +47,7 @@ class MobMincerJeiPlugin : IModPlugin {
     }
 
     override fun registerRecipeCatalysts(registration: IRecipeCatalystRegistration) {
-        val mincerStack = ItemStack(MincerItems.MOB_MINCER)
+        val mincerStack = ItemStack(MMContent.MOB_MINCER_ITEM)
         registration.addRecipeCatalyst(mincerStack, LOOT_TYPE)
         val enchantedStack = mincerStack.copy()
         enchantedStack.enchant(Enchantments.SILK_TOUCH, 1)

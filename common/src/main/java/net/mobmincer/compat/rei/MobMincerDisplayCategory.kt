@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.Enchantments
 import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.compat.jeirei.MobMincerCategory
-import net.mobmincer.core.registry.MincerItems
+import net.mobmincer.core.registry.MMContent
 
 class MobMincerDisplayCategory : DisplayCategory<MobMincerDisplay> {
 
@@ -21,7 +21,7 @@ class MobMincerDisplayCategory : DisplayCategory<MobMincerDisplay> {
 
     override fun getTitle(): Component = MobMincerCategory.TITLE
 
-    override fun getIcon(): Renderer = EntryStacks.of(MincerItems.MOB_MINCER.get())
+    override fun getIcon(): Renderer = EntryStacks.of(MMContent.MOB_MINCER_ITEM.get())
 
     override fun getDisplayHeight(): Int = MobMincerCategory.HEIGHT + 2
 
@@ -64,7 +64,7 @@ class MobMincerDisplayCategory : DisplayCategory<MobMincerDisplay> {
         )
 
         for ((i, row) in dropRows.withIndex()) {
-            val mincerStack = ItemStack(MincerItems.MOB_MINCER)
+            val mincerStack = ItemStack(MMContent.MOB_MINCER_ITEM)
             val isPlayerDropsRow = i == playerDropsIndex
             if (isPlayerDropsRow) {
                 mincerStack.enchant(Enchantments.SILK_TOUCH, 1)

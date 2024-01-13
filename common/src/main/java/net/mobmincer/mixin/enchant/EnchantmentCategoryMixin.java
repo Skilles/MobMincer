@@ -2,7 +2,7 @@ package net.mobmincer.mixin.enchant;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.world.item.Item;
-import net.mobmincer.core.registry.MincerItems;
+import net.mobmincer.core.registry.MMContent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -14,6 +14,6 @@ public class EnchantmentCategoryMixin {
 
     @ModifyReturnValue(method = "canEnchant(Lnet/minecraft/world/item/Item;)Z", at = @At(value = "RETURN"))
     private boolean canEnchant(boolean original, Item item) {
-        return item.equals(MincerItems.INSTANCE.getMOB_MINCER().get()) || original;
+        return item.equals(MMContent.INSTANCE.getMOB_MINCER_ITEM().get()) || original;
     }
 }

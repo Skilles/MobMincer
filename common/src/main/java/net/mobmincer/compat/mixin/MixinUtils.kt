@@ -6,13 +6,13 @@ import net.minecraft.world.item.enchantment.Enchantment
 import net.minecraft.world.item.enchantment.Enchantments
 import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.core.entity.MobMincerEntity
-import net.mobmincer.core.registry.MincerItems.MOB_MINCER
+import net.mobmincer.core.registry.MMContent
 
 object MixinUtils {
 
     @JvmStatic
     fun canEnchant(original: Boolean, item: Item, enchantment: Enchantment): Boolean {
-        if (item != MOB_MINCER.get()) {
+        if (item != MMContent.MOB_MINCER_ITEM.get()) {
             return original
         }
 

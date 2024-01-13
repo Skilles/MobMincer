@@ -1,19 +1,22 @@
-package net.mobmincer.common.data
+package net.mobmincer.fabric.data
 
-import dev.architectury.injectables.annotations.PlatformOnly
-import net.minecraft.data.PackOutput
-import net.minecraft.data.recipes.*
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider
+import net.minecraft.data.recipes.RecipeCategory
+import net.minecraft.data.recipes.RecipeOutput
+import net.minecraft.data.recipes.ShapedRecipeBuilder
+import net.minecraft.data.recipes.SpecialRecipeBuilder
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.Items
 import net.mobmincer.MobMincer
 import net.mobmincer.core.recipe.MincerUpgradeRecipe
-import net.mobmincer.core.registry.MincerItems
+import net.mobmincer.core.registry.MMContent
 
 // We don't use this in Forge, so we don't have to worry about mappings
-class MobMincerRecipeProvider(output: PackOutput) : RecipeProvider(output) {
-    @PlatformOnly(PlatformOnly.FABRIC)
+class MobMincerRecipeProvider(output: FabricDataOutput) : FabricRecipeProvider(output) {
+
     override fun buildRecipes(recipeOutput: RecipeOutput) {
-        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, MincerItems.MOB_MINCER.get(), 1)
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, MMContent.MOB_MINCER_ITEM.get(), 1)
             .pattern(" I ")
             .pattern("IEI")
             .pattern("ISI")

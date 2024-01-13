@@ -7,10 +7,8 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.mobmincer.client.model.MobMincerModel
 import net.mobmincer.client.render.MobMincerEntityRenderer
-import net.mobmincer.core.registry.MincerBlocks
-import net.mobmincer.core.registry.MincerEntities
-import net.mobmincer.core.registry.MincerItems
-import net.mobmincer.core.registry.MincerTabs
+import net.mobmincer.core.registry.MMContent
+import net.mobmincer.core.registry.MincerRegistry
 import net.mobmincer.network.MincerNetwork
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -22,10 +20,7 @@ object MobMincer {
 
     @JvmStatic
     fun init() {
-        MincerBlocks.register()
-        MincerTabs.register()
-        MincerItems.register()
-        MincerEntities.register()
+        MincerRegistry.performRegistration()
 
         LifecycleEvent.SERVER_LEVEL_UNLOAD.register {
             FakePlayer.unload(it)
@@ -37,7 +32,7 @@ object MobMincer {
     @JvmStatic
     @Environment(EnvType.CLIENT)
     fun initClient() {
-        EntityRendererRegistry.register(MincerEntities.MOB_MINCER, MobMincerEntityRenderer.Provider())
+        EntityRendererRegistry.register(MMContent.MOB_MINCER_ENTITY, MobMincerEntityRenderer.Provider())
         EntityModelLayerRegistry.register(MobMincerModel.LAYER_LOCATION, MobMincerModel::createBodyLayer)
 
         MincerNetwork.registerClientRecievers()

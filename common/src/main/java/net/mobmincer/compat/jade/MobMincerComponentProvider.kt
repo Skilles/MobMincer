@@ -8,7 +8,7 @@ import net.mobmincer.client.render.MobMincerEntityRenderer
 import net.mobmincer.compat.jade.ComponentProviderUtils.appendTooltipData
 import net.mobmincer.compat.jade.ComponentProviderUtils.getTooltipComponents
 import net.mobmincer.core.entity.MobMincerEntity
-import net.mobmincer.core.registry.MincerEntities.MOB_MINCER
+import net.mobmincer.core.registry.MMContent
 import snownee.jade.api.EntityAccessor
 import snownee.jade.api.IEntityComponentProvider
 import snownee.jade.api.IServerDataProvider
@@ -29,7 +29,7 @@ object MobMincerComponentProvider : IEntityComponentProvider, IServerDataProvide
             for ((i, component) in getTooltipComponents(serverData).withIndex()) {
                 val contents = component.contents
                 if (contents is TranslatableContents) {
-                    if (contents.key.endsWith("progress")) {
+                    if (contents.key.endsWith("progress") || contents.key.endsWith("power")) {
                         val progress = contents.args[0] as Float
                         val style = SimpleProgressStyle()
                         style.autoTextColor = false
@@ -61,7 +61,7 @@ object MobMincerComponentProvider : IEntityComponentProvider, IServerDataProvide
     }
 
     override fun getUid(): ResourceLocation {
-        return MOB_MINCER.id
+        return MMContent.MOB_MINCER_ENTITY.id
     }
 
     override fun appendServerData(data: CompoundTag, accessor: EntityAccessor) {

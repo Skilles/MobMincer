@@ -15,27 +15,28 @@ import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Rarity
 import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.DispenserBlock
 import net.minecraft.world.phys.AABB
+import net.mobmincer.api.item.BaseItem
+import net.mobmincer.api.item.CreativeTabIcon
 import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.core.attachment.Attachments
 import net.mobmincer.core.entity.MobMincerEntity
 import net.mobmincer.core.item.MobMincerType.Companion.getMincerType
 import net.mobmincer.core.item.MobMincerType.Companion.setMincerType
 import net.mobmincer.core.registry.AttachmentRegistry
-import net.mobmincer.energy.EnergyUtil
+import net.mobmincer.energy.EnergyUtil.getEnergyStorage
 import net.mobmincer.energy.MMChargableItem
 import kotlin.math.max
 
 /**
  * A mob mincer item that can be placed on a mob. Over time, the mob will be "minced" and will drop loot until it dies.
  */
-class MobMincerItem(properties: Properties) : Item(properties), MMChargableItem {
+class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)), MMChargableItem, CreativeTabIcon {
 
     override fun getDefaultInstance(): ItemStack {
         val instance = super.getDefaultInstance()
@@ -130,7 +131,7 @@ class MobMincerItem(properties: Properties) : Item(properties), MMChargableItem 
         }
 
         if (stack.getMincerType() == MobMincerType.POWERED) {
-            val energy = EnergyUtil.getEnergyStorage(stack).energy
+            val energy = stack.getEnergyStorage().energy
             val maxEnergy = getEnergyCapacity(stack)
             tooltipComponents.add(Component.literal("Energy: $energy/$maxEnergy").withStyle(ChatFormatting.GRAY))
         }

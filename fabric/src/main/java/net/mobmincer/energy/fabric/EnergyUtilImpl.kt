@@ -5,9 +5,9 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
 import net.minecraft.core.Direction
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.entity.BlockEntity
+import net.mobmincer.api.blockentity.SidedEnergyBlockEntity
 import net.mobmincer.energy.MMEnergyStorage
 import net.mobmincer.energy.MMSidedEnergyStorage
-import net.mobmincer.energy.SidedEnergyBlockEntity
 import team.reborn.energy.api.EnergyStorage
 
 object EnergyUtilImpl {
@@ -86,13 +86,13 @@ object EnergyUtilImpl {
     }
 
     @JvmStatic
-    fun getEnergyStorage(stack: ItemStack): MMEnergyStorage {
-        return getStorage(stack) as MMEnergyStorage? ?: throw IllegalArgumentException("ItemStack does not have an MM energy storage")
+    fun ItemStack.getEnergyStorage(): MMEnergyStorage {
+        return getStorage(this) as MMEnergyStorage? ?: throw IllegalArgumentException("ItemStack does not have an MM energy storage")
     }
 
     @JvmStatic
-    fun getEnergyStorage(blockEntity: BlockEntity, direction: Direction?): MMEnergyStorage {
-        return getStorage(blockEntity, direction) as MMEnergyStorage? ?: throw IllegalArgumentException("BlockEntity does not have an MM energy storage")
+    fun BlockEntity.getEnergyStorage(direction: Direction? = null): MMEnergyStorage {
+        return getStorage(this, direction) as MMEnergyStorage? ?: throw IllegalArgumentException("BlockEntity does not have an MM energy storage")
     }
 
     private fun getStorage(stack: ItemStack): EnergyStorage? {

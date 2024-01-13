@@ -31,8 +31,7 @@ import net.mobmincer.core.attachment.Attachments
 import net.mobmincer.core.attachment.StorageAttachment
 import net.mobmincer.core.loot.LootFactory
 import net.mobmincer.core.loot.LootLookup
-import net.mobmincer.core.registry.MincerEntities.MOB_MINCER
-import net.mobmincer.core.registry.MincerItems
+import net.mobmincer.core.registry.MMContent
 import net.mobmincer.network.MincerNetwork
 import net.mobmincer.util.MathUtils
 import java.util.*
@@ -110,8 +109,8 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
             level: Level,
         ): MobMincerEntity? {
             require(!level.isClientSide) { "Mob mincer entity must be spawned on the server" }
-            require(sourceStack.`is`(MincerItems.MOB_MINCER.get())) { "Source stack must be a mob mincer item" }
-            val entity = MOB_MINCER.get().create(level) ?: return null
+            require(sourceStack.`is`(MMContent.MOB_MINCER_ITEM.get())) { "Source stack must be a mob mincer item" }
+            val entity = MMContent.MOB_MINCER_ENTITY.get().create(level) ?: return null
             entity.initialize(target, sourceStack, level as ServerLevel)
             return entity
         }

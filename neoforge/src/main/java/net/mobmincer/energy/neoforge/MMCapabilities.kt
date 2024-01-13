@@ -2,8 +2,8 @@ package net.mobmincer.energy.neoforge
 
 import net.minecraft.core.Direction
 import net.minecraft.world.item.ItemStack
+import net.mobmincer.api.blockentity.SidedEnergyBlockEntity
 import net.mobmincer.energy.MMChargableItem
-import net.mobmincer.energy.SidedEnergyBlockEntity
 import net.neoforged.neoforge.common.capabilities.Capabilities
 import net.neoforged.neoforge.common.capabilities.Capability
 import net.neoforged.neoforge.common.capabilities.ICapabilityProvider

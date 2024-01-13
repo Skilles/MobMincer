@@ -4,32 +4,10 @@ import dev.architectury.injectables.annotations.ExpectPlatform
 import net.minecraft.core.Direction
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.entity.BlockEntity
+import net.mobmincer.api.blockentity.SidedEnergyBlockEntity
+import net.mobmincer.core.entity.MobMincerEntity
 
 object EnergyUtil {
-
-    /*@JvmStatic
-    @ExpectPlatform
-    fun getCurrentEnergy(stack: ItemStack): Long {
-        throw AssertionError()
-    }
-
-    @JvmStatic
-    @ExpectPlatform
-    fun setCurrentEnergy(stack: ItemStack, energy: Long): Long {
-        throw AssertionError()
-    }
-
-    @JvmStatic
-    @ExpectPlatform
-    fun extractEnergy(stack: ItemStack, amount: Long, simulate: Boolean): Long {
-        throw AssertionError()
-    }
-
-    @JvmStatic
-    @ExpectPlatform
-    fun insertEnergy(stack: ItemStack, amount: Long, simulate: Boolean): Long {
-        throw AssertionError()
-    }*/
 
     @JvmStatic
     @ExpectPlatform
@@ -39,14 +17,18 @@ object EnergyUtil {
 
     @JvmStatic
     @ExpectPlatform
-    fun getEnergyStorage(stack: ItemStack): MMEnergyStorage {
+    fun ItemStack.getEnergyStorage(): MMEnergyStorage {
         throw AssertionError()
     }
 
     @JvmStatic
     @ExpectPlatform
-    fun getEnergyStorage(blockEntity: BlockEntity, direction: Direction?): MMEnergyStorage {
+    fun BlockEntity.getEnergyStorage(direction: Direction? = null): MMEnergyStorage {
         throw AssertionError()
+    }
+
+    fun MobMincerEntity.getEnergyStorage(): MMEnergyStorage {
+        return this.sourceStack.getEnergyStorage()
     }
 
     fun extractEnergy(blockEntity: SidedEnergyBlockEntity, amount: Long, direction: Direction? = null): Long {

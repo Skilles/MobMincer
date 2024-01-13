@@ -8,7 +8,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.mobmincer.core.entity.MobMincerEntity;
-import net.mobmincer.core.registry.MincerItems;
+import net.mobmincer.core.registry.MMContent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,7 +23,7 @@ public abstract class ItemEntityMixin {
     @Inject(method = "tick()V", at = @At("TAIL"))
     private void tick(CallbackInfo ci) {
         var item = getItem();
-        if (item.is(MincerItems.INSTANCE.getMOB_MINCER().get())) {
+        if (item.is(MMContent.INSTANCE.getMOB_MINCER_ITEM().get())) {
             // Collide and attach to an entity if shot from a dispenser
             var thisEntity = (ItemEntity) (Object) (this);
             if (!thisEntity.onGround() && thisEntity.getTags().contains("mob_mincer:dispensed")) {
