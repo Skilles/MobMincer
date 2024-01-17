@@ -184,6 +184,30 @@ unifiedPublishing {
                 curseforge = "architectury-api"
                 modrinth = "architectury-api"
             }
+            depends {
+                curseforge = "forge-config-api-port-fabric"
+                modrinth = "forge-config-api-port"
+            }
+            depends {
+                curseforge = "fabric-language-kotlin"
+                modrinth = "fabric-language-kotlin"
+            }
+            depends {
+                curseforge = "kotlin-for-forge"
+                modrinth = "kotlin-for-forge"
+            }
+            optional {
+                curseforge = "roughly-enough-resources"
+                modrinth = "rei"
+            }
+            optional {
+                curseforge = "jei"
+                modrinth = "jei"
+            }
+            optional {
+                curseforge = "jade"
+                modrinth = "jade"
+            }
         }
     }
 }
