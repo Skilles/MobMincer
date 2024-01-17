@@ -1,11 +1,15 @@
 package net.mobmincer.api.blockentity
 
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.ClientGamePacketListener
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
 import net.minecraft.world.Container
+import net.minecraft.world.MenuProvider
+import net.minecraft.world.WorldlyContainer
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
@@ -23,8 +27,21 @@ abstract class BaseMachineBlockEntity(type: BlockEntityType<*>, pos: BlockPos, b
         pos,
         blockState
     ),
-    Container,
-    InventoryProvider {
+    WorldlyContainer,
+    InventoryProvider,
+    MenuProvider {
+
+    override fun getMaxStackSize(): Int {
+        return getOptionalInventory().map { it.getMaxStackSize() }.orElse(0)
+    }
+
+    override fun canPlaceItem(index: Int, stack: ItemStack): Boolean {
+        return getOptionalInventory().map { it.canPlaceItem(index, stack) }.orElse(false)
+    }
+
+    override fun canTakeItem(target: Container, index: Int, stack: ItemStack): Boolean {
+        return getOptionalInventory().map { it.canTakeItem(target, index, stack) }.orElse(false)
+    }
 
     override fun clearContent() {
         getOptionalInventory().ifPresent { it.clearContent() }
@@ -58,8 +75,20 @@ abstract class BaseMachineBlockEntity(type: BlockEntityType<*>, pos: BlockPos, b
         return getOptionalInventory().map { it.stillValid(player) }.orElse(false)
     }
 
+    override fun getSlotsForFace(side: Direction): IntArray {
+        return getOptionalInventory().map { it.getSlotsForFace(side) }.orElse(IntArray(0))
+    }
+
+    override fun canPlaceItemThroughFace(index: Int, itemStack: ItemStack, direction: Direction?): Boolean {
+        return getOptionalInventory().map { it.canPlaceItemThroughFace(index, itemStack, direction) }.orElse(false)
+    }
+
+    override fun canTakeItemThroughFace(index: Int, stack: ItemStack, direction: Direction): Boolean {
+        return getOptionalInventory().map { it.canTakeItemThroughFace(index, stack, direction) }.orElse(false)
+    }
+
     fun getOptionalInventory(): Optional<MachineInventory<*>> {
-        return Optional.ofNullable(getInventory() as? MachineInventory<*>)
+        return Optional.ofNullable(getInventory() as? MachineInventory<*> ?: throw IllegalStateException("Inventory is not a MachineInventory"))
     }
 
     override fun load(tag: CompoundTag) {
@@ -82,11 +111,13 @@ abstract class BaseMachineBlockEntity(type: BlockEntityType<*>, pos: BlockPos, b
         return tag
     }
 
-    fun onPlace(level: Level, pos: BlockPos, state: BlockState, placer: LivingEntity?, stack: ItemStack) {
+    override fun getDisplayName(): Component {
+        return blockState.block.name
+    }
 
+    fun onPlace(level: Level, pos: BlockPos, state: BlockState, placer: LivingEntity?, stack: ItemStack) {
     }
 
     fun onBreak(level: Level, player: Player, pos: BlockPos, state: BlockState, tool: ItemStack) {
-
     }
 }

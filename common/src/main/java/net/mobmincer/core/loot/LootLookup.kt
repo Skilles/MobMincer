@@ -33,7 +33,12 @@ object LootLookup {
     }
 
     fun set(identifier: ResourceLocation, loot: LootTable) {
-        ID_TO_LOOT[identifier] = LootStack.from(loot)
+        val lootStack = LootStack.from(loot)
+        if (lootStack.isEmpty()) {
+            ID_TO_LOOT.remove(identifier)
+        } else {
+            ID_TO_LOOT[identifier] = lootStack
+        }
     }
 
     fun clear() {

@@ -7,7 +7,6 @@ enum class MobMincerType {
     POWERED,
     CREATIVE;
 
-
     companion object {
         fun ItemStack.getMincerType(): MobMincerType {
             require(this.item is MobMincerItem)

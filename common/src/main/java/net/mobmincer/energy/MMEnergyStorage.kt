@@ -1,6 +1,8 @@
 package net.mobmincer.energy
 
-interface MMEnergyStorage {
+import net.mobmincer.util.NBTSerializable
+
+interface MMEnergyStorage : NBTSerializable {
 
     /**
      * Return false if calling [.insert] will absolutely always return 0, or true otherwise or in doubt.
@@ -38,15 +40,12 @@ interface MMEnergyStorage {
      */
     fun extract(maxAmount: Long): Long
 
+    val energyCapacity: Long
+
     /**
      * Return the current amount of energy that is stored.
      */
     var energy: Long
-
-    /**
-     * Return the maximum amount of energy that could be stored.
-     */
-    fun getEnergyCapacity(): Long
 
     val isEmpty: Boolean
         get() = energy <= 0

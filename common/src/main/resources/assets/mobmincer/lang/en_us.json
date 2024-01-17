@@ -1,6 +1,7 @@
 {
   "entity.mobmincer.mob_mincer": "Mob Mincer",
   "item.mobmincer.mob_mincer": "Mob Mincer",
+  "item.mobmincer.power_provider": "Power Provider",
   "itemGroup.mobmincer.mob_mincer": "Mob Mincer",
   "advancements.mobmincer.mob_mincer.title": "Mob Mincer",
   "advancements.mobmincer.mob_mincer.description": "Craft a Mob Mincer",
@@ -15,11 +16,20 @@
   "mobmincer.config.mobDamagePercent": "Mob Damage Percent",
   "mobmincer.config.coloredMobs": "Colored Mobs",
   "mobmincer.config.allowDispensing": "Allow Dispensing",
+  "mobmincer.config.allowKillLoot": "Allow Kill Loot",
+  "mobmincer.config.dropChance": "Drop Chance",
+  "mobmincer.config.soulSpeedMultiplier": "Soul Speed Multiplier",
+  "mobmincer.config.mendingRepairMultiplier": "Mending Repair Multiplier",
+  "mobmincer.config.entityFilterMode": "Entity Filter Mode",
+  "mobmincer.config.entityFilter": "Entity Filter",
   "mobmincer.jei.category.title": "Mob Mincer",
   "mobmincer.attachment.storage": "Storage",
   "mobmincer.attachment.feeder": "Feeder",
   "mobmincer.attachment.pacifier": "Pacifier",
   "mobmincer.attachment.spreader": "Spreader",
   "mobmincer.jei.info.header": "Attachments (Shift + Right Click)",
-  "mobmincer.jei.tooltip.playerKilled": " (Player Killed)"
+  "mobmincer.jei.tooltip.playerKilled": " (Player Killed)",
+  "mobmincer.tooltip.type": "Type: ",
+  "mobmincer.tooltip.energy": "Energy: ",
+  "mobmincer.tooltip.attachments": "Attachments:"
 }

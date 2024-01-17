@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.nbt.StringTag
 import net.minecraft.network.chat.Component
+import net.mobmincer.MobMincer
 import net.mobmincer.core.entity.MobMincerEntity
 import net.mobmincer.core.item.MobMincerType
 import net.mobmincer.core.item.MobMincerType.Companion.getMincerType
@@ -24,8 +25,8 @@ object ComponentProviderUtils {
         val type = this.sourceStack.getMincerType()
         compound.putString("Type", type.name)
         if (type == MobMincerType.POWERED) {
-            val storage = this.sourceStack.getEnergyStorage()
-            compound.putInt("Power", (storage.energy / storage.getEnergyCapacity()).toInt())
+            val storage = this.sourceStack.getEnergyStorage() ?: return MobMincer.logger.warn("No energy storage found for powered mincer!")
+            compound.putFloat("Power", storage.energy.toFloat() / storage.energyCapacity)
         }
     }
 
@@ -60,7 +61,7 @@ object ComponentProviderUtils {
             components.add(
                 Component.translatable(
                     "mobmincer.waila.tooltip.power",
-                    data.getInt("Power")
+                    data.getFloat("Power")
                 )
             )
         }

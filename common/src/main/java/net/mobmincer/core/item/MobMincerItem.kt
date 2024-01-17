@@ -21,8 +21,8 @@ import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.DispenserBlock
 import net.minecraft.world.phys.AABB
+import net.mobmincer.MobMincer
 import net.mobmincer.api.item.BaseItem
-import net.mobmincer.api.item.CreativeTabIcon
 import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.core.attachment.Attachments
 import net.mobmincer.core.entity.MobMincerEntity
@@ -31,12 +31,17 @@ import net.mobmincer.core.item.MobMincerType.Companion.setMincerType
 import net.mobmincer.core.registry.AttachmentRegistry
 import net.mobmincer.energy.EnergyUtil.getEnergyStorage
 import net.mobmincer.energy.MMChargableItem
+import net.mobmincer.util.StringUtils
 import kotlin.math.max
 
 /**
  * A mob mincer item that can be placed on a mob. Over time, the mob will be "minced" and will drop loot until it dies.
  */
-class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)), MMChargableItem, CreativeTabIcon {
+class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)), MMChargableItem {
+
+    init {
+        DispenserBlock.registerBehavior(this, DISPENSE_BEHAVIOR)
+    }
 
     override fun getDefaultInstance(): ItemStack {
         val instance = super.getDefaultInstance()
@@ -65,8 +70,6 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
             MobMincerType.CREATIVE -> Rarity.EPIC
         }
     }
-
-
 
     override fun interactLivingEntity(
         stack: ItemStack,
@@ -97,14 +100,45 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
     }
 
     override fun getBarWidth(stack: ItemStack): Int {
-        val maxDamage = MobMincerConfig.CONFIG.baseDurability.get()
-        return Math.round(13.0f - stack.damageValue.toFloat() * 13.0f / maxDamage.toFloat())
+        val (value, maxValue) = getDamageValues(stack)
+
+        return Math.round(13.0f - value.toFloat() * 13.0f / maxValue.toFloat())
     }
 
     override fun getBarColor(stack: ItemStack): Int {
-        val maxDamage = MobMincerConfig.CONFIG.baseDurability.get()
-        val f = max(0.0, ((maxDamage - stack.damageValue.toFloat()) / maxDamage).toDouble()).toFloat()
+        val (value, maxValue) = getDamageValues(stack)
+        val f = max(0.0, ((maxValue - value.toFloat()) / maxValue).toDouble()).toFloat()
         return Mth.hsvToRgb(f / 3.0f, 1.0f, 1.0f)
+    }
+
+    override fun isBarVisible(stack: ItemStack): Boolean {
+        return when (stack.getMincerType()) {
+            MobMincerType.BASIC -> super.isBarVisible(stack)
+            MobMincerType.POWERED -> true
+            MobMincerType.CREATIVE -> false
+        }
+    }
+
+    private fun getDamageValues(stack: ItemStack): Pair<Int, Int> {
+        val type = stack.getMincerType()
+
+        if (type == MobMincerType.CREATIVE) {
+            return 0 to 1
+        }
+
+        val value: Int
+        val maxValue: Int
+        if (type == MobMincerType.POWERED) {
+            maxValue = getEnergyCapacity(stack).toInt()
+            value = stack.getEnergyStorage()?.energy?.toInt()?.let { maxValue - it } ?: return 1 to 1.also {
+                MobMincer.logger.warn("No energy storage found for powered mincer!")
+            }
+        } else {
+            value = stack.damageValue
+            maxValue = MobMincerConfig.CONFIG.baseDurability.get()
+        }
+
+        return value to maxValue
     }
 
     override fun appendHoverText(stack: ItemStack, level: Level?, tooltipComponents: MutableList<Component>, isAdvanced: TooltipFlag) {
@@ -112,6 +146,14 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
             return
         }
         val stackTag = stack.tag!!
+        val mincerType = stack.getMincerType()
+
+        tooltipComponents.add(
+            Component.literal(
+                StringUtils.toFirstCapitalAllLowercase(mincerType.name)
+            ).withStyle(ChatFormatting.GRAY)
+        )
+
         if (stackTag.contains("MobMincer")) {
             val tag = stackTag.getCompound("MobMincer")
             if (tag.contains("Attachments")) {
@@ -119,7 +161,7 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
                 if (attachments.isEmpty()) {
                     return
                 }
-                tooltipComponents.add(Component.literal("Attachments:"))
+                tooltipComponents.add(Component.translatable("mobmincer.tooltip.attachments"))
                 for (i in 0 until attachments.size) {
                     val attachment = attachments.getCompound(i)
                     val type = Attachments.valueOf(attachment.getString("Type"))
@@ -130,10 +172,16 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
             }
         }
 
-        if (stack.getMincerType() == MobMincerType.POWERED) {
-            val energy = stack.getEnergyStorage().energy
+        if (mincerType == MobMincerType.POWERED) {
+            val energy = stack.getEnergyStorage()?.energy ?: return MobMincer.logger.warn("No energy storage found for powered mincer!")
             val maxEnergy = getEnergyCapacity(stack)
-            tooltipComponents.add(Component.literal("Energy: $energy/$maxEnergy").withStyle(ChatFormatting.GRAY))
+            tooltipComponents.add(
+                Component.translatable(
+                    "mobmincer.tooltip.energy"
+                ).withStyle(
+                    ChatFormatting.GOLD
+                ).append(StringUtils.getPercentageText((energy / maxEnergy * 100).toInt()))
+            )
         }
     }
 

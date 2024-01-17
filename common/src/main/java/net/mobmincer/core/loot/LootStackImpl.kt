@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.monster.Slime
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.enchantment.Enchantments
@@ -56,7 +57,18 @@ class LootStackImpl(private val table: LootTable, entries: List<LootStack.LootSt
         }
         val items = table.getRandomItems(lootParams, entity.lootTableSeed)
         fakePlayer?.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY)
+
+        performCustomOverrides(entity, items)
+
         return items
+    }
+
+    private fun performCustomOverrides(entity: LivingEntity, loot: ObjectArrayList<ItemStack>) {
+        if (entity is Slime && entity.size > 1) {
+            loot.find { it.item == Items.SLIME_BALL }?.let {
+                it.count += 1
+            }
+        }
     }
 
     companion object {
@@ -89,7 +101,7 @@ class LootStackImpl(private val table: LootTable, entries: List<LootStack.LootSt
     }
 
     override fun isEmpty(): Boolean {
-        return this === EMPTY
+        return backingList.isEmpty()
     }
 
     override fun iterator(): Iterator<LootStack.LootStackEntry> {

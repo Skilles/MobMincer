@@ -1,11 +1,16 @@
 package net.mobmincer.api.inventory
 
+import net.minecraft.core.Direction
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.WorldlyContainer
+import net.minecraft.world.item.ItemStack
 import net.mobmincer.api.blockentity.BaseMachineBlockEntity
 
-class MachineInventory<T : BaseMachineBlockEntity>(size: Int, val name: String, private val stackLimit: Int, val blockEntity: T, val access: InventoryAccess<T>) : BaseInventory(
-    size
-) {
+class MachineInventory<T : BaseMachineBlockEntity>(size: Int, val name: String, private val stackLimit: Int, val blockEntity: T, private val access: InventoryAccess<T>) :
+    BaseInventory(
+        size
+    ),
+    WorldlyContainer {
 
     var hasChanged: Boolean = false
         private set(value) {
@@ -22,6 +27,21 @@ class MachineInventory<T : BaseMachineBlockEntity>(size: Int, val name: String, 
         blockEntity,
         InventoryAccess { _, _, _, _, _ -> true }
     )
+
+    override fun getSlotsForFace(side: Direction): IntArray {
+        return IntArray(this.containerSize) { it }
+    }
+
+    override fun canPlaceItemThroughFace(index: Int, itemStack: ItemStack, direction: Direction?): Boolean = access.canHandleIO(
+        index,
+        itemStack,
+        direction ?: Direction.UP,
+        InventoryAccess.AccessDirection.INSERT,
+        blockEntity
+    )
+
+    override fun canTakeItemThroughFace(index: Int, stack: ItemStack, direction: Direction): Boolean =
+        access.canHandleIO(index, stack, direction, InventoryAccess.AccessDirection.EXTRACT, blockEntity)
 
     override fun getMaxStackSize(): Int = stackLimit
 

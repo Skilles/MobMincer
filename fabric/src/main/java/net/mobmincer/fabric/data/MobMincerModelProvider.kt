@@ -10,7 +10,7 @@ import net.mobmincer.core.registry.MMContent
 class MobMincerModelProvider(output: FabricDataOutput) : FabricModelProvider(output) {
     override fun generateBlockStateModels(generator: BlockModelGenerators) {
         MMContent.Machine.entries.forEach {
-            generator.createTrivialBlock(it.block, TexturedModel.CUBE_TOP_BOTTOM)
+            generator.createTrivialBlock(it.info.block.get(), TexturedModel.CUBE_TOP_BOTTOM)
         }
     }
 

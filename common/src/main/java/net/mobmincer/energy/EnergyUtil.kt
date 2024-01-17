@@ -17,35 +17,46 @@ object EnergyUtil {
 
     @JvmStatic
     @ExpectPlatform
-    fun ItemStack.getEnergyStorage(): MMEnergyStorage {
+    fun getSidedStorage(blockEntity: SidedEnergyBlockEntity, direction: Direction? = null): MMEnergyStorage {
         throw AssertionError()
     }
 
     @JvmStatic
     @ExpectPlatform
-    fun BlockEntity.getEnergyStorage(direction: Direction? = null): MMEnergyStorage {
+    fun ItemStack.getEnergyStorage(): MMEnergyStorage? {
+        throw AssertionError()
+    }
+
+    @JvmStatic
+    @ExpectPlatform
+    fun BlockEntity.getEnergyStorage(direction: Direction? = null): MMEnergyStorage? {
+        throw AssertionError()
+    }
+
+    @JvmStatic
+    @ExpectPlatform
+    fun moveEnergy(from: MMEnergyStorage, to: MMEnergyStorage, maxAmount: Long): Long {
+        throw AssertionError()
+    }
+
+    @JvmStatic
+    @ExpectPlatform
+    fun ItemStack.setEnergyUnchecked(amount: Long) {
+        throw AssertionError()
+    }
+
+    @JvmStatic
+    @ExpectPlatform
+    fun ItemStack.getEnergyUnchecked(): Long {
         throw AssertionError()
     }
 
     fun MobMincerEntity.getEnergyStorage(): MMEnergyStorage {
-        return this.sourceStack.getEnergyStorage()
-    }
-
-    fun extractEnergy(blockEntity: SidedEnergyBlockEntity, amount: Long, direction: Direction? = null): Long {
-        return blockEntity.getOrCreateEnergyStorage(direction).extract(amount)
-    }
-
-    fun insertEnergy(blockEntity: SidedEnergyBlockEntity, amount: Long, direction: Direction? = null): Long {
-        return blockEntity.getOrCreateEnergyStorage(direction).insert(amount)
-    }
-
-    fun transferEnergy(from: SidedEnergyBlockEntity, to: MMEnergyStorage, amount: Long, direction: Direction? = null): Long {
-        val extracted = extractEnergy(from, amount, direction)
-        return to.insert(extracted)
+        return this.sourceStack.getEnergyStorage() ?: throw IllegalStateException("No energy storage found on Mincer")
     }
 
     fun transferEnergy(from: SidedEnergyBlockEntity, to: List<MMEnergyStorage>, amount: Long, direction: Direction? = null): Long {
-        val extracted = extractEnergy(from, amount, direction) / to.size
+        val extracted = from.energyStorage.extract(amount, direction) / to.size
         return to.sumOf { it.insert(extracted) }
     }
 }

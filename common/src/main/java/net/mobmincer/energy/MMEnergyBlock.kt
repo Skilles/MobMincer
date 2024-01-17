@@ -10,11 +10,7 @@ interface MMEnergyBlock {
 
     fun getEnergyMaxOutput(side: Direction?): Long
 
-    fun supportsInsertion(side: Direction?): Boolean {
-        return getEnergyMaxInput(side) > 0
-    }
+    fun supportsInsertion(side: Direction?): Boolean = getEnergyMaxInput(side) > 0
 
-    fun supportsExtraction(side: Direction?): Boolean {
-        return getEnergyMaxOutput(side) > 0
-    }
+    fun supportsExtraction(side: Direction?): Boolean = getEnergyMaxOutput(side) > 0
 }

@@ -7,7 +7,7 @@ import net.mobmincer.core.registry.MMContent
 class MobMincerLootTableProvider(dataOutput: FabricDataOutput) : FabricBlockLootTableProvider(dataOutput) {
     override fun generate() {
         MMContent.Machine.entries.forEach {
-            dropSelf(it.block)
+            dropSelf(it.info.block.get())
         }
     }
 }

@@ -3,6 +3,7 @@ package net.mobmincer.energy.neoforge
 import net.minecraft.core.Direction
 import net.minecraft.world.item.ItemStack
 import net.mobmincer.api.blockentity.SidedEnergyBlockEntity
+import net.mobmincer.energy.EnergyUtil
 import net.mobmincer.energy.MMChargableItem
 import net.neoforged.neoforge.common.capabilities.Capabilities
 import net.neoforged.neoforge.common.capabilities.Capability
@@ -43,7 +44,7 @@ object MMCapabilities {
             override fun <T> getCapability(cap: Capability<T>, side: Direction?): LazyOptional<T> {
                 return Capabilities.ENERGY.orEmpty(
                     cap,
-                    LazyOptional.of { blockEntity.getOrCreateEnergyStorage(side) as IEnergyStorage }
+                    LazyOptional.of { EnergyUtil.getSidedStorage(blockEntity, side) as IEnergyStorage }
                 )
             }
         }

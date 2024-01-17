@@ -12,7 +12,7 @@ import net.mobmincer.energy.MMSidedEnergyStorage
 import team.reborn.energy.api.EnergyStorage
 import kotlin.math.min
 
-class MMSidedEnergyContainer(private val blockEntity: SidedEnergyBlockEntity) : SnapshotParticipant<Long>(), MMSidedEnergyStorage {
+class MMSidedEnergyWrapper(private val blockEntity: SidedEnergyBlockEntity) : SnapshotParticipant<Long>(), MMSidedEnergyStorage {
 
     override var energy: Long = 0
     private val sideStorages = arrayOfNulls<SideStorage>(7)
@@ -27,21 +27,13 @@ class MMSidedEnergyContainer(private val blockEntity: SidedEnergyBlockEntity) : 
     /**
      * @return An [EnergyStorage] implementation for the passed side.
      */
-    fun getSideStorage(side: Direction?): SideStorage {
-        return sideStorages[side?.get3DDataValue() ?: 6]!!
-    }
-
-    override fun getMMSideStorage(side: Direction?): MMEnergyStorage {
-        return getSideStorage(side)
-    }
+    fun getSideStorage(side: Direction?): SideStorage = sideStorages[side?.get3DDataValue() ?: 6]!!
 
     override fun onFinalCommit() {
         blockEntity.setChanged()
     }
 
-    override fun createSnapshot(): Long {
-        return energy
-    }
+    override fun createSnapshot(): Long = energy
 
     override fun readSnapshot(snapshot: Long) {
         energy = snapshot
@@ -53,13 +45,13 @@ class MMSidedEnergyContainer(private val blockEntity: SidedEnergyBlockEntity) : 
             StoragePreconditions.notNegative(maxAmount)
 
             val inserted = min(
-                getEnergyMaxInput(side).toDouble(),
+                block.getEnergyMaxInput(side).toDouble(),
                 min(maxAmount.toDouble(), (capacity - energy).toDouble())
             ).toLong()
 
             if (inserted > 0) {
                 updateSnapshots(transaction)
-                this@MMSidedEnergyContainer.energy += inserted
+                this@MMSidedEnergyWrapper.energy += inserted
                 return inserted
             }
 
@@ -70,63 +62,53 @@ class MMSidedEnergyContainer(private val blockEntity: SidedEnergyBlockEntity) : 
             StoragePreconditions.notNegative(maxAmount)
 
             val extracted = min(
-                getEnergyMaxOutput(side).toDouble(),
+                block.getEnergyMaxOutput(side).toDouble(),
                 min(maxAmount.toDouble(), energy.toDouble())
             ).toLong()
 
             if (extracted > 0) {
                 updateSnapshots(transaction)
-                this@MMSidedEnergyContainer.energy -= extracted
+                this@MMSidedEnergyWrapper.energy -= extracted
                 return extracted
             }
 
             return 0
         }
 
-        override fun getAmount(): Long {
-            return energy
-        }
+        override fun getAmount(): Long = this@MMSidedEnergyWrapper.energy
 
-        override fun insert(maxAmount: Long): Long {
-            return insert(maxAmount, Transaction.openOuter())
-        }
+        override var energy: Long = this@MMSidedEnergyWrapper.energy
 
-        override fun extract(maxAmount: Long): Long {
-            return extract(maxAmount, Transaction.openOuter())
-        }
+        override fun insert(maxAmount: Long): Long = insert(maxAmount, Transaction.openOuter())
 
-        override var energy: Long = this@MMSidedEnergyContainer.energy
+        override fun extract(maxAmount: Long): Long = extract(maxAmount, Transaction.openOuter())
 
-        override fun getEnergyCapacity(): Long {
-            return capacity
-        }
+        override val energyCapacity: Long
+            get() = this@MMSidedEnergyWrapper.energyCapacity
 
-        override fun getCapacity(): Long {
-            return this@MMSidedEnergyContainer.getEnergyCapacity()
-        }
+        override fun getCapacity(): Long = this@MMSidedEnergyWrapper.energyCapacity
     }
 
-    override fun insert(maxAmount: Long): Long {
+    override fun insert(maxAmount: Long, side: Direction?): Long {
         Transaction.openOuter().use {
-            return getSideStorage(null).insert(maxAmount, it)
+            return getSideStorage(side).insert(maxAmount, it)
         }
     }
 
-    override fun extract(maxAmount: Long): Long {
+    override fun insert(maxAmount: Long): Long = insert(maxAmount, null)
+
+    override fun extract(maxAmount: Long, side: Direction?): Long {
         Transaction.openOuter().use {
-            return getSideStorage(null).extract(maxAmount, it)
+            return getSideStorage(side).extract(maxAmount, it)
         }
     }
 
-    override fun getEnergyCapacity(): Long {
-        return block.getEnergyCapacity()
-    }
+    override fun extract(maxAmount: Long): Long = extract(maxAmount, null)
 
-    override fun getEnergyMaxInput(side: Direction?): Long {
-        return block.getEnergyMaxInput(side)
-    }
+    override fun getEnergyMaxInput(side: Direction?): Long = block.getEnergyMaxInput(side)
 
-    override fun getEnergyMaxOutput(side: Direction?): Long {
-        return block.getEnergyMaxOutput(side)
-    }
+    override fun getEnergyMaxOutput(side: Direction?): Long = block.getEnergyMaxOutput(side)
+
+    override val energyCapacity: Long
+        get() = block.getEnergyCapacity()
 }

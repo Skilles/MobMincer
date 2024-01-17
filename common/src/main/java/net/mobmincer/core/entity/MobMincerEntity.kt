@@ -29,9 +29,12 @@ import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.core.attachment.AttachmentHolder
 import net.mobmincer.core.attachment.Attachments
 import net.mobmincer.core.attachment.StorageAttachment
+import net.mobmincer.core.item.MobMincerType
+import net.mobmincer.core.item.MobMincerType.Companion.getMincerType
 import net.mobmincer.core.loot.LootFactory
 import net.mobmincer.core.loot.LootLookup
 import net.mobmincer.core.registry.MMContent
+import net.mobmincer.energy.EnergyUtil.getEnergyStorage
 import net.mobmincer.network.MincerNetwork
 import net.mobmincer.util.MathUtils
 import java.util.*
@@ -53,6 +56,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
     private var hasMending: Boolean = false
     lateinit var sourceStack: ItemStack
     val attachments = AttachmentHolder(this)
+    lateinit var mincerType: MobMincerType
 
     var isErrored: Boolean
         get() = entityData.get(IS_ERRORED)
@@ -65,11 +69,19 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
 
     val idleAnimationState = AnimationState()
 
+    val canMince: Boolean
+        get() = when (this.mincerType) {
+            MobMincerType.CREATIVE -> true
+            MobMincerType.POWERED -> (sourceStack.getEnergyStorage()?.energy ?: 0) >= MobMincerConfig.CONFIG.poweredMinceCost.get()
+            else -> sourceStack.damageValue <= sourceStack.maxDamage
+        }
+
     private fun initSourceItem(sourceStack: ItemStack) {
         this.itemEnchantments = EnchantmentHelper.getEnchantments(sourceStack)
         this.sourceStack = sourceStack
         this.maxMinceTick = MathUtils.getCalculatedMaxMinceTick(itemEnchantments.getOrDefault(Enchantments.SOUL_SPEED, 0))
         this.hasMending = itemEnchantments.containsKey(Enchantments.MENDING)
+        this.mincerType = sourceStack.getMincerType()
     }
 
     private fun initialize(target: LivingEntity, sourceStack: ItemStack, level: ServerLevel) {
@@ -116,7 +128,12 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
         }
 
         fun canAttach(target: LivingEntity, sourceStack: ItemStack): Boolean {
-            return !target.isBaby && target.isAlive && target.passengers.isEmpty() && LootLookup.hasLoot(target, EnchantmentHelper.hasSilkTouch(sourceStack)) && !target.tags.contains(ROOT_TAG)
+            return !target.isBaby &&
+                    target.isAlive &&
+                    target.passengers.isEmpty() &&
+                    LootLookup.hasLoot(target, EnchantmentHelper.hasSilkTouch(sourceStack)) &&
+                    !target.tags.contains(ROOT_TAG) &&
+                    MobMincerConfig.testEntityFilter(target.type.`arch$registryName`())
         }
     }
 
@@ -151,7 +168,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
 
     private fun tickMince(level: ServerLevel) {
         if (++currentMinceTick >= maxMinceTick) {
-            if (dropTargetLoot()) {
+            if (canMince && dropTargetLoot()) {
                 isErrored = false
                 val damage = MobMincerConfig.CONFIG.mobDamagePercent.get().toFloat() * target.maxHealth
                 if (target.hurt(
@@ -162,7 +179,6 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
                     damageDealt += damage
                 }
                 attachments.onMince(damage)
-                takeDurabilityDamage()
                 level.sendParticles(
                     ParticleTypes.HAPPY_VILLAGER, this.x, this.y + this.bbHeight, this.z,
                     3,
@@ -171,6 +187,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
                     0.0,
                     1.0
                 )
+                takeDurabilityDamage()
             } else {
                 isErrored = true
                 level.sendParticles(
@@ -187,6 +204,15 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
     }
 
     private fun takeDurabilityDamage() {
+        if (this.mincerType == MobMincerType.CREATIVE) {
+            return
+        }
+
+        if (this.mincerType == MobMincerType.POWERED) {
+            sourceStack.getEnergyStorage()?.extract(MobMincerConfig.CONFIG.poweredMinceCost.get().toLong())
+            return
+        }
+
         // Chance to ignore durability: (1 / bound) * level
         if (this.random.nextInt(MobMincerConfig.CONFIG.unbreakingBound.get()) < itemEnchantments.getOrDefault(Enchantments.UNBREAKING, 0)) {
             return

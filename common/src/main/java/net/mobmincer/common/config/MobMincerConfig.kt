@@ -1,5 +1,7 @@
 package net.mobmincer.common.config
 
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceLocation
 import net.neoforged.neoforge.common.ModConfigSpec
 import org.apache.commons.lang3.tuple.Pair
 
@@ -68,6 +70,28 @@ class MobMincerConfig private constructor(builder: ModConfigSpec.Builder) {
         .translation("mobmincer.config.mendingRepairMultiplier")
         .defineInRange("mendingRepairMultiplier", 1.0, 0.0, 1.0)
 
+    val entityFilterMode = builder
+        .comment("The mode for the entity filter")
+        .translation("mobmincer.config.entityFilterMode")
+        .defineEnum("entityFilterMode", EntityFilterMode.BLACKLIST)
+
+    val entityFilter: ModConfigSpec.ConfigValue<List<String>> = builder
+        .comment("A list of mobs for the blacklist/whitelist. Example: minecraft:zombie")
+        .translation("mobmincer.config.entityFilter")
+        .defineListAllowEmpty("entityFilter", listOf<String>()) {
+            BuiltInRegistries.ENTITY_TYPE.containsKey(ResourceLocation.of(it.toString(), ':'))
+        }
+
+    val poweredMinceCost: ModConfigSpec.IntValue = builder
+        .comment("The amount of RF required per mince using the powered mincer")
+        .translation("mobmincer.config.poweredMinceCost")
+        .defineInRange("poweredMinceCost", 1000, 1, 1000000)
+
+    enum class EntityFilterMode {
+        BLACKLIST,
+        WHITELIST
+    }
+
     companion object {
         private val specPair: Pair<MobMincerConfig, ModConfigSpec> =
             ModConfigSpec.Builder().configure(::MobMincerConfig)
@@ -75,6 +99,19 @@ class MobMincerConfig private constructor(builder: ModConfigSpec.Builder) {
         // To allow consuming the config without neoforge dependency
         fun <T> getValue(path: String): T {
             return specPair.right.get(path)
+        }
+
+        fun testEntityFilter(entityType: ResourceLocation?): Boolean {
+            if (entityType == null) {
+                return false
+            }
+            val mode = CONFIG.entityFilterMode.get()
+            val filter = CONFIG.entityFilter.get()
+            return when (mode) {
+                EntityFilterMode.BLACKLIST -> !filter.contains(entityType.toString())
+                EntityFilterMode.WHITELIST -> filter.contains(entityType.toString())
+                null -> true
+            }
         }
 
         val CONFIG: MobMincerConfig = specPair.left

@@ -1,17 +1,21 @@
 package net.mobmincer.energy
 
 import net.minecraft.core.Direction
-import net.minecraft.nbt.Tag
 
-interface MMSidedEnergyStorage : MMEnergyStorage, MMEnergyBlock {
-    fun getMMSideStorage(side: Direction?): MMEnergyStorage
+interface MMSidedEnergyStorage : MMEnergyStorage {
+    fun insert(maxAmount: Long, side: Direction?): Long
 
-    fun serialize(): Tag? = null
+    fun extract(maxAmount: Long, side: Direction?): Long
 
-    fun deserialize(tag: Tag?) {}
+    fun getEnergyMaxInput(side: Direction?): Long
 
-    override val supportsInsertion: Boolean
-        get() = supportsInsertion(null)
-    override val supportsExtraction: Boolean
-        get() = supportsExtraction(null)
+    fun getEnergyMaxOutput(side: Direction?): Long
+
+    fun supportsInsertion(side: Direction?): Boolean {
+        return getEnergyMaxInput(side) > 0
+    }
+
+    fun supportsExtraction(side: Direction?): Boolean {
+        return getEnergyMaxOutput(side) > 0
+    }
 }
