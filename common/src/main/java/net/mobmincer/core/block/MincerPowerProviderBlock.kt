@@ -21,7 +21,7 @@ class MincerPowerProviderBlock(blockEntityFactory: BiFunction<BlockPos, BlockSta
     ) {
 
     override fun isEnabled(enabledFeatures: FeatureFlagSet): Boolean {
-        return false
+        return true
     }
 
     override fun getEnergyMaxInput(side: Direction?): Long {

@@ -55,20 +55,27 @@ class LootStackImpl(private val table: LootTable, entries: List<LootStack.LootSt
             }
             it.setItemInHand(InteractionHand.MAIN_HAND, tempSword)
         }
-        val items = table.getRandomItems(lootParams, entity.lootTableSeed)
+
+        val items: ObjectArrayList<ItemStack>
+        if (entity is Slime && !entity.isTiny) {
+            val slimeSize = entity.size
+            entity.setSize(1, false)
+            items = table.getRandomItems(lootParams, entity.lootTableSeed)
+            items.forEach { item ->
+                if (item.item == Items.SLIME_BALL) {
+                    item.count *= slimeSize
+                }
+            }
+            if (slimeSize > 1) {
+                entity.setSize(slimeSize - 1, true)
+            }
+        } else {
+            items = table.getRandomItems(lootParams, entity.lootTableSeed)
+        }
+
         fakePlayer?.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY)
 
-        performCustomOverrides(entity, items)
-
         return items
-    }
-
-    private fun performCustomOverrides(entity: LivingEntity, loot: ObjectArrayList<ItemStack>) {
-        if (entity is Slime && entity.size > 1) {
-            loot.find { it.item == Items.SLIME_BALL }?.let {
-                it.count += 1
-            }
-        }
     }
 
     companion object {

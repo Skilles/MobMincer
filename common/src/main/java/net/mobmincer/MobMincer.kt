@@ -11,6 +11,7 @@ import net.mobmincer.client.menu.Menus
 import net.mobmincer.client.menu.screen.PowerProviderScreen
 import net.mobmincer.client.model.MobMincerModel
 import net.mobmincer.client.render.MobMincerEntityRenderer
+import net.mobmincer.core.recipe.RecipeSerializers
 import net.mobmincer.core.registry.MMContent
 import net.mobmincer.core.registry.MincerRegistry
 import net.mobmincer.network.MincerNetwork
@@ -24,6 +25,7 @@ object MobMincer {
 
     init {
         MMContent.init()
+        RecipeSerializers.register()
     }
 
     @JvmStatic
@@ -34,9 +36,6 @@ object MobMincer {
             FakePlayer.unload(it)
         }
 
-        ClientLifecycleEvent.CLIENT_SETUP.register {
-            MenuRegistry.registerScreenFactory(Menus.POWER_PROVIDER.get(), ::PowerProviderScreen)
-        }
 
         MincerNetwork.registerServerRecievers()
     }
@@ -44,6 +43,9 @@ object MobMincer {
     @JvmStatic
     @Environment(EnvType.CLIENT)
     fun initClient() {
+        ClientLifecycleEvent.CLIENT_SETUP.register {
+            MenuRegistry.registerScreenFactory(Menus.POWER_PROVIDER.get(), ::PowerProviderScreen)
+        }
         EntityRendererRegistry.register(MMContent.MOB_MINCER_ENTITY, MobMincerEntityRenderer.Provider())
         EntityModelLayerRegistry.register(MobMincerModel.LAYER_LOCATION, MobMincerModel::createBodyLayer)
 

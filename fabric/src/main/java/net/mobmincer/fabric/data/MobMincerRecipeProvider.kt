@@ -9,7 +9,7 @@ import net.minecraft.data.recipes.SpecialRecipeBuilder
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.Items
 import net.mobmincer.MobMincer
-import net.mobmincer.core.recipe.MincerUpgradeRecipe
+import net.mobmincer.core.recipe.RecipeSerializers
 import net.mobmincer.core.registry.MMContent
 
 // We don't use this in Forge, so we don't have to worry about mappings
@@ -25,8 +25,9 @@ class MobMincerRecipeProvider(output: FabricDataOutput) : FabricRecipeProvider(o
             .define('S', Items.DIAMOND_SWORD)
             .unlockedBy("has_ink_sac", has(Items.INK_SAC))
             .save(recipeOutput, ResourceLocation(MobMincer.MOD_ID, "mob_mincer"))
+
         SpecialRecipeBuilder.special(
-            MincerUpgradeRecipe.SERIALIZER
+            RecipeSerializers.MINCER_POWER_UPGRADE
         ).save(recipeOutput, ResourceLocation(MobMincer.MOD_ID, "mob_mincer_upgrade"))
     }
 }

@@ -1,7 +1,7 @@
 {
   "entity.mobmincer.mob_mincer": "Mob Mincer",
   "item.mobmincer.mob_mincer": "Mob Mincer",
-  "item.mobmincer.power_provider": "Power Provider",
+  "block.mobmincer.power_provider": "Power Provider",
   "itemGroup.mobmincer.mob_mincer": "Mob Mincer",
   "advancements.mobmincer.mob_mincer.title": "Mob Mincer",
   "advancements.mobmincer.mob_mincer.description": "Craft a Mob Mincer",
