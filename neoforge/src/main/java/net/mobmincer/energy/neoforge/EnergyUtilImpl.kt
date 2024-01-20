@@ -3,7 +3,7 @@ package net.mobmincer.energy.neoforge
 import net.minecraft.core.Direction
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.entity.BlockEntity
-import net.mobmincer.api.blockentity.SidedEnergyBlockEntity
+import net.mobmincer.api.blockentity.EnergyMachineBlockEntity
 import net.mobmincer.energy.MMEnergyStorage
 import net.mobmincer.energy.MMSidedEnergyStorage
 import net.neoforged.neoforge.common.capabilities.Capabilities
@@ -13,18 +13,18 @@ import net.neoforged.neoforge.energy.IEnergyStorage
 object EnergyUtilImpl {
 
     @JvmStatic
-    fun createSidedStorage(blockEntity: SidedEnergyBlockEntity): MMSidedEnergyStorage {
+    fun createSidedStorage(blockEntity: EnergyMachineBlockEntity): MMSidedEnergyStorage {
         return MMSidedEnergyWrapper(blockEntity)
     }
 
     @JvmStatic
-    fun getSidedStorage(blockEntity: SidedEnergyBlockEntity, direction: Direction? = null): MMEnergyStorage {
+    fun getSidedStorage(blockEntity: EnergyMachineBlockEntity, direction: Direction? = null): MMEnergyStorage {
         return (blockEntity.energyStorage as MMSidedEnergyWrapper).getSideStorage(direction)
     }
 
     @JvmStatic
     fun ItemStack.getEnergyStorage(): MMEnergyStorage? {
-        return getStorage(this)?.let { fromForgeStorage(it) }
+        return getStorage(this)?.let { it as? MMEnergyStorage ?: fromForgeStorage(it) }
     }
 
     @JvmStatic

@@ -12,4 +12,12 @@ object MathUtils {
         val multiplier = MobMincerConfig.CONFIG.soulSpeedMultiplier.get()
         return max(1, (configMax * (1 - multiplier).pow(soulSpeedLevel)).roundToInt())
     }
+
+    fun Long.toIntSafe(): Int {
+        return if (this > Int.MAX_VALUE) {
+            Int.MAX_VALUE
+        } else {
+            this.toInt()
+        }
+    }
 }

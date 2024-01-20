@@ -1,5 +1,7 @@
 package net.mobmincer.energy
 
+import net.minecraft.nbt.LongTag
+import net.minecraft.nbt.Tag
 import net.mobmincer.util.NBTSerializable
 
 interface MMEnergyStorage : NBTSerializable {
@@ -49,4 +51,14 @@ interface MMEnergyStorage : NBTSerializable {
 
     val isEmpty: Boolean
         get() = energy <= 0
+
+    // NBTSerializable
+    override fun serialize(): Tag {
+        return LongTag.valueOf(energy)
+    }
+
+    override fun deserialize(tag: Tag?) {
+        require(tag is LongTag)
+        energy = tag.asLong
+    }
 }

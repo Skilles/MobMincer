@@ -2,31 +2,37 @@ package net.mobmincer.client.menu
 
 import net.minecraft.util.Mth
 import net.minecraft.world.Container
+import net.minecraft.world.SimpleContainer
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.inventory.AbstractContainerMenu
-import net.minecraft.world.inventory.ContainerData
-import net.minecraft.world.inventory.SimpleContainerData
-import net.minecraft.world.inventory.Slot
+import net.minecraft.world.inventory.*
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity
 import net.mobmincer.client.menu.slot.FuelSlot
+import net.mobmincer.client.menu.slot.PowerSlot
+import net.mobmincer.core.registry.MMContent
+import net.mobmincer.energy.EnergyUtil.usesEnergy
 
-class PowerProviderMenu(containerId: Int, private val playerInventory: Inventory, private val container: Container, private val data: ContainerData) : AbstractContainerMenu(
+class PowerProviderMenu(containerId: Int, playerInventory: Inventory, private val container: Container, private val data: ContainerData, private val access: ContainerLevelAccess) :
+    AbstractContainerMenu(
     Menus.POWER_PROVIDER.get(),
     containerId
 ) {
 
-    val burnTime: Int
+    var burnTime: Int
         get() = data.get(0)
-    val maxBurnTime: Int
+        set(value) = data.set(0, value)
+    var maxBurnTime: Int
         get() = data.get(1)
-    val energy: Int
+        set(value) = data.set(1, value)
+    var energy: Int
         get() = data.get(2)
-    val capacity: Int
+        set(value) = data.set(2, value)
+    var capacity: Int
         get() = data.get(3)
-    val isActive: Boolean
-        get() = data.get(4) == 1
+        set(value) = data.set(3, value)
+    val isBurning: Boolean
+        get() = burnTime > 0
 
     val burnProgress: Float
         get() {
@@ -49,15 +55,18 @@ class PowerProviderMenu(containerId: Int, private val playerInventory: Inventory
     constructor(containerId: Int, playerInventory: Inventory) : this(
         containerId,
         playerInventory,
-        playerInventory,
-        SimpleContainerData(5)
+        SimpleContainer(2),
+        SimpleContainerData(4),
+        ContainerLevelAccess.NULL
     )
 
     init {
-        checkContainerSize(container, 1)
-        checkContainerDataCount(data, 1)
+        checkContainerSize(container, 2)
+        checkContainerDataCount(data, 4)
 
-        this.addSlot(FuelSlot(container, 0, 56, 17))
+        this.addSlot(PowerSlot(container, 0, 56, 17))
+        this.addSlot(FuelSlot(container, 1, 56, 53))
+        this.addDataSlots(data)
 
         for (i in 0..2) {
             for (j in 0..8) {
@@ -68,8 +77,6 @@ class PowerProviderMenu(containerId: Int, private val playerInventory: Inventory
         for (i in 0..8) {
             this.addSlot(Slot(playerInventory, i, 8 + i * 18, 142))
         }
-
-        this.addDataSlots(data)
     }
 
     override fun quickMoveStack(player: Player, index: Int): ItemStack {
@@ -78,13 +85,12 @@ class PowerProviderMenu(containerId: Int, private val playerInventory: Inventory
         if (slot.hasItem()) {
             val itemStack2 = slot.item
             itemStack = itemStack2.copy()
-            if (index == 2) {
-                if (!this.moveItemStackTo(itemStack2, 3, 39, true)) {
-                    return ItemStack.EMPTY
-                }
-                slot.onQuickCraft(itemStack2, itemStack)
-            } else if (index != 1 && index != 0) {
+            if (index != 1 && index != 0) {
                 if (AbstractFurnaceBlockEntity.isFuel(itemStack2)) {
+                    if (!this.moveItemStackTo(itemStack2, 1, 2, false)) {
+                        return ItemStack.EMPTY
+                    }
+                } else if (slot.item.usesEnergy()) {
                     if (!this.moveItemStackTo(itemStack2, 0, 1, false)) {
                         return ItemStack.EMPTY
                     }
@@ -116,6 +122,10 @@ class PowerProviderMenu(containerId: Int, private val playerInventory: Inventory
     }
 
     override fun stillValid(player: Player): Boolean {
-        return container.stillValid(player)
+        return container.stillValid(player) && stillValid(
+            access,
+            player,
+            MMContent.POWER_PROVIDER.block.get()
+        )
     }
 }

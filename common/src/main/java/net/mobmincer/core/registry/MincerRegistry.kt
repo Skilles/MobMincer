@@ -22,7 +22,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType
 import net.mobmincer.MobMincer
 import net.mobmincer.api.block.BaseEntityBlock
 import net.mobmincer.api.block.BaseMachineBlock
-import net.mobmincer.client.menu.Menus
 import java.util.function.Function
 import java.util.function.Supplier
 
@@ -78,14 +77,17 @@ object MincerRegistry {
 
     private fun <B : BaseEntityBlock<out E, *>, E : BlockEntity> registerBlockWithEntity(id: String, block: Supplier<B>): Pair<RegistrySupplier<B>, RegistrySupplier<BlockEntityType<E>>> {
         val blockSupplier = registerBlock(id, block)
-        val blockEntitySupplier = registerBlockEntity(
-            id
-        ) { pos, state -> blockSupplier.get().constructTypedEntity(pos, state) }
+        val blockEntitySupplier = registerBlockEntity(id, blockSupplier)
         return blockSupplier to blockEntitySupplier
     }
 
-    private fun <T : BlockEntity> registerBlockEntity(id: String, blockEntityTypeSupplier: BlockEntityType.BlockEntitySupplier<T>): RegistrySupplier<BlockEntityType<T>> {
-        return BLOCK_ENTITIES.register(id) { BlockEntityType.Builder.of(blockEntityTypeSupplier).build(null) }
+    private fun <B : BaseEntityBlock<out E, *>, E : BlockEntity> registerBlockEntity(id: String, block: Supplier<B>): RegistrySupplier<BlockEntityType<E>> {
+        return BLOCK_ENTITIES.register(id) {
+            BlockEntityType.Builder.of(
+                { pos, state -> block.get().constructTypedEntity(pos, state) },
+                block.get()
+            ).build(null)
+        }
     }
 
     fun <B : BaseMachineBlock<E, I>, E : BlockEntity, I : BlockItem> register(machine: MMContent.Machine): MachineRegistryInfo<B, E, I> {
@@ -121,7 +123,6 @@ object MincerRegistry {
         BLOCK_ENTITIES.register()
         ITEMS.register()
         ENTITIES.register()
-        Menus.init()
         MENUS.register()
     }
 

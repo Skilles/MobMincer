@@ -18,6 +18,9 @@ object AttachmentRegistry {
     val SPREADER: MobMincerAttachment<SpreaderAttachment> =
         registerAttachment(MobMincerAttachment.Builder.of(Attachments.SPREADER, ::SpreaderAttachment))
 
+    val TANK: MobMincerAttachment<TankAttachment> =
+        registerAttachment(MobMincerAttachment.Builder.of(Attachments.TANK, ::TankAttachment))
+
     private fun <T : AttachmentInstance> registerAttachment(builder: MobMincerAttachment.Builder<T>): MobMincerAttachment<T> {
         val mincerAttachment = builder.build()
         attachments[builder.type] = mincerAttachment

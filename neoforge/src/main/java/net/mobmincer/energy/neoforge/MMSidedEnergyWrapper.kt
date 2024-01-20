@@ -1,9 +1,8 @@
 package net.mobmincer.energy.neoforge
 
 import net.minecraft.core.Direction
-import net.minecraft.nbt.LongTag
 import net.minecraft.nbt.Tag
-import net.mobmincer.api.blockentity.SidedEnergyBlockEntity
+import net.mobmincer.api.blockentity.EnergyMachineBlockEntity
 import net.mobmincer.energy.MMEnergyBlock
 import net.mobmincer.energy.MMEnergyStorage
 import net.mobmincer.energy.MMSidedEnergyStorage
@@ -12,7 +11,7 @@ import net.neoforged.neoforge.energy.EnergyStorage
 import net.neoforged.neoforge.energy.IEnergyStorage
 import kotlin.math.min
 
-class MMSidedEnergyWrapper(blockEntity: SidedEnergyBlockEntity) : INBTSerializable<Tag>, MMSidedEnergyStorage {
+class MMSidedEnergyWrapper(blockEntity: EnergyMachineBlockEntity) : INBTSerializable<Tag>, MMSidedEnergyStorage, IEnergyStorage {
 
     override var energy: Long = 0
     private val sideStorages = arrayOfNulls<SideStorage>(7)
@@ -96,16 +95,22 @@ class MMSidedEnergyWrapper(blockEntity: SidedEnergyBlockEntity) : INBTSerializab
 
     override fun getEnergyMaxOutput(side: Direction?): Long = block.getEnergyMaxOutput(side)
 
-    override fun serializeNBT(): Tag = LongTag.valueOf(energy)
+    override fun serializeNBT(): Tag = serialize()
 
     override fun deserializeNBT(arg: Tag) {
-        require(arg is LongTag)
-        energy = arg.asLong
+        deserializeNBT(arg)
     }
 
-    override fun serialize(): Tag = serializeNBT()
+    // IEnergyStorage
+    override fun receiveEnergy(i: Int, bl: Boolean): Int = insert(i.toLong(), null).toInt()
 
-    override fun deserialize(tag: Tag?) {
-        tag?.let { deserializeNBT(it) }
-    }
+    override fun extractEnergy(i: Int, bl: Boolean): Int = extract(i.toLong(), null).toInt()
+
+    override fun getEnergyStored(): Int = energy.toInt()
+
+    override fun getMaxEnergyStored(): Int = energyCapacity.toInt()
+
+    override fun canExtract(): Boolean = getEnergyMaxOutput(null) > 0
+
+    override fun canReceive(): Boolean = getEnergyMaxInput(null) > 0
 }

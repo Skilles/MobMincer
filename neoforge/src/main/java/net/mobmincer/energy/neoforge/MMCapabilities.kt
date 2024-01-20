@@ -2,7 +2,7 @@ package net.mobmincer.energy.neoforge
 
 import net.minecraft.core.Direction
 import net.minecraft.world.item.ItemStack
-import net.mobmincer.api.blockentity.SidedEnergyBlockEntity
+import net.mobmincer.api.blockentity.EnergyMachineBlockEntity
 import net.mobmincer.energy.EnergyUtil
 import net.mobmincer.energy.MMChargableItem
 import net.neoforged.neoforge.common.capabilities.Capabilities
@@ -39,7 +39,7 @@ object MMCapabilities {
         return null
     }
 
-    fun createEnergyBlockProvider(blockEntity: SidedEnergyBlockEntity): ICapabilityProvider {
+    fun createEnergyBlockProvider(blockEntity: EnergyMachineBlockEntity): ICapabilityProvider {
         return object : ICapabilityProvider {
             override fun <T> getCapability(cap: Capability<T>, side: Direction?): LazyOptional<T> {
                 return Capabilities.ENERGY.orEmpty(

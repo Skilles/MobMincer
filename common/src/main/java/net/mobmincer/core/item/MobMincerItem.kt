@@ -6,6 +6,7 @@ import net.minecraft.core.Position
 import net.minecraft.core.dispenser.BlockSource
 import net.minecraft.core.dispenser.OptionalDispenseItemBehavior
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.ListTag
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
@@ -52,6 +53,25 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
     override fun verifyTagAfterLoad(tag: CompoundTag) {
         if (!tag.contains("MobMincer")) {
             tag.put("MobMincer", CompoundTag())
+        } else if (tag.contains("Attachments")) {
+            val attachments = tag.getList("Attachments", 10)
+            if (attachments.isEmpty()) {
+                tag.remove("Attachments")
+            } else {
+                val newAttachments = ListTag()
+                attachments.forEach {
+                    val attachment = it as CompoundTag
+                    val typeName = attachment.getString("Type")
+                    try {
+                        Attachments.valueOf(typeName)
+                    } catch (e: IllegalArgumentException) {
+                        MobMincer.logger.warn("Found invalid attachment type $typeName on item load!")
+                        return
+                    }
+                    newAttachments.add(attachment)
+                }
+                tag.put("Attachments", newAttachments)
+            }
         }
     }
 
@@ -126,19 +146,17 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
             return 0 to 1
         }
 
-        val value: Int
-        val maxValue: Int
         if (type == MobMincerType.POWERED) {
-            maxValue = getEnergyCapacity(stack).toInt()
-            value = stack.getEnergyStorage()?.energy?.toInt()?.let { maxValue - it } ?: return 1 to 1.also {
+            val maxValue = getEnergyCapacity(stack)
+            val value = stack.getEnergyStorage()?.energy?.let { maxValue - it } ?: return 1 to 1.also {
                 MobMincer.logger.warn("No energy storage found for powered mincer!")
             }
+            return value.toInt() to maxValue.toInt()
         } else {
-            value = stack.damageValue
-            maxValue = MobMincerConfig.CONFIG.baseDurability.get()
+            val value = stack.damageValue
+            val maxValue = MobMincerConfig.CONFIG.baseDurability.get()
+            return value to maxValue
         }
-
-        return value to maxValue
     }
 
     override fun appendHoverText(stack: ItemStack, level: Level?, tooltipComponents: MutableList<Component>, isAdvanced: TooltipFlag) {
@@ -158,15 +176,14 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
             val tag = stackTag.getCompound("MobMincer")
             if (tag.contains("Attachments")) {
                 val attachments = tag.getList("Attachments", 10)
-                if (attachments.isEmpty()) {
-                    return
-                }
-                tooltipComponents.add(Component.translatable("mobmincer.tooltip.attachments"))
-                for (i in 0 until attachments.size) {
-                    val attachment = attachments.getCompound(i)
-                    val type = Attachments.valueOf(attachment.getString("Type"))
-                    AttachmentRegistry.get(type)?.name?.let { name ->
-                        tooltipComponents.add(Component.literal("- ").append(name).withStyle(ChatFormatting.GRAY))
+                if (!attachments.isEmpty()) {
+                    tooltipComponents.add(Component.translatable("mobmincer.tooltip.attachments"))
+                    for (i in 0 until attachments.size) {
+                        val attachment = attachments.getCompound(i)
+                        val type = Attachments.valueOf(attachment.getString("Type"))
+                        AttachmentRegistry.get(type)?.name?.let { name ->
+                            tooltipComponents.add(Component.literal("- ").append(name).withStyle(ChatFormatting.GRAY))
+                        }
                     }
                 }
             }
@@ -180,7 +197,7 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
                     "mobmincer.tooltip.energy"
                 ).withStyle(
                     ChatFormatting.GOLD
-                ).append(StringUtils.getPercentageText((energy / maxEnergy * 100).toInt()))
+                ).append(StringUtils.getPercentageText((energy.toFloat() / maxEnergy * 100).toInt()))
             )
         }
     }
@@ -196,6 +213,7 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
     override fun getEnergyMaxOutput(stack: ItemStack): Long {
         return 0
     }
+
 
     companion object {
         val DISPENSE_BEHAVIOR = object : OptionalDispenseItemBehavior() {

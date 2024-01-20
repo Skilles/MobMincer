@@ -22,9 +22,9 @@ class PowerProviderScreen(menu: PowerProviderMenu, playerInventory: Inventory, t
 
     public override fun init() {
         super.init()
-        this.widthTooNarrow = this.width < 379
-        this.leftPos = if (this.widthTooNarrow) (this.width - this.imageWidth) / 2 else 97
-        this.titleLabelX = (this.imageWidth - font.width(this.title)) / 2
+        //this.widthTooNarrow = this.width < 379
+        //this.leftPos = if (this.widthTooNarrow) (this.width - this.imageWidth) / 2 else 97
+        //this.titleLabelX = (this.imageWidth - font.width(this.title)) / 2
     }
 
     public override fun containerTick() {
@@ -32,7 +32,11 @@ class PowerProviderScreen(menu: PowerProviderMenu, playerInventory: Inventory, t
     }
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick)
+        if (this.widthTooNarrow) {
+            this.renderBackground(guiGraphics, mouseX, mouseY, partialTick)
+        } else {
+            super.render(guiGraphics, mouseX, mouseY, partialTick)
+        }
         this.renderTooltip(guiGraphics, mouseX, mouseY)
     }
 
@@ -42,17 +46,21 @@ class PowerProviderScreen(menu: PowerProviderMenu, playerInventory: Inventory, t
         val i = this.leftPos
         val j = this.topPos
         guiGraphics.blit(this.texture, i, j, 0, 0, this.imageWidth, this.imageHeight)
-        if (menu.isActive) {
+        if (menu.isBurning) {
             k = 14
-            l = Mth.ceil(menu.energyProgress * 13.0f) + 1
+            l = Mth.ceil(menu.burnProgress * 13.0f) + 1
             guiGraphics.blitSprite(this.litProgressSprite, 14, 14, 0, 14 - l, i + 56, j + 36 + 14 - l, 14, l)
         }
         k = 24
-        l = Mth.ceil(menu.burnProgress * 24.0f)
+        l = Mth.ceil(menu.energyProgress * 24.0f)
         guiGraphics.blitSprite(this.burnProgressSprite, 24, 16, 0, 0, i + 79, j + 34, l, 16)
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        if (this.widthTooNarrow) {
+            return true
+        }
+
         return super.mouseClicked(mouseX, mouseY, button)
     }
 

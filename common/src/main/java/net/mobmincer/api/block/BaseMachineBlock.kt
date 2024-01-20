@@ -17,8 +17,8 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.BlockHitResult
 import net.mobmincer.api.blockentity.BaseMachineBlockEntity
+import net.mobmincer.api.blockentity.EnergyMachineBlockEntity
 import net.mobmincer.api.blockentity.MachineGuiHandler
-import net.mobmincer.api.blockentity.SidedEnergyBlockEntity
 import net.mobmincer.energy.MMEnergyBlock
 import java.util.function.BiFunction
 
@@ -68,7 +68,7 @@ abstract class BaseMachineBlock<T : BlockEntity, I : BlockItem>(blockEntityFacto
 
     override fun getAnalogOutputSignal(state: BlockState, level: Level, pos: BlockPos): Int {
         val blockEntity = level.getBlockEntity(pos)
-        return if (blockEntity is SidedEnergyBlockEntity) {
+        return if (blockEntity is EnergyMachineBlockEntity) {
             val storage = blockEntity.energyStorage
             val energy = storage.energy
             val maxEnergy = storage.energyCapacity.toFloat()

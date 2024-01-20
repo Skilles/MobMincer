@@ -34,7 +34,7 @@ class StorageAttachment(type: MobMincerAttachment<StorageAttachment>, mincer: Mo
     }
 
     override fun onInteract(player: Player) {
-        if (player.level().isClientSide) {
+        if (player.level().isClientSide || player.isShiftKeyDown) {
             return
         }
         player.openMenu(

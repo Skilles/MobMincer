@@ -8,7 +8,7 @@ import net.mobmincer.energy.EnergyUtil
 import net.mobmincer.energy.EnergyUtil.getEnergyStorage
 import net.mobmincer.energy.MMSidedEnergyStorage
 
-abstract class SidedEnergyBlockEntity(type: BlockEntityType<*>, pos: BlockPos, blockState: BlockState) :
+abstract class EnergyMachineBlockEntity(type: BlockEntityType<*>, pos: BlockPos, blockState: BlockState) :
     BaseMachineBlockEntity(
         type,
         pos,
@@ -20,20 +20,28 @@ abstract class SidedEnergyBlockEntity(type: BlockEntityType<*>, pos: BlockPos, b
     override fun load(tag: CompoundTag) {
         super.load(tag)
         if (tag.contains("energy")) {
-            energyStorage.deserialize(tag.getCompound("energy"))
+            energyStorage.deserialize(tag.get("energy"))
         }
     }
 
     override fun saveAdditional(tag: CompoundTag) {
         super.saveAdditional(tag)
-        energyStorage.serialize()?.let { tag.put("energy", it) }
+        energyStorage.serialize().let { tag.put("energy", it) }
     }
 
-    fun discharge(slot: Int, amount: Long = Long.MAX_VALUE) {
+    fun discharge(slot: Int, amount: Long = energyStorage.getEnergyMaxOutput(null)) {
         val level = level ?: return
         if (level.isClientSide) return
 
-        val chargableItem = getOptionalInventory().map { it.getItem(slot) }.orElse(null) ?: return
+        if (!hasInventory || energyStorage.energy <= 0 || !energyStorage.supportsExtraction) {
+            return
+        }
+
+        val chargableItem = optionalInventory.map { it.getItem(slot) }.orElse(null) ?: return
+
+        if (chargableItem.isEmpty) {
+            return
+        }
 
         chargableItem.getEnergyStorage()?.let {
             EnergyUtil.moveEnergy(this.energyStorage, it, amount)

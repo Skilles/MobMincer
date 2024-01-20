@@ -22,21 +22,22 @@ abstract class AttachmentInstance(val type: MobMincerAttachment<*>, protected va
 
     open fun onInteract(player: Player) {}
 
-    open fun serialize(tag: CompoundTag) {
-
-    }
-
-    open fun toTag(): CompoundTag? {
+    open fun toItemTag(): CompoundTag? {
         return null
     }
 
-    open fun fromTag(tag: CompoundTag) {
+    open fun fromItemTag(tag: CompoundTag) {
 
     }
 
     open fun deserialize(tag: CompoundTag, entity: MobMincerEntity) {
 
     }
+
+    open fun serialize(tag: CompoundTag) {
+
+    }
+
 
     open fun getInteractionPriority(): Int {
         return 0

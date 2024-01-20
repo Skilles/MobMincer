@@ -1,11 +1,11 @@
 package net.mobmincer.energy.fabric
 
-import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction
 import net.minecraft.core.Direction
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.entity.BlockEntity
-import net.mobmincer.api.blockentity.SidedEnergyBlockEntity
+import net.mobmincer.MobMincer
+import net.mobmincer.api.blockentity.EnergyMachineBlockEntity
 import net.mobmincer.energy.MMChargableItem
 import net.mobmincer.energy.MMEnergyBlock
 import net.mobmincer.energy.MMEnergyStorage
@@ -17,28 +17,36 @@ import team.reborn.energy.api.base.SimpleEnergyItem
 object EnergyUtilImpl {
 
     @JvmStatic
-    fun createSidedStorage(blockEntity: SidedEnergyBlockEntity): MMSidedEnergyStorage {
-        return MMSidedEnergyWrapper(blockEntity)
-    }
+    fun createSidedStorage(blockEntity: EnergyMachineBlockEntity): MMSidedEnergyStorage = MMSidedEnergyWrapper(
+        blockEntity
+    )
 
     @JvmStatic
-    fun getSidedStorage(blockEntity: SidedEnergyBlockEntity, direction: Direction? = null): MMEnergyStorage {
-        return (blockEntity.energyStorage as MMSidedEnergyWrapper).getSideStorage(direction)
-    }
+    fun getSidedStorage(
+        blockEntity: EnergyMachineBlockEntity,
+        direction: Direction? = null
+    ): MMEnergyStorage = (blockEntity.energyStorage as MMSidedEnergyWrapper).getSideStorage(
+        direction
+    )
 
     @JvmStatic
-    fun ItemStack.getEnergyStorage(): MMEnergyStorage? {
-        return getStorage(this)?.let { fromFabricStorage(it) }
-    }
+    fun ItemStack.getEnergyStorage(): MMEnergyStorage? = getStorage(
+        this
+    )?.let { fromFabricStorage(it) }
 
     @JvmStatic
-    fun BlockEntity.getEnergyStorage(direction: Direction? = null): MMEnergyStorage? {
-        return getStorage(this, direction)?.let { fromFabricStorage(it) }
-    }
+    fun BlockEntity.getEnergyStorage(direction: Direction? = null): MMEnergyStorage? = getStorage(
+        this,
+        direction
+    )?.let { fromFabricStorage(it) }
 
     @JvmStatic
-    fun moveEnergy(from: EnergyStorage, to: EnergyStorage, maxAmount: Long): Long {
-        return EnergyStorageUtil.move(from, to, maxAmount, null)
+    fun moveEnergy(from: MMEnergyStorage, to: MMEnergyStorage, maxAmount: Long): Long {
+        if (from is EnergyStorage && to is EnergyStorage) {
+            return EnergyStorageUtil.move(from, to, maxAmount, null)
+        }
+        MobMincer.logger.warn("moveEnergy called with non-fabric energy storage")
+        return 0
     }
 
     @JvmStatic
@@ -47,9 +55,7 @@ object EnergyUtilImpl {
     }
 
     @JvmStatic
-    fun ItemStack.getEnergyUnchecked(): Long {
-        return SimpleEnergyItem.getStoredEnergyUnchecked(this)
-    }
+    fun ItemStack.getEnergyUnchecked(): Long = SimpleEnergyItem.getStoredEnergyUnchecked(this)
 
     fun registerStorage() {
         EnergyStorage.ITEM.registerFallback { stack, context ->
@@ -70,7 +76,7 @@ object EnergyUtilImpl {
 
         EnergyStorage.SIDED.registerFallback { level, blockPos, blockState, blockEntity, direction ->
             val block = blockState.block
-            if (block is MMEnergyBlock && blockEntity is SidedEnergyBlockEntity) {
+            if (block is MMEnergyBlock && blockEntity is EnergyMachineBlockEntity) {
                 getSidedStorage(blockEntity, direction) as EnergyStorage
             } else {
                 null
@@ -78,16 +84,21 @@ object EnergyUtilImpl {
         }
     }
 
-    private fun getStorage(stack: ItemStack): EnergyStorage? {
-        return ContainerItemContext.withConstant(stack).find(EnergyStorage.ITEM)
-    }
+    private fun getStorage(stack: ItemStack): EnergyStorage? = EnergyStorage.ITEM.find(
+        stack,
+        SimpleContainerItemContext(stack)
+    )
 
-    private fun getStorage(blockEntity: BlockEntity, direction: Direction?): EnergyStorage? {
-        return EnergyStorage.SIDED.find(blockEntity.level, blockEntity.blockPos, direction)
-    }
+    private fun getStorage(blockEntity: BlockEntity, direction: Direction?): EnergyStorage? = EnergyStorage.SIDED.find(
+        blockEntity.level,
+        blockEntity.blockPos,
+        direction
+    )
 
     private fun fromFabricStorage(fabricStorage: EnergyStorage): MMEnergyStorage {
-        if (fabricStorage is MMEnergyStorage) return fabricStorage
+        if (fabricStorage is MMEnergyStorage) {
+            return fabricStorage
+        }
 
         return object : MMEnergyStorage, EnergyStorage by fabricStorage {
             override val supportsInsertion: Boolean

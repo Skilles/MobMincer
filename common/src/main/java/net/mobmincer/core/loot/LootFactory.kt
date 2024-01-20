@@ -11,7 +11,7 @@ fun interface LootFactory {
         val EMPTY = LootFactory { ObjectArrayList() }
 
         fun create(entity: LivingEntity, killedByPlayer: Boolean, lootingLevel: Int): LootFactory {
-            return LootFactory { LootLookup.get(entity)!!.generateServerLoot(entity, killedByPlayer, lootingLevel) }
+            return LootFactory { LootLookup.get(entity)?.generateServerLoot(entity, killedByPlayer, lootingLevel) ?: ObjectArrayList() }
         }
     }
 }

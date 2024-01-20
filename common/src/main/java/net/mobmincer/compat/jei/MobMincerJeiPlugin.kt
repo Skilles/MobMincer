@@ -31,7 +31,7 @@ class MobMincerJeiPlugin : IModPlugin {
     override fun registerRecipes(registration: IRecipeRegistration) {
         val infoEntries = AttachmentRegistry.getEntries().map { (key, value) ->
             value.name.copy().withStyle(ChatFormatting.DARK_AQUA).append(
-                key.item.description.copy().append(
+                key.asItem().description.copy().append(
                     " - "
                 )
             ) as Component

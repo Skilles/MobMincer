@@ -6,7 +6,6 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
 import net.mobmincer.core.entity.MobMincerEntity
 import net.mobmincer.core.registry.AttachmentRegistry
-import net.mobmincer.util.EncodingUtils.getOrCreateTag
 import java.util.*
 
 class AttachmentHolder(private val mobMincer: MobMincerEntity) {
@@ -27,8 +26,8 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
         return this.attachments.containsKey(attachment)
     }
 
-    fun getAttachment(attachment: Attachments): AttachmentInstance? {
-        return this.attachments[attachment]
+    fun <T : AttachmentInstance> getAttachment(attachment: Attachments): T? {
+        return this.attachments[attachment] as? T
     }
 
     fun tryAddAttachment(item: Item): Boolean {
@@ -54,7 +53,7 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
             this.attachments.entries.forEach {
                 val thisTag = CompoundTag()
                 thisTag.putString("Type", it.key.name)
-                it.value.toTag()?.let { tag -> thisTag.put("Data", tag) }
+                it.value.toItemTag()?.let { tag -> thisTag.put("Data", tag) }
                 newTag.add(thisTag)
                 stopMincerDeath = it.value.onDeath(reason)
             }
@@ -79,17 +78,20 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
 
     fun onAttach() {
         require(attachments.isEmpty()) { "Attachments already exist" }
-        this.mobMincer.sourceStack.getOrCreateTagElement(
+        val rootTag = this.mobMincer.sourceStack.getOrCreateTagElement(
             "MobMincer"
-        ).getOrCreateTag("Attachments", ListTag::class.java).forEach { tag ->
-            tag as CompoundTag
-            val name = tag.getString("Type")
-            val data = tag.getCompound("Data")
-            val attachment = addAttachment(Attachments.valueOf(name))
-            attachment?.let {
-                it.fromTag(data)
-                it.onAttach()
-            } ?: error("Failed to add attachment $name from item")
+        )
+        if (rootTag.contains("Attachments")) {
+            rootTag.getList("Attachments", 10).forEach { tag ->
+                tag as CompoundTag
+                val name = tag.getString("Type")
+                val data = tag.getCompound("Data")
+                val attachment = addAttachment(Attachments.valueOf(name))
+                attachment?.let {
+                    it.fromItemTag(data)
+                    it.onAttach()
+                } ?: error("Failed to add attachment $name from item")
+            }
         }
     }
 
@@ -119,4 +121,6 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
 
     val values: Collection<AttachmentInstance>
         get() = this.attachments.values
+
+    fun isEmpty(): Boolean = this.attachments.isEmpty()
 }

@@ -1,6 +1,7 @@
 package net.mobmincer.core.entity
 
 import dev.architectury.networking.NetworkManager
+import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.FriendlyByteBuf
@@ -25,6 +26,7 @@ import net.minecraft.world.item.enchantment.Enchantment
 import net.minecraft.world.item.enchantment.EnchantmentHelper
 import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.level.Level
+import net.mobmincer.MobMincer
 import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.core.attachment.AttachmentHolder
 import net.mobmincer.core.attachment.Attachments
@@ -38,7 +40,9 @@ import net.mobmincer.energy.EnergyUtil.getEnergyStorage
 import net.mobmincer.network.MincerNetwork
 import net.mobmincer.util.MathUtils
 import java.util.*
+import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 class MobMincerEntity(type: EntityType<*>, level: Level) :
     WearableEntity(
@@ -67,7 +71,8 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
             entityData.set(IS_ERRORED, value)
         }
 
-    val idleAnimationState = AnimationState()
+    // val idleAnimationState = AnimationState()
+    val fillTankAnimationState = AnimationState()
 
     val canMince: Boolean
         get() = when (this.mincerType) {
@@ -77,8 +82,8 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
         }
 
     private fun initSourceItem(sourceStack: ItemStack) {
-        this.itemEnchantments = EnchantmentHelper.getEnchantments(sourceStack)
         this.sourceStack = sourceStack
+        this.itemEnchantments = EnchantmentHelper.getEnchantments(sourceStack)
         this.maxMinceTick = MathUtils.getCalculatedMaxMinceTick(itemEnchantments.getOrDefault(Enchantments.SOUL_SPEED, 0))
         this.hasMending = itemEnchantments.containsKey(Enchantments.MENDING)
         this.mincerType = sourceStack.getMincerType()
@@ -112,7 +117,10 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
     companion object {
         private val IS_ERRORED = SynchedEntityData.defineId(MobMincerEntity::class.java, EntityDataSerializers.BOOLEAN)
 
+        // Used to know when an entity has a mob mincer attached to it
         const val ROOT_TAG = "mobmincer"
+
+        // Used to know when an entity has already been minced
         const val TAG_SKIP_LOOT = "${ROOT_TAG}:skip_loot"
 
         fun spawn(
@@ -138,31 +146,35 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
     }
 
     override fun doTick() {
-        if (this.level().isClientSide) {
-            idleAnimationState.animateWhen(target.isAlive, this.tickCount)
+        val level = this.level()
+        if (level is ServerLevel) {
+            serverTick(level)
+        } else {
+            // idleAnimationState.animateWhen(target.isAlive, this.tickCount)
+            fillTankAnimationState.animateWhen(attachments.hasAttachment(Attachments.TANK), this.tickCount)
         }
-        mainTick()
     }
 
-    private fun mainTick() {
-        val isClient = this.level().isClientSide
-
-        if (!isClient) {
-            if (target.isAlive) {
-                tickMince(this.level() as ServerLevel)
-            } else {
-                if (hasMending) {
-                    mendMincer()
-                }
-                dropAsItem(DestroyReason.TARGET_KILLED)
+    private fun serverTick(level: ServerLevel) {
+        if (target.isAlive) {
+            tickMince(level)
+        } else {
+            if (hasMending) {
+                mendMincer()
             }
+            dropAsItem(DestroyReason.TARGET_KILLED)
         }
     }
 
     private fun mendMincer() {
         val repairAmount = damageDealt * MobMincerConfig.CONFIG.mendingRepairMultiplier.get()
+        MobMincer.logger.info("Repairing mincer $repairAmount") // TODO: Remove
         if (repairAmount > 0) {
-            sourceStack.hurt(-repairAmount.roundToInt(), random, null)
+            if (mincerType == MobMincerType.POWERED) {
+                sourceStack.getEnergyStorage()?.insert(repairAmount.roundToLong() * (getMincePowerCost() / 2))
+            } else if (mincerType == MobMincerType.BASIC) {
+                sourceStack.hurt(-repairAmount.roundToInt(), random, null)
+            }
         }
     }
 
@@ -179,27 +191,37 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
                     damageDealt += damage
                 }
                 attachments.onMince(damage)
-                level.sendParticles(
-                    ParticleTypes.HAPPY_VILLAGER, this.x, this.y + this.bbHeight, this.z,
-                    3,
-                    0.0,
-                    0.1,
-                    0.0,
-                    1.0
-                )
+                spawnParticles(level, ParticleTypes.HAPPY_VILLAGER, 3, 1.0)
                 takeDurabilityDamage()
             } else {
                 isErrored = true
-                level.sendParticles(
-                    ParticleTypes.SMOKE, this.x, this.y + this.bbHeight, this.z,
-                    10,
-                    0.0,
-                    0.1,
-                    0.0,
-                    0.01
-                )
+                spawnParticles(level, ParticleTypes.SMOKE, 10, 0.01)
             }
             currentMinceTick = 0
+        }
+    }
+
+    private fun spawnParticles(level: ServerLevel, type: ParticleOptions, count: Int = 1, speed: Double = 1.0) {
+        level.sendParticles(
+            type, this.x, this.y + this.bbHeight, this.z,
+            count,
+            0.0,
+            0.1,
+            0.0,
+            speed
+        )
+    }
+
+    private fun getMincePowerCost(): Long {
+        val baseCost = MobMincerConfig.CONFIG.poweredMinceCost.get()
+        val unbreaking = itemEnchantments.getOrDefault(Enchantments.UNBREAKING, 0)
+        return if (unbreaking > 0) {
+            min(
+                baseCost.toDouble(),
+                baseCost * (baseCost * 1.5 / unbreaking)
+            ).roundToLong()
+        } else {
+            baseCost.toLong()
         }
     }
 
@@ -209,7 +231,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
         }
 
         if (this.mincerType == MobMincerType.POWERED) {
-            sourceStack.getEnergyStorage()?.extract(MobMincerConfig.CONFIG.poweredMinceCost.get().toLong())
+            sourceStack.getEnergyStorage()?.extract(getMincePowerCost())
             return
         }
 
@@ -228,8 +250,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
             if (!itemEnchantments.containsKey(Enchantments.MOB_LOOTING)) {
                 it.count = 1
             }
-            attachments.getAttachment(Attachments.STORAGE)?.let { attachment ->
-                attachment as StorageAttachment
+            attachments.getAttachment<StorageAttachment>(Attachments.STORAGE)?.let { attachment ->
                 if (attachment.inventory.canAddItem(it)) {
                     attachment.inventory.addItem(it)
                 } else {
@@ -317,16 +338,16 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
     }
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult {
-        if (!player.isShiftKeyDown) {
+        if (!player.isShiftKeyDown || player.mainHandItem.isEmpty) {
             attachments.onInteract(player)
-            return InteractionResult.sidedSuccess((this.level() as Level).isClientSide)
+            return InteractionResult.sidedSuccess(this.level().isClientSide)
         }
 
         if (!player.mainHandItem.isEmpty && player.isShiftKeyDown) {
             // We are holding an item, so lets try to add it as an attachment
             if (attachments.tryAddAttachment(player.mainHandItem.item)) {
                 player.mainHandItem.shrink(1)
-                return InteractionResult.sidedSuccess((this.level() as Level).isClientSide)
+                return InteractionResult.sidedSuccess(this.level().isClientSide)
             }
         }
 
@@ -354,12 +375,23 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
 
     override fun readAdditionalSaveData(compound: CompoundTag) {
         super.readAdditionalSaveData(compound)
-        if (compound.contains("SourceStack") && compound.contains("Attachments") && compound.contains("CurrentMinceTick")) {
-            currentMinceTick = compound.getInt("CurrentMinceTick")
-            this.initSourceItem(ItemStack.of(compound.getCompound("SourceStack")))
-            attachments.fromEntityTag(compound.getList("Attachments", 10))
-        } else {
+        if (!compound.contains("SourceStack")) {
             destroy(true)
+            return
+        }
+
+        this.initSourceItem(ItemStack.of(compound.getCompound("SourceStack")))
+
+        if (compound.contains("DamageDealt")) {
+            damageDealt = compound.getFloat("DamageDealt")
+        }
+
+        if (compound.contains("CurrentMinceTick")) {
+            currentMinceTick = compound.getInt("CurrentMinceTick")
+        }
+
+        if (compound.contains("Attachments")) {
+            attachments.fromEntityTag(compound.getList("Attachments", 10))
         }
     }
 
@@ -368,6 +400,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
         compound.put("SourceStack", sourceStack.save(CompoundTag()))
         compound.put("Attachments", attachments.toEntityTag())
         compound.putInt("CurrentMinceTick", currentMinceTick)
+        compound.putFloat("DamageDealt", damageDealt)
     }
 
     override fun saveAdditionalSpawnData(buf: FriendlyByteBuf) {

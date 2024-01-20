@@ -17,11 +17,13 @@ object ComponentProviderUtils {
         compound.putInt("MaxDurability", this.sourceStack.maxDamage)
         compound.putFloat("Progress", this.currentMinceTick.toFloat() / this.maxMinceTick.toFloat())
         compound.putBoolean("Errored", this.isErrored)
-        val attachmentsTag = ListTag()
-        this.attachments.values.forEach {
-            attachmentsTag.add(StringTag.valueOf(it.type.name.string))
+        if (!this.attachments.isEmpty()) {
+            val attachmentsTag = ListTag()
+            this.attachments.values.forEach {
+                attachmentsTag.add(StringTag.valueOf(it.type.name.string))
+            }
+            compound.put("Attachments", attachmentsTag)
         }
-        compound.put("Attachments", attachmentsTag)
         val type = this.sourceStack.getMincerType()
         compound.putString("Type", type.name)
         if (type == MobMincerType.POWERED) {
@@ -47,13 +49,15 @@ object ComponentProviderUtils {
                 Component.translatable("mobmincer.waila.tooltip.progress", data.getFloat("Progress"))
             )
         }
-        val attachments = data.getList("Attachments", 8)
-        if (!attachments.isEmpty()) {
-            components.add(Component.translatable("mobmincer.waila.tooltip.attachments"))
-            attachments.forEach {
-                components.add(
-                    Component.literal(" - ${it.asString}")
-                )
+        if (data.contains("Attachments")) {
+            val attachments = data.getList("Attachments", 8)
+            if (!attachments.isEmpty()) {
+                components.add(Component.translatable("mobmincer.waila.tooltip.attachments"))
+                attachments.forEach {
+                    components.add(
+                        Component.literal(" - ${it.asString}")
+                    )
+                }
             }
         }
         val type = MobMincerType.valueOf(data.getString("Type"))
