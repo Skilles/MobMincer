@@ -51,17 +51,17 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
     }
 
     override fun verifyTagAfterLoad(tag: CompoundTag) {
-        if (!tag.contains("MobMincer")) {
-            tag.put("MobMincer", CompoundTag())
-        } else if (tag.contains("Attachments")) {
-            val attachments = tag.getList("Attachments", 10)
+        if (!tag.contains(MobMincerEntity.ROOT_TAG)) {
+            tag.put(MobMincerEntity.ROOT_TAG, CompoundTag())
+        } else if (tag.contains(MobMincerEntity.ATTACHMENTS_TAG)) {
+            val attachments = tag.getList(MobMincerEntity.ATTACHMENTS_TAG, 10)
             if (attachments.isEmpty()) {
-                tag.remove("Attachments")
+                tag.remove(MobMincerEntity.ATTACHMENTS_TAG)
             } else {
                 val newAttachments = ListTag()
                 attachments.forEach {
                     val attachment = it as CompoundTag
-                    val typeName = attachment.getString("Type")
+                    val typeName = attachment.getString(MobMincerEntity.ATTACHMENTS_TYPE_TAG)
                     try {
                         Attachments.valueOf(typeName)
                     } catch (e: IllegalArgumentException) {
@@ -70,7 +70,7 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
                     }
                     newAttachments.add(attachment)
                 }
-                tag.put("Attachments", newAttachments)
+                tag.put(MobMincerEntity.ATTACHMENTS_TAG, newAttachments)
             }
         }
     }
@@ -172,10 +172,10 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
             ).withStyle(ChatFormatting.GRAY)
         )
 
-        if (stackTag.contains("MobMincer")) {
-            val tag = stackTag.getCompound("MobMincer")
-            if (tag.contains("Attachments")) {
-                val attachments = tag.getList("Attachments", 10)
+        if (stackTag.contains(MobMincerEntity.ROOT_TAG)) {
+            val tag = stackTag.getCompound(MobMincerEntity.ROOT_TAG)
+            if (tag.contains(MobMincerEntity.ATTACHMENTS_TAG)) {
+                val attachments = tag.getList(MobMincerEntity.ATTACHMENTS_TAG, 10)
                 if (!attachments.isEmpty()) {
                     tooltipComponents.add(Component.translatable("mobmincer.tooltip.attachments"))
                     for (i in 0 until attachments.size) {

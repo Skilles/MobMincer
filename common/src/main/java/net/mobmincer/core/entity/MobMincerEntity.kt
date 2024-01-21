@@ -93,12 +93,13 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
         initSourceItem(sourceStack.copy())
         super.initialize(target)
         sourceStack.shrink(1)
+        readAttachmentsFromTag(sourceStack.getOrCreateTagElement(ROOT_TAG))
         level.addFreshEntity(this)
         attachments.onAttach()
     }
 
     override fun onTargetBind() {
-        this.target.addTag(ROOT_TAG)
+        this.target.addTag(TARGET_TAG)
         if (!this.level().isClientSide) {
             val killedByPlayer = itemEnchantments.containsKey(Enchantments.SILK_TOUCH)
             this.lootFactory = LootFactory.create(target, killedByPlayer, itemEnchantments.getOrDefault(Enchantments.MOB_LOOTING, 0))
@@ -107,7 +108,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
     }
 
     fun changeTarget(target: LivingEntity) {
-        this.target.removeTag(ROOT_TAG)
+        this.target.removeTag(TARGET_TAG)
         super.initialize(target)
         if (!this.level().isClientSide) {
             MincerNetwork.updateClientMincerTarget(this)
@@ -118,10 +119,15 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
         private val IS_ERRORED = SynchedEntityData.defineId(MobMincerEntity::class.java, EntityDataSerializers.BOOLEAN)
 
         // Used to know when an entity has a mob mincer attached to it
-        const val ROOT_TAG = "mobmincer"
+        const val TARGET_TAG = "mobmincer"
 
         // Used to know when an entity has already been minced
-        const val TAG_SKIP_LOOT = "${ROOT_TAG}:skip_loot"
+        const val TAG_SKIP_LOOT = "${TARGET_TAG}:skip_loot"
+
+        const val ROOT_TAG = "MobMincer"
+        const val ATTACHMENTS_TAG = "Attachments"
+        const val ATTACHMENTS_TYPE_TAG = "Type"
+        const val ATTACHMENTS_DATA_TAG = "Data"
 
         fun spawn(
             target: LivingEntity,
@@ -140,7 +146,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
                     target.isAlive &&
                     target.passengers.isEmpty() &&
                     LootLookup.hasLoot(target, EnchantmentHelper.hasSilkTouch(sourceStack)) &&
-                    !target.tags.contains(ROOT_TAG) &&
+                    !target.tags.contains(TARGET_TAG) &&
                     MobMincerConfig.testEntityFilter(target.type.`arch$registryName`())
         }
     }
@@ -329,12 +335,12 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
     }
 
     override fun remove(reason: RemovalReason) {
-        target.removeTag(ROOT_TAG)
+        target.removeTag(TARGET_TAG)
         super.remove(reason)
     }
 
     override fun onClientRemoval() {
-        target.removeTag(ROOT_TAG)
+        target.removeTag(TARGET_TAG)
     }
 
     override fun interact(player: Player, hand: InteractionHand): InteractionResult {
@@ -390,28 +396,38 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
             currentMinceTick = compound.getInt("CurrentMinceTick")
         }
 
-        if (compound.contains("Attachments")) {
-            attachments.fromEntityTag(compound.getList("Attachments", 10))
+        if (compound.contains(ATTACHMENTS_TAG)) {
+            attachments.fromTag(compound.getList(ATTACHMENTS_TAG, 10))
         }
     }
 
     override fun addAdditionalSaveData(compound: CompoundTag) {
         super.addAdditionalSaveData(compound)
         compound.put("SourceStack", sourceStack.save(CompoundTag()))
-        compound.put("Attachments", attachments.toEntityTag())
         compound.putInt("CurrentMinceTick", currentMinceTick)
         compound.putFloat("DamageDealt", damageDealt)
+        compound.put(ATTACHMENTS_TAG, attachments.toTag())
     }
 
     override fun saveAdditionalSpawnData(buf: FriendlyByteBuf) {
         super.saveAdditionalSpawnData(buf)
         buf.writeItem(sourceStack)
+        val compoundTag = CompoundTag()
+        compoundTag.put(ATTACHMENTS_TAG, attachments.toTag())
+        buf.writeNbt(compoundTag)
     }
 
     override fun loadAdditionalSpawnData(buf: FriendlyByteBuf) {
         super.loadAdditionalSpawnData(buf)
         this.initSourceItem(buf.readItem())
+        buf.readNbt()?.let(::readAttachmentsFromTag)
         attachments.onAttach()
-        this.target.addTag(ROOT_TAG)
+        this.target.addTag(TARGET_TAG)
+    }
+
+    private fun readAttachmentsFromTag(tag: CompoundTag) {
+        if (tag.contains(ATTACHMENTS_TAG)) {
+            attachments.fromTag(tag.getList(ATTACHMENTS_TAG, 10))
+        }
     }
 }

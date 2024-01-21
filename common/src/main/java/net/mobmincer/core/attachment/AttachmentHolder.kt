@@ -46,24 +46,12 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
 
     fun onDeath(reason: MobMincerEntity.DestroyReason): Boolean {
         val addTag = reason != MobMincerEntity.DestroyReason.BROKEN
-        if (addTag) {
-            val stackTag = mobMincer.sourceStack.getOrCreateTagElement("MobMincer")
-            val newTag = ListTag()
-            var stopMincerDeath = false
-            this.attachments.entries.forEach {
-                val thisTag = CompoundTag()
-                thisTag.putString("Type", it.key.name)
-                it.value.toItemTag()?.let { tag -> thisTag.put("Data", tag) }
-                newTag.add(thisTag)
-                stopMincerDeath = it.value.onDeath(reason)
-            }
-            if (attachments.isNotEmpty()) {
-                stackTag.put("Attachments", newTag)
-            }
-            return stopMincerDeath
-        } else {
-            return this.attachments.values.any { it.onDeath(reason) }
+        val stopDeath = this.attachments.values.any { it.onDeath(reason) }
+        if (addTag && attachments.isNotEmpty()) {
+            val stackTag = mobMincer.sourceStack.getOrCreateTagElement(MobMincerEntity.ROOT_TAG)
+            stackTag.put(MobMincerEntity.ATTACHMENTS_TAG, toTag())
         }
+        return stopDeath
     }
 
     fun onMince(dealtDamage: Float) {
@@ -77,45 +65,57 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
     }
 
     fun onAttach() {
-        require(attachments.isEmpty()) { "Attachments already exist" }
+        this.attachments.values.forEach { it.onAttach() }
+        /*require(attachments.isEmpty()) { "Attachments already exist" }
         val rootTag = this.mobMincer.sourceStack.getOrCreateTagElement(
             "MobMincer"
         )
         if (rootTag.contains("Attachments")) {
             rootTag.getList("Attachments", 10).forEach { tag ->
                 tag as CompoundTag
-                val name = tag.getString("Type")
-                val data = tag.getCompound("Data")
+                val name = tag.getString(MobMincerEntity.ATTACHMENTS_TYPE_TAG)
+                val data = tag.getCompound(MobMincerEntity.ATTACHMENTS_DATA_TAG)
                 val attachment = addAttachment(Attachments.valueOf(name))
                 attachment?.let {
-                    it.fromItemTag(data)
                     it.onAttach()
                 } ?: error("Failed to add attachment $name from item")
             }
-        }
+        }*/
     }
 
-    fun toEntityTag(): ListTag {
+    fun toTag(): ListTag {
         val tag = ListTag()
         this.attachments.forEach { (attachment, instance) ->
             val baseTag = CompoundTag()
-            baseTag.putString("type", attachment.name)
+            baseTag.putString(MobMincerEntity.ATTACHMENTS_TYPE_TAG, attachment.name)
             val attachmentTag = CompoundTag()
             instance.serialize(attachmentTag)
-            baseTag.put("data", attachmentTag)
+            baseTag.put(MobMincerEntity.ATTACHMENTS_DATA_TAG, attachmentTag)
             tag.add(baseTag)
         }
         return tag
     }
 
-    fun fromEntityTag(tag: ListTag) {
+    fun fromTag(tag: ListTag) {
         tag.forEach { attachmentTag ->
             attachmentTag as CompoundTag
-            val attachment = Attachments.valueOf(attachmentTag.getString("type"))
+            nbtDataFixer(attachmentTag)
+            val attachment = Attachments.valueOf(attachmentTag.getString(MobMincerEntity.ATTACHMENTS_TYPE_TAG))
             AttachmentRegistry.get(attachment)?.create(mobMincer)?.let {
-                it.deserialize(attachmentTag.getCompound("data"), mobMincer)
+                it.deserialize(attachmentTag.getCompound(MobMincerEntity.ATTACHMENTS_DATA_TAG), mobMincer)
                 this.attachments[attachment] = it
             }
+        }
+    }
+
+    private fun nbtDataFixer(attachmentTag: CompoundTag) {
+        if (attachmentTag.contains("type")) {
+            attachmentTag.putString(MobMincerEntity.ATTACHMENTS_TYPE_TAG, attachmentTag.getString("type"))
+            attachmentTag.remove("type")
+        }
+        if (attachmentTag.contains("data")) {
+            attachmentTag.put(MobMincerEntity.ATTACHMENTS_DATA_TAG, attachmentTag.getCompound("data"))
+            attachmentTag.remove("data")
         }
     }
 

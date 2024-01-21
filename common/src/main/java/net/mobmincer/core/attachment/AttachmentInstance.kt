@@ -22,14 +22,6 @@ abstract class AttachmentInstance(val type: MobMincerAttachment<*>, protected va
 
     open fun onInteract(player: Player) {}
 
-    open fun toItemTag(): CompoundTag? {
-        return null
-    }
-
-    open fun fromItemTag(tag: CompoundTag) {
-
-    }
-
     open fun deserialize(tag: CompoundTag, entity: MobMincerEntity) {
 
     }
