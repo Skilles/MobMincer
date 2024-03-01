@@ -64,9 +64,7 @@ Shift + right-click the Mob Mincer with the attachment in your hand to attach it
 
 ### Disclaimer
 
-* The Mob Mincer can be used on any mob that has a loot table, but some mobs have special conditions (eg. slimes only dropping slime balls when they are the smallest size). This will be fixed in a
-  later
-  release along with more drop customization.
+* The Mob Mincer can be used on any mob that has a loot table. Certain mobs like Withers will not work.
 * Just like with killing a mob, not every mince will produce a drop, though you can improve this with looting. Without looting, you are limited to one drop per mince.
 * If you cannot attach a mob mincer to a mob that drops loot, try enchanting it with Silk touch to allow for player drops.
 * Certain mods may make this too overpowered. Future configuration options will allow for more customization.
@@ -93,7 +91,8 @@ Shift + right-click the Mob Mincer with the attachment in your hand to attach it
 
 * [Kotlin for Forge](https://www.curseforge.com/minecraft/mc-mods/kotlin-for-forge)
 
-*Support for [Jade](https://www.curseforge.com/minecraft/mc-mods/jade), JEI, and REI included*
+*Support for [Jade](https://www.curseforge.com/minecraft/mc-mods/jade), [JEI](https://www.curseforge.com/minecraft/mc-mods/jei),
+and [REI](https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items) included*
 
 ### Issues
 
