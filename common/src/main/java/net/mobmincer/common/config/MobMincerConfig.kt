@@ -28,7 +28,7 @@ class MobMincerConfig private constructor(builder: ModConfigSpec.Builder) {
     val mobDamagePercent: ModConfigSpec.DoubleValue = builder
         .comment("The percent of damage dealt to the mob when mincing")
         .translation("mobmincer.config.mobDamagePercent")
-        .defineInRange("mobDamagePercent", 0.1, 0.0, 1.0)
+        .defineInRange("mobDamagePercent", 0.2, 0.0, 1.0)
 
     val feederHealPercent: ModConfigSpec.DoubleValue = builder
         .comment("The percent of damage healed using the feeder attachment")
@@ -86,6 +86,11 @@ class MobMincerConfig private constructor(builder: ModConfigSpec.Builder) {
         .comment("The amount of RF required per mince using the powered mincer")
         .translation("mobmincer.config.poweredMinceCost")
         .defineInRange("poweredMinceCost", 1000, 1, 1000000)
+
+    val experienceMultiplier: ModConfigSpec.DoubleValue = builder
+        .comment("The multiplier for the amount of xp fluid added to the tank when mincing")
+        .translation("mobmincer.config.experienceMultiplier")
+        .defineInRange("experienceMultiplier", 2.0, 0.0, 100.0)
 
     enum class EntityFilterMode {
         BLACKLIST,
