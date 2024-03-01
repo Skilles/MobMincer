@@ -21,7 +21,7 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     modApi("dev.architectury:architectury:${rootProject.property("architectury_version")}")
 
-    api("fuzs.forgeconfigapiport:forgeconfigapiport-common:${rootProject.property("forge_config_version")}")
+    api("fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:${rootProject.property("forge_config_version")}")
 
     modCompileOnly("curse.maven:jade-324717:${rootProject.property("jade_version_fabric")}")
     modCompileOnlyApi(
