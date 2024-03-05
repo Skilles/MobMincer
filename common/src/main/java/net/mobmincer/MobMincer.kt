@@ -1,5 +1,7 @@
 package net.mobmincer
 
+import dev.architectury.event.EventResult
+import dev.architectury.event.events.common.BlockEvent
 import dev.architectury.event.events.common.LifecycleEvent
 import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry
 import dev.architectury.registry.client.level.entity.EntityRendererRegistry
@@ -9,6 +11,7 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.renderer.item.ItemProperties
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.Mth
+import net.mobmincer.api.blockentity.EnergyMachineBlockEntity
 import net.mobmincer.client.menu.Menus
 import net.mobmincer.client.menu.screen.PowerProviderScreen
 import net.mobmincer.client.model.MobMincerModel
@@ -39,6 +42,18 @@ object MobMincer {
 
         LifecycleEvent.SERVER_LEVEL_UNLOAD.register {
             FakePlayer.unload(it)
+        }
+
+        BlockEvent.BREAK.register { world, pos, state, player, id ->
+            if (!world.isClientSide) {
+                world.getBlockEntity(pos)?.let {
+                    if (it is EnergyMachineBlockEntity) {
+                        val energyStorage = it.energyStorage
+
+                    }
+                }
+            }
+            EventResult.pass()
         }
 
         MincerNetwork.registerServerRecievers()

@@ -7,6 +7,7 @@ import net.minecraft.world.level.block.SoundType
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.material.MapColor
 import net.mobmincer.api.block.BaseMachineBlock
+import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.core.item.MincerPowerProviderItem
 import java.util.*
 import java.util.function.BiFunction
@@ -25,15 +26,15 @@ class MincerPowerProviderBlock(blockEntityFactory: BiFunction<BlockPos, BlockSta
     }
 
     override fun getEnergyMaxInput(side: Direction?): Long {
-        return 1000
+        return MobMincerConfig.CONFIG.powerProviderTransferRate.get().toLong()
     }
 
     override fun getEnergyMaxOutput(side: Direction?): Long {
-        return 1000
+        return MobMincerConfig.CONFIG.powerProviderTransferRate.get().toLong()
     }
 
     override fun getEnergyCapacity(): Long {
-        return 10000
+        return MobMincerConfig.CONFIG.powerProviderCapacity.get().toLong()
     }
 
     override fun getBlockItem(): Optional<MincerPowerProviderItem> {

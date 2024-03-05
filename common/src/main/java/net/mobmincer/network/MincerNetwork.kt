@@ -14,6 +14,8 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.level.storage.loot.LootDataType
 import net.minecraft.world.level.storage.loot.LootTable
 import net.mobmincer.MobMincer
+import net.mobmincer.core.attachment.AttachmentInstance
+import net.mobmincer.core.attachment.Attachments
 import net.mobmincer.core.entity.MobMincerEntity
 import net.mobmincer.core.loot.LootLookup
 import net.mobmincer.util.EncodingUtils.writeIdentifier
@@ -25,6 +27,8 @@ object MincerNetwork {
     private val CHANGE_TARGET = ResourceLocation(MobMincer.MOD_ID, "ct")
     private val SEND_LOOT_DATA: ResourceLocation = ResourceLocation(MobMincer.MOD_ID, "sld")
     private val ASK_SYNC_LOOT: ResourceLocation = ResourceLocation(MobMincer.MOD_ID, "asl")
+    private val SYNC_MINCER_DATA: ResourceLocation = ResourceLocation(MobMincer.MOD_ID, "smd")
+    private val SYNC_MINCER_ATTACHMENT: ResourceLocation = ResourceLocation(MobMincer.MOD_ID, "sma")
 
     fun registerClientRecievers() {
         NetworkManager.registerReceiver(NetworkManager.s2c(), CHANGE_TARGET) { buf, context ->
@@ -63,6 +67,27 @@ object MincerNetwork {
                 }
             }
         }
+
+        NetworkManager.registerReceiver(NetworkManager.s2c(), SYNC_MINCER_DATA) { buf, context ->
+            val mincerId = buf.readInt()
+            val mincerData = buf.readNbt() ?: return@registerReceiver
+            context.queue {
+                val level = context.player.level()
+                val mincer = level.getEntity(mincerId) as? MobMincerEntity
+                mincer?.load(mincerData)
+            }
+        }
+
+        NetworkManager.registerReceiver(NetworkManager.s2c(), SYNC_MINCER_ATTACHMENT) { buf, context ->
+            val mincerId = buf.readInt()
+            val attachment = buf.readEnum(Attachments::class.java)
+            val attachmentData = buf.readNbt() ?: return@registerReceiver
+            context.queue {
+                val level = context.player.level()
+                val mincer = level.getEntity(mincerId) as? MobMincerEntity
+                mincer?.attachments?.loadAttachment(attachment, attachmentData)
+            }
+        }
     }
 
     fun registerServerRecievers() {
@@ -71,6 +96,27 @@ object MincerNetwork {
                 sendLootToPlayers(GameInstance.getServer()!!, Collections.singletonList(context.player as ServerPlayer))
             }
         }
+    }
+
+    fun syncMincerData(mincerEntity: MobMincerEntity) {
+        val buf = FriendlyByteBuf(Unpooled.buffer())
+        buf.writeInt(mincerEntity.id)
+        val nbt = CompoundTag()
+        mincerEntity.save(nbt)
+        buf.writeNbt(nbt)
+        val level = mincerEntity.level() as ServerLevel
+        NetworkManager.sendToPlayers(level.players(), SYNC_MINCER_DATA, buf)
+    }
+
+    fun syncAttachmentData(mincerEntity: MobMincerEntity, attachment: Attachments) {
+        val buf = FriendlyByteBuf(Unpooled.buffer())
+        buf.writeInt(mincerEntity.id)
+        val nbt = CompoundTag()
+        buf.writeEnum(attachment)
+        mincerEntity.attachments.getAttachment<AttachmentInstance>(attachment)!!.serialize(nbt)
+        buf.writeNbt(nbt)
+        val level = mincerEntity.level() as ServerLevel
+        NetworkManager.sendToPlayers(level.players(), SYNC_MINCER_ATTACHMENT, buf)
     }
 
     fun updateClientMincerTarget(mincerEntity: MobMincerEntity) {

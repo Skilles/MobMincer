@@ -96,8 +96,10 @@ abstract class BaseMachineBlockEntity(type: BlockEntityType<*>, pos: BlockPos, b
     override fun getDisplayName(): Component = blockState.block.name
 
     fun onPlace(level: Level, pos: BlockPos, state: BlockState, placer: LivingEntity?, stack: ItemStack) {
+        stack.tag?.let(::load)
     }
 
     fun onBreak(level: Level, player: Player, pos: BlockPos, state: BlockState, tool: ItemStack) {
+
     }
 }

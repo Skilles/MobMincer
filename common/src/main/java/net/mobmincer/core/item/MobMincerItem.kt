@@ -30,6 +30,7 @@ import net.mobmincer.core.entity.MobMincerEntity
 import net.mobmincer.core.item.MobMincerType.Companion.getMincerType
 import net.mobmincer.core.item.MobMincerType.Companion.setMincerType
 import net.mobmincer.core.registry.AttachmentRegistry
+import net.mobmincer.energy.EnergyUtil.getEnergyDamageValues
 import net.mobmincer.energy.EnergyUtil.getEnergyStorage
 import net.mobmincer.energy.MMChargableItem
 import net.mobmincer.util.StringUtils
@@ -147,11 +148,7 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
         }
 
         if (type == MobMincerType.POWERED) {
-            val maxValue = getEnergyCapacity(stack)
-            val value = stack.getEnergyStorage()?.energy?.let { maxValue - it } ?: return 1 to 1.also {
-                MobMincer.logger.warn("No energy storage found for powered mincer!")
-            }
-            return value.toInt() to maxValue.toInt()
+            return stack.getEnergyDamageValues()
         } else {
             val value = stack.damageValue
             val maxValue = MobMincerConfig.CONFIG.baseDurability.get()
@@ -181,9 +178,19 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
                     for (i in 0 until attachments.size) {
                         val attachment = attachments.getCompound(i)
                         val type = Attachments.valueOf(attachment.getString("Type"))
-                        AttachmentRegistry.get(type)?.name?.let { name ->
-                            tooltipComponents.add(Component.literal("- ").append(name).withStyle(ChatFormatting.GRAY))
+                        val name = AttachmentRegistry.get(type)?.name ?: Component.literal("Unknown Attachment")
+                        val tooltip = Component.literal("- ").append(name).withStyle(ChatFormatting.GRAY)
+                        if (type == Attachments.TANK) {
+                            val data = attachment.getCompound("Data")
+                            val fluidAmount = data.getFloat("fluidAmount")
+                            val capacity = data.getInt("capacity")
+                            tooltip.append(
+                                Component.literal(
+                                    " "
+                                ).append(StringUtils.getPercentageText(fluidAmount.toInt(), capacity))
+                            )
                         }
+                        tooltipComponents.add(tooltip)
                     }
                 }
             }
@@ -197,23 +204,33 @@ class MobMincerItem : BaseItem(Properties().stacksTo(1).defaultDurability(100)),
                     "mobmincer.tooltip.energy"
                 ).withStyle(
                     ChatFormatting.GOLD
-                ).append(StringUtils.getPercentageText((energy.toFloat() / maxEnergy * 100).toInt()))
+                ).append(
+                    StringUtils.getPercentageText(
+                        energy.toInt(),
+                        maxEnergy.toInt()
+                    )
+                )
             )
         }
     }
 
     override fun getEnergyCapacity(stack: ItemStack): Long {
-        return 1000
-    }
-
-    override fun getEnergyMaxInput(stack: ItemStack): Long {
-        return 100
-    }
-
-    override fun getEnergyMaxOutput(stack: ItemStack): Long {
+        if (stack.getMincerType() == MobMincerType.POWERED) {
+            return MobMincerConfig.CONFIG.poweredMincerCapacity.get().toLong()
+        }
         return 0
     }
 
+    override fun getEnergyMaxInput(stack: ItemStack): Long {
+        if (stack.getMincerType() == MobMincerType.POWERED) {
+            return getEnergyCapacity(stack)
+        }
+        return 0
+    }
+
+    override fun getEnergyMaxOutput(stack: ItemStack): Long {
+        return getEnergyMaxInput(stack)
+    }
 
     companion object {
         val DISPENSE_BEHAVIOR = object : OptionalDispenseItemBehavior() {

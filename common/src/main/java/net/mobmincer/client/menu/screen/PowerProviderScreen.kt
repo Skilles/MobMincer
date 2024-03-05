@@ -8,6 +8,7 @@ import net.minecraft.util.Mth
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.inventory.Slot
+import net.mobmincer.MobMincer
 import net.mobmincer.client.menu.PowerProviderMenu
 
 class PowerProviderScreen(menu: PowerProviderMenu, playerInventory: Inventory, title: Component) : AbstractContainerScreen<PowerProviderMenu>(
@@ -16,15 +17,18 @@ class PowerProviderScreen(menu: PowerProviderMenu, playerInventory: Inventory, t
     title
 ) {
     private var widthTooNarrow = false
-    private var texture: ResourceLocation = ResourceLocation("textures/gui/container/furnace.png")
+    private var texture: ResourceLocation = ResourceLocation(MobMincer.MOD_ID, "textures/gui/power_provider.png")
     private val litProgressSprite: ResourceLocation = ResourceLocation("container/furnace/lit_progress")
-    private val burnProgressSprite: ResourceLocation = ResourceLocation("container/furnace/burn_progress")
+
+    //private val burnProgressSprite: ResourceLocation = ResourceLocation("container/furnace/burn_progress")
+    private val powerProgressSprite: ResourceLocation =
+        ResourceLocation(MobMincer.MOD_ID, "power_progress")
 
     public override fun init() {
         super.init()
-        //this.widthTooNarrow = this.width < 379
-        //this.leftPos = if (this.widthTooNarrow) (this.width - this.imageWidth) / 2 else 97
-        //this.titleLabelX = (this.imageWidth - font.width(this.title)) / 2
+        // this.widthTooNarrow = this.width < 379
+        // this.leftPos = if (this.widthTooNarrow) (this.width - this.imageWidth) / 2 else 97
+        // this.titleLabelX = (this.imageWidth - font.width(this.title)) / 2
     }
 
     public override fun containerTick() {
@@ -40,6 +44,25 @@ class PowerProviderScreen(menu: PowerProviderMenu, playerInventory: Inventory, t
         this.renderTooltip(guiGraphics, mouseX, mouseY)
     }
 
+    override fun renderTooltip(guiGraphics: GuiGraphics, x: Int, y: Int) {
+        super.renderTooltip(guiGraphics, x, y)
+
+        val powerProgressTop = this.topPos + 25
+        val powerProgressHeight = 36
+        val powerProgressLeft = this.leftPos + 47
+        val powerProgressWidth = 110
+        if (x >= powerProgressLeft &&
+            x <= powerProgressLeft + powerProgressWidth &&
+            y >= powerProgressTop &&
+            y <= powerProgressTop + powerProgressHeight
+        ) {
+            val energy = menu.energy
+            val capacity = menu.capacity
+            val tooltip = Component.literal("$energy / $capacity RF")
+            guiGraphics.renderTooltip(minecraft!!.font, tooltip, x, y)
+        }
+    }
+
     override fun renderBg(guiGraphics: GuiGraphics, partialTick: Float, mouseX: Int, mouseY: Int) {
         var l: Int
         var k: Int
@@ -49,11 +72,11 @@ class PowerProviderScreen(menu: PowerProviderMenu, playerInventory: Inventory, t
         if (menu.isBurning) {
             k = 14
             l = Mth.ceil(menu.burnProgress * 13.0f) + 1
-            guiGraphics.blitSprite(this.litProgressSprite, 14, 14, 0, 14 - l, i + 56, j + 36 + 14 - l, 14, l)
+            guiGraphics.blitSprite(this.litProgressSprite, 14, 14, 0, 14 - l, i + 19, j + 36 + 14 - l, 14, l)
         }
         k = 24
-        l = Mth.ceil(menu.energyProgress * 24.0f)
-        guiGraphics.blitSprite(this.burnProgressSprite, 24, 16, 0, 0, i + 79, j + 34, l, 16)
+        l = Mth.ceil(menu.energyProgress * 112.0f)
+        guiGraphics.blitSprite(this.powerProgressSprite, 112, 40, 2, 2, i + 48, j + 25, l, 36)
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {

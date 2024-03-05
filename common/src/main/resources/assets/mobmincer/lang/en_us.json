@@ -7,6 +7,7 @@
   "advancements.mobmincer.mob_mincer.description": "Craft a Mob Mincer",
   "mobmincer.waila.tooltip.durability": "Durability: %d/%d",
   "mobmincer.waila.tooltip.errored": "Invalid Mob",
+  "mobmincer.waila.tooltip.errored.powered": "No Power",
   "mobmincer.waila.tooltip.progress": "Mince: %.0f%%",
   "mobmincer.waila.tooltip.power": "Power: %.0f%%",
   "mobmincer.waila.tooltip.attachments": "Attachments:",

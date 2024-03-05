@@ -45,7 +45,7 @@ object MobMincerComponentProvider : IEntityComponentProvider, IServerDataProvide
                 if (contents is TranslatableContents) {
                     val contentKey = contents.key
                     if (contentKey.endsWith("progress") || contentKey.endsWith("power") || contentKey.endsWith("fluid")) {
-                        val progress = contents.args[0] as Float
+                        val progress = contents.args[0] as Int / 100F
                         val style = SimpleProgressStyle()
                         style.autoTextColor = false
                         style.textColor = Color.hex("#B2BEB5").toInt()

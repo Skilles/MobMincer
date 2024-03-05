@@ -24,7 +24,7 @@ object ComponentProviderUtils {
             this.attachments.values.forEach {
                 attachmentsTag.add(StringTag.valueOf(it.type.name.string))
                 if (it is TankAttachment) {
-                    compound.putFloat("FluidAmount", it.fluidAmount)
+                    compound.putFloat("FluidAmount", it.fluidAmount / it.capacity)
                 }
             }
             compound.put("Attachments", attachmentsTag)
@@ -39,14 +39,6 @@ object ComponentProviderUtils {
 
     fun getTooltipComponents(data: CompoundTag): List<MutableComponent> {
         val components = mutableListOf<MutableComponent>()
-        val errored = data.getBoolean("Errored")
-        if (errored) {
-            components.add(Component.translatable("mobmincer.waila.tooltip.errored"))
-        } else {
-            components.add(
-                Component.translatable("mobmincer.waila.tooltip.progress", data.getFloat("Progress"))
-            )
-        }
         val type = MobMincerType.valueOf(data.getString("Type"))
         if (type == MobMincerType.BASIC) {
             components.add(
@@ -60,8 +52,19 @@ object ComponentProviderUtils {
             components.add(
                 Component.translatable(
                     "mobmincer.waila.tooltip.power",
-                    data.getFloat("Power")
+                    (data.getFloat("Power") * 100).toInt()
                 )
+            )
+        }
+        val errored = data.getBoolean("Errored")
+        if (errored) {
+            val erroredComponent = Component.translatable("mobmincer.waila.tooltip.errored")
+            components.add(
+                if (type == MobMincerType.POWERED) erroredComponent.append(Component.literal(" / ")).append(Component.translatable("mobmincer.waila.tooltip.errored.powered")) else erroredComponent
+            )
+        } else {
+            components.add(
+                Component.translatable("mobmincer.waila.tooltip.progress", (data.getFloat("Progress") * 100).toInt())
             )
         }
         if (data.contains("Attachments")) {
@@ -69,7 +72,7 @@ object ComponentProviderUtils {
                 components.add(
                     Component.translatable(
                         "mobmincer.waila.tooltip.fluid",
-                        data.getFloat("FluidAmount")
+                        (data.getFloat("FluidAmount") * 100).toInt()
                     )
                 )
             }

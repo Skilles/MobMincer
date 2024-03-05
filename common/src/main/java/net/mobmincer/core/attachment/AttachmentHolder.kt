@@ -108,6 +108,16 @@ class AttachmentHolder(private val mobMincer: MobMincerEntity) {
         }
     }
 
+    fun loadAttachment(attachment: Attachments, tag: CompoundTag) {
+        if (this.hasAttachment(attachment)) {
+            this.getAttachment<AttachmentInstance>(attachment)!!.deserialize(tag, mobMincer)
+        } else {
+            val instance = AttachmentRegistry.get(attachment)!!.create(mobMincer)
+            instance.deserialize(tag, mobMincer)
+            this.attachments[attachment] = instance
+        }
+    }
+
     private fun nbtDataFixer(attachmentTag: CompoundTag) {
         if (attachmentTag.contains("type")) {
             attachmentTag.putString(MobMincerEntity.ATTACHMENTS_TYPE_TAG, attachmentTag.getString("type"))

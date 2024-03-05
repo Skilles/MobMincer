@@ -5,6 +5,7 @@ import net.mobmincer.core.entity.MobMincerEntity
 
 class MobMincerAttachment<T : AttachmentInstance>(type: Attachments, private val factory: AttachmentFactory<T>, val name: Component) {
     val item = type.asItem()
+    val id = type
 
     fun create(mincer: MobMincerEntity): T {
         return this.factory.create(this, mincer)

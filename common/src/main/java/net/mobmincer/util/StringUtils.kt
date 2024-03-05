@@ -1,6 +1,7 @@
 package net.mobmincer.util
 
 import net.minecraft.ChatFormatting
+import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import java.util.*
@@ -22,7 +23,11 @@ object StringUtils {
         return output.substring(0, 1).uppercase(Locale.getDefault()) + output.substring(1)
     }
 
-    fun getPercentageText(percentage: Int): MutableComponent {
+    fun getPercentageText(minValue: Int, maxValue: Int, advanced: Boolean = Screen.hasShiftDown()): MutableComponent {
+        val percentage = (minValue.toFloat() / maxValue * 100).toInt()
+        if (advanced) {
+            return Component.literal("$minValue/$maxValue").withStyle(getPercentageColour(percentage))
+        }
         return Component.literal(percentage.toString())
             .withStyle(getPercentageColour(percentage))
             .append("%")

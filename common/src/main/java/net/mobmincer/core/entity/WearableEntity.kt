@@ -16,6 +16,8 @@ abstract class WearableEntity(entityType: EntityType<*>, level: Level) :
         level
     ),
     EntitySpawnExtension {
+    var initialized = false
+        private set
 
     lateinit var target: LivingEntity
         private set
@@ -27,6 +29,7 @@ abstract class WearableEntity(entityType: EntityType<*>, level: Level) :
         this.targetUUID = target.uuid
         this.setPos(target.x, target.y + target.bbHeight, target.z)
         onTargetBind()
+        initialized = true
     }
 
     final override fun tick() {
@@ -51,18 +54,26 @@ abstract class WearableEntity(entityType: EntityType<*>, level: Level) :
         // NO-OP
     }
 
-    private fun rebindTarget() {
+    private fun getNewTarget(): LivingEntity? {
         val candidates = level().getEntities(
             this,
             AABB.ofSize(this.position(), 1.25, 1.5, 1.25)
         ) { entity -> entity.uuid.equals(targetUUID) }
-        if (candidates.isEmpty() || candidates[0] !is LivingEntity) {
-            destroy(true)
+        return if (candidates.isEmpty() || candidates[0] !is LivingEntity) {
+            null
         } else {
-            this.target = candidates[0] as LivingEntity
+            candidates[0] as LivingEntity
+        }
+    }
+
+    private fun rebindTarget() {
+        val target = getNewTarget()
+        target?.let {
+            this.target = it
             onTargetBind()
             this.tick()
-        }
+            initialized = true
+        } ?: destroy(true)
     }
 
     protected open fun destroy(discard: Boolean = false) {
@@ -103,5 +114,6 @@ abstract class WearableEntity(entityType: EntityType<*>, level: Level) :
 
     override fun loadAdditionalSpawnData(buf: FriendlyByteBuf) {
         this.target = level().getEntity(buf.readInt()) as LivingEntity
+        this.targetUUID = target.uuid
     }
 }

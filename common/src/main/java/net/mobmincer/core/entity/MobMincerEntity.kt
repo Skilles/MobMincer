@@ -16,7 +16,6 @@ import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.damagesource.DamageTypes
-import net.minecraft.world.entity.AnimationState
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.LivingEntity
@@ -40,6 +39,7 @@ import net.mobmincer.energy.EnergyUtil.getEnergyStorage
 import net.mobmincer.network.MincerNetwork
 import net.mobmincer.util.MathUtils
 import java.util.*
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -70,9 +70,6 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
             }
             entityData.set(IS_ERRORED, value)
         }
-
-    // val idleAnimationState = AnimationState()
-    val fillTankAnimationState = AnimationState()
 
     val canMince: Boolean
         get() = when (this.mincerType) {
@@ -155,9 +152,6 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
         val level = this.level()
         if (level is ServerLevel) {
             serverTick(level)
-        } else {
-            // idleAnimationState.animateWhen(target.isAlive, this.tickCount)
-            fillTankAnimationState.animateWhen(attachments.hasAttachment(Attachments.TANK), this.tickCount)
         }
     }
 
@@ -188,7 +182,10 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
         if (++currentMinceTick >= maxMinceTick) {
             if (canMince && dropTargetLoot()) {
                 isErrored = false
-                val damage = MobMincerConfig.CONFIG.mobDamagePercent.get().toFloat() * target.maxHealth
+                val damage = max(
+                    0.5F,
+                    MobMincerConfig.CONFIG.mobDamagePercent.get().toFloat() * target.maxHealth
+                )
                 if (target.hurt(
                         damageSources().indirectMagic(this, this),
                         damage
@@ -224,7 +221,7 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
         return if (unbreaking > 0) {
             min(
                 baseCost.toDouble(),
-                baseCost * (baseCost * 1.5 / unbreaking)
+                baseCost.toDouble() * (1 / unbreaking.toDouble())
             ).roundToLong()
         } else {
             baseCost.toLong()
@@ -237,7 +234,9 @@ class MobMincerEntity(type: EntityType<*>, level: Level) :
         }
 
         if (this.mincerType == MobMincerType.POWERED) {
-            sourceStack.getEnergyStorage()?.extract(getMincePowerCost())
+            val powerCost = getMincePowerCost()
+            val energyStorage = sourceStack.getEnergyStorage()
+            energyStorage?.extract(powerCost)
             return
         }
 

@@ -14,8 +14,10 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder
 import net.minecraft.client.model.geom.builders.LayerDefinition
 import net.minecraft.client.model.geom.builders.MeshDefinition
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.util.Mth
 import net.mobmincer.MobMincer
 import net.mobmincer.core.attachment.Attachments
+import net.mobmincer.core.attachment.TankAttachment
 import net.mobmincer.core.entity.MobMincerEntity
 
 class MobMincerModel(private val root: ModelPart) : HierarchicalModel<MobMincerEntity>() {
@@ -74,12 +76,9 @@ class MobMincerModel(private val root: ModelPart) : HierarchicalModel<MobMincerE
         setupAttachmentPart(spreader, Attachments.SPREADER, entity, rotYRadians, rotXRadians)
         setupAttachmentPart(feeder, Attachments.FEEDER, entity, rotYRadians, rotXRadians)
         if (setupAttachmentPart(tank, Attachments.TANK, entity, rotYRadians, rotXRadians)) {
-            filled.visible = entity.fillTankAnimationState.isStarted
-            this.animate(
-                entity.fillTankAnimationState,
-                FILL_TANK,
-                entity.tickCount + partialTicks,
-            )
+            filled.visible = true
+            val tankAttachment = entity.attachments.getAttachment<TankAttachment>(Attachments.TANK)!!
+            filled.zScale = Mth.clamp(tankAttachment.fluidAmount / tankAttachment.capacity, 0.0F, 1.0F)
         }
     }
 
@@ -98,73 +97,141 @@ class MobMincerModel(private val root: ModelPart) : HierarchicalModel<MobMincerE
 
             val feeder = partdefinition.addOrReplaceChild(
                 "feeder",
-                CubeListBuilder.create().texOffs(0, 20).addBox(-4.25f, -9.5f, -1.0f, 1.0f, 2.0f, 2.0f, CubeDeformation(0.0f)),
+                CubeListBuilder.create().texOffs(
+                    0,
+                    20
+                ).addBox(-4.25f, -9.5f, -1.0f, 1.0f, 2.0f, 2.0f, CubeDeformation(0.0f)),
                 PartPose.offset(0.0f, 20.0f, 0.0f)
             )
 
             val spreader = partdefinition.addOrReplaceChild(
-                "spreader", CubeListBuilder.create().texOffs(8, 15).addBox(-2.5f, -15.0f, -0.5f, 0.0f, 4.0f, 1.0f, CubeDeformation(0.0f))
-                    .texOffs(4, 16).addBox(-3.0f, -16.0f, -0.5f, 1.0f, 1.0f, 1.0f, CubeDeformation(0.0f)), PartPose.offset(0.0f, 20.0f, 0.0f)
+                "spreader",
+                CubeListBuilder.create().texOffs(
+                    8,
+                    15
+                ).addBox(-2.5f, -15.0f, -0.5f, 0.0f, 4.0f, 1.0f, CubeDeformation(0.0f))
+                    .texOffs(4, 16).addBox(-3.0f, -16.0f, -0.5f, 1.0f, 1.0f, 1.0f, CubeDeformation(0.0f)),
+                PartPose.offset(0.0f, 20.0f, 0.0f)
             )
 
             val default_top = partdefinition.addOrReplaceChild(
                 "default_top",
-                CubeListBuilder.create().texOffs(18, 10).addBox(-1.0f, -14.0f, -1.0f, 2.0f, 1.0f, 2.0f, CubeDeformation(0.0f)),
+                CubeListBuilder.create().texOffs(
+                    18,
+                    10
+                ).addBox(-1.0f, -14.0f, -1.0f, 2.0f, 1.0f, 2.0f, CubeDeformation(0.0f)),
                 PartPose.offset(0.0f, 20.0f, 0.0f)
             )
 
             val pink_top = partdefinition.addOrReplaceChild(
                 "pink_top",
-                CubeListBuilder.create().texOffs(0, 16).addBox(-1.0f, -14.0f, -1.0f, 2.0f, 2.0f, 2.0f, CubeDeformation(0.0f)),
+                CubeListBuilder.create().texOffs(
+                    0,
+                    16
+                ).addBox(-1.0f, -14.0f, -1.0f, 2.0f, 2.0f, 2.0f, CubeDeformation(0.0f)),
                 PartPose.offset(0.0f, 20.0f, 0.0f)
             )
 
             val head = partdefinition.addOrReplaceChild(
-                "head", CubeListBuilder.create().texOffs(4, 2).addBox(-3.0f, -12.0f, -3.0f, 6.0f, 1.0f, 6.0f, CubeDeformation(0.0f))
+                "head",
+                CubeListBuilder.create().texOffs(
+                    4,
+                    2
+                ).addBox(-3.0f, -12.0f, -3.0f, 6.0f, 1.0f, 6.0f, CubeDeformation(0.0f))
                     .texOffs(8, 3).addBox(-2.0f, -13.0f, -2.0f, 4.0f, 1.0f, 4.0f, CubeDeformation(0.0f))
-                    .texOffs(0, 0).addBox(-4.0f, -11.0f, -4.0f, 8.0f, 8.0f, 8.0f, CubeDeformation(0.0f)), PartPose.offset(0.0f, 20.0f, 0.0f)
+                    .texOffs(0, 0).addBox(-4.0f, -11.0f, -4.0f, 8.0f, 8.0f, 8.0f, CubeDeformation(0.0f)),
+                PartPose.offset(0.0f, 20.0f, 0.0f)
             )
 
-            val legs = partdefinition.addOrReplaceChild("legs", CubeListBuilder.create(), PartPose.offset(0.0f, 20.0f, 0.0f))
+            val legs = partdefinition.addOrReplaceChild(
+                "legs",
+                CubeListBuilder.create(),
+                PartPose.offset(0.0f, 20.0f, 0.0f)
+            )
 
             val cube_r1 = legs.addOrReplaceChild(
-                "cube_r1", CubeListBuilder.create().texOffs(17, 6).mirror().addBox(2.0f, 0.75f, 1.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)).mirror(false)
-                    .texOffs(16, 0).mirror().addBox(2.0f, 0.75f, -0.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)).mirror(false)
-                    .texOffs(0, 7).mirror().addBox(2.0f, 0.75f, 3.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)).mirror(false), PartPose.offsetAndRotation(4.2426f, -5.5858f, -2.0f, 0.0f, 0.0f, 0.3927f)
+                "cube_r1",
+                CubeListBuilder.create().texOffs(
+                    17,
+                    6
+                ).mirror().addBox(2.0f, 0.75f, 1.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)).mirror(false)
+                    .texOffs(
+                        16,
+                        0
+                    ).mirror().addBox(2.0f, 0.75f, -0.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)).mirror(false)
+                    .texOffs(
+                        0,
+                        7
+                    ).mirror().addBox(2.0f, 0.75f, 3.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)).mirror(false),
+                PartPose.offsetAndRotation(4.2426f, -5.5858f, -2.0f, 0.0f, 0.0f, 0.3927f)
             )
 
             val cube_r2 = legs.addOrReplaceChild(
-                "cube_r2", CubeListBuilder.create().texOffs(17, 6).mirror().addBox(1.0f, 0.0f, -2.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)).mirror(false)
-                    .texOffs(17, 7).mirror().addBox(1.0f, 0.0f, -0.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)).mirror(false)
-                    .texOffs(17, 0).mirror().addBox(1.0f, 0.0f, 1.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)).mirror(false), PartPose.offsetAndRotation(0.0f, -7.0f, 0.0f, 0.0f, 0.0f, -0.7854f)
+                "cube_r2",
+                CubeListBuilder.create().texOffs(
+                    17,
+                    6
+                ).mirror().addBox(1.0f, 0.0f, -2.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)).mirror(false)
+                    .texOffs(
+                        17,
+                        7
+                    ).mirror().addBox(1.0f, 0.0f, -0.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)).mirror(false)
+                    .texOffs(
+                        17,
+                        0
+                    ).mirror().addBox(1.0f, 0.0f, 1.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)).mirror(false),
+                PartPose.offsetAndRotation(0.0f, -7.0f, 0.0f, 0.0f, 0.0f, -0.7854f)
             )
 
             val cube_r3 = legs.addOrReplaceChild(
-                "cube_r3", CubeListBuilder.create().texOffs(17, 6).addBox(-3.0f, 0.0f, -0.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f))
+                "cube_r3",
+                CubeListBuilder.create().texOffs(
+                    17,
+                    6
+                ).addBox(-3.0f, 0.0f, -0.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f))
                     .texOffs(17, 5).addBox(-3.0f, 0.0f, -2.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f))
-                    .texOffs(17, 5).addBox(-3.0f, 0.0f, 1.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)), PartPose.offsetAndRotation(0.0f, -7.0f, 0.0f, 0.0f, 0.0f, 0.7854f)
+                    .texOffs(17, 5).addBox(-3.0f, 0.0f, 1.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)),
+                PartPose.offsetAndRotation(0.0f, -7.0f, 0.0f, 0.0f, 0.0f, 0.7854f)
             )
 
             val cube_r4 = legs.addOrReplaceChild(
-                "cube_r4", CubeListBuilder.create().texOffs(18, 7).addBox(-4.0f, 0.75f, 3.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f))
+                "cube_r4",
+                CubeListBuilder.create().texOffs(
+                    18,
+                    7
+                ).addBox(-4.0f, 0.75f, 3.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f))
                     .texOffs(17, 5).addBox(-4.0f, 0.75f, 1.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f))
-                    .texOffs(9, 0).addBox(-4.0f, 0.75f, -0.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)), PartPose.offsetAndRotation(-4.2426f, -5.5858f, -2.0f, 0.0f, 0.0f, -0.3927f)
+                    .texOffs(9, 0).addBox(-4.0f, 0.75f, -0.5f, 2.0f, 8.0f, 1.0f, CubeDeformation(0.0f)),
+                PartPose.offsetAndRotation(-4.2426f, -5.5858f, -2.0f, 0.0f, 0.0f, -0.3927f)
             )
 
             val chest = partdefinition.addOrReplaceChild(
                 "chest",
-                CubeListBuilder.create().texOffs(0, 24).addBox(-3.0f, -10.0f, 2.5f, 6.0f, 6.0f, 2.0f, CubeDeformation(0.0f)),
+                CubeListBuilder.create().texOffs(
+                    0,
+                    24
+                ).addBox(-3.0f, -10.0f, 2.5f, 6.0f, 6.0f, 2.0f, CubeDeformation(0.0f)),
                 PartPose.offset(0.0f, 20.0f, 0.0f)
             )
 
             val tank = partdefinition.addOrReplaceChild(
                 "tank",
-                CubeListBuilder.create().texOffs(16, 24).addBox(2.5f, -10.0f, -3.0f, 2.0f, 2.0f, 6.0f, CubeDeformation(0.0f)),
+                CubeListBuilder.create().texOffs(
+                    16,
+                    24
+                ).addBox(2.5f, -10.0f, -3.0f, 2.0f, 2.0f, 6.0f, CubeDeformation(0.0f)),
                 PartPose.offset(0.0f, 20.0f, 0.0f)
             )
 
             val filled =
-                tank.addOrReplaceChild("filled", CubeListBuilder.create().texOffs(20, 16).addBox(0.0f, -1.0f, -6.0f, 0.0f, 2.0f, 6.0f, CubeDeformation(0.0f)), PartPose.offset(4.4f, -9.0f, 3.0f))
+                tank.addOrReplaceChild(
+                    "filled",
+                    CubeListBuilder.create().texOffs(
+                        20,
+                        16
+                    ).addBox(0.0f, -1.0f, -6.0f, 0.0f, 2.0f, 6.0f, CubeDeformation(0.0f)),
+                    PartPose.offset(4.4f, -9.0f, 3.0f)
+                )
 
             return LayerDefinition.create(meshdefinition, 32, 32)
         }
@@ -196,17 +263,6 @@ class MobMincerModel(private val root: ModelPart) : HierarchicalModel<MobMincerE
                         KeyframeAnimations.degreeVec(0.0f, 0.0f, 0.0f),
                         AnimationChannel.Interpolations.CATMULLROM
                     )
-                )
-            )
-            .build()
-
-        private val FILL_TANK: AnimationDefinition = AnimationDefinition.Builder.withLength(1.0f)
-            .addAnimation(
-                "filled",
-                AnimationChannel(
-                    AnimationChannel.Targets.SCALE,
-                    Keyframe(0.0f, KeyframeAnimations.scaleVec(1.0, 1.0, 0.0), AnimationChannel.Interpolations.LINEAR),
-                    Keyframe(1.0f, KeyframeAnimations.scaleVec(1.0, 1.0, 1.0), AnimationChannel.Interpolations.LINEAR)
                 )
             )
             .build()

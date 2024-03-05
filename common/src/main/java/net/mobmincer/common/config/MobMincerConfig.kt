@@ -70,7 +70,7 @@ class MobMincerConfig private constructor(builder: ModConfigSpec.Builder) {
         .translation("mobmincer.config.mendingRepairMultiplier")
         .defineInRange("mendingRepairMultiplier", 1.0, 0.0, 1.0)
 
-    val entityFilterMode = builder
+    val entityFilterMode: ModConfigSpec.EnumValue<EntityFilterMode> = builder
         .comment("The mode for the entity filter")
         .translation("mobmincer.config.entityFilterMode")
         .defineEnum("entityFilterMode", EntityFilterMode.BLACKLIST)
@@ -85,12 +85,47 @@ class MobMincerConfig private constructor(builder: ModConfigSpec.Builder) {
     val poweredMinceCost: ModConfigSpec.IntValue = builder
         .comment("The amount of RF required per mince using the powered mincer")
         .translation("mobmincer.config.poweredMinceCost")
-        .defineInRange("poweredMinceCost", 1000, 1, 1000000)
+        .defineInRange("poweredMinceCost", 500, 1, 1000000)
+
+    val poweredMincerCapacity: ModConfigSpec.IntValue = builder
+        .comment("The amount of RF that the powered mincer can store")
+        .translation("mobmincer.config.poweredMincerCapacity")
+        .defineInRange("poweredMincerCapacity", 10000, 1, Int.MAX_VALUE)
+
+    val powerProviderCapacity: ModConfigSpec.IntValue = builder
+        .comment("The amount of RF that the power provider can store")
+        .translation("mobmincer.config.powerProviderCapacity")
+        .defineInRange("powerProviderCapacity", 1000000, 1, Int.MAX_VALUE)
+
+    val powerProviderTransferRate: ModConfigSpec.IntValue = builder
+        .comment("The amount of RF that the power provider can transfer per tick")
+        .translation("mobmincer.config.powerProviderTransferRate")
+        .defineInRange("powerProviderTransferRate", 50000, 1, Int.MAX_VALUE)
+
+    val powerProviderBurnRate: ModConfigSpec.IntValue = builder
+        .comment("The amount of RF that the power provider gains per fuel burn tick")
+        .translation("mobmincer.config.powerProviderBurnRate")
+        .defineInRange("powerProviderBurnRate", 40, 1, Int.MAX_VALUE)
+
+    val powerProviderPulseRate: ModConfigSpec.IntValue = builder
+        .comment("The amount of ticks between each power provider pulse")
+        .translation("mobmincer.config.powerProviderPulseRate")
+        .defineInRange("powerProviderPulseRate", 15, 1, Int.MAX_VALUE)
 
     val experienceMultiplier: ModConfigSpec.DoubleValue = builder
         .comment("The multiplier for the amount of xp fluid added to the tank when mincing")
         .translation("mobmincer.config.experienceMultiplier")
         .defineInRange("experienceMultiplier", 2.0, 0.0, 100.0)
+
+    val tankCapacity: ModConfigSpec.IntValue = builder
+        .comment("The initial capacity of the tank attachment. 1 xp bucket = 1000 mB of fluid")
+        .translation("mobmincer.config.tankCapacity")
+        .defineInRange("tankCapacity", 10000, 1, Int.MAX_VALUE)
+
+    val enablePowerParticles: ModConfigSpec.BooleanValue = builder
+        .comment("Whether or not to enable particles when the powered mincer is running. Affects all players.")
+        .translation("mobmincer.config.enablePowerParticles")
+        .define("enablePowerParticles", true)
 
     enum class EntityFilterMode {
         BLACKLIST,

@@ -23,12 +23,16 @@ import net.mobmincer.api.blockentity.EnergyMachineBlockEntity
 import net.mobmincer.api.inventory.InventoryAccess
 import net.mobmincer.api.inventory.MachineInventory
 import net.mobmincer.client.menu.PowerProviderMenu
+import net.mobmincer.common.config.MobMincerConfig
 import net.mobmincer.core.entity.MobMincerEntity
 import net.mobmincer.core.registry.MMContent
 import net.mobmincer.energy.EnergyUtil.getEnergyStorage
 import net.mobmincer.energy.EnergyUtil.usesEnergy
+import net.mobmincer.energy.MMEnergyStorage
+import java.util.*
 import kotlin.math.abs
-
+import kotlin.math.min
+import kotlin.math.sin
 
 class MincerPowerProviderBlockEntity(pos: BlockPos, blockState: BlockState) :
     EnergyMachineBlockEntity(
@@ -59,18 +63,19 @@ class MincerPowerProviderBlockEntity(pos: BlockPos, blockState: BlockState) :
 
     var burnTime = 0
     var maxBurnTime = 0
+    var lastPulseTicks = 0
 
     override fun tick(level: Level, blockPos: BlockPos, blockState: BlockState, blockEntity: MincerPowerProviderBlockEntity) {
         if (level.isClientSide) return
 
-        if (burnTime > 0) {
-            burnTime--
-            blockEntity.energyStorage.insert(1)
+        if (blockEntity.burnTime > 0) {
+            blockEntity.burnTime--
+            blockEntity.energyStorage.insert(MobMincerConfig.CONFIG.powerProviderBurnRate.get().toLong())
         } else {
             val fuelStack = inventory.getItem(FUEL_SLOT)
             if (isFuel(fuelStack)) {
-                burnTime = getBurnDuration(fuelStack)
-                maxBurnTime = burnTime
+                blockEntity.burnTime = getBurnDuration(fuelStack)
+                blockEntity.maxBurnTime = burnTime
                 fuelStack.shrink(1)
             }
         }
@@ -83,7 +88,7 @@ class MincerPowerProviderBlockEntity(pos: BlockPos, blockState: BlockState) :
             return 0
         } else {
             val item = fuel.item
-            return getFuel().getOrDefault(item, 0) / 4
+            return getFuel().getOrDefault(item, 0) / 16
         }
     }
 
@@ -133,26 +138,44 @@ class MincerPowerProviderBlockEntity(pos: BlockPos, blockState: BlockState) :
             blockEntity: MincerPowerProviderBlockEntity
         ) {
             require(level is ServerLevel)
-            if (blockEntity.energyStorage.isEmpty) return
+            if (blockEntity.energyStorage.isEmpty || --blockEntity.lastPulseTicks > 0) return
+            blockEntity.lastPulseTicks = MobMincerConfig.CONFIG.powerProviderPulseRate.get()
 
-            val nearbyMincers = level.getEntitiesOfClass(
-                MobMincerEntity::class.java,
-                AABB(pos).inflate(5.0)
+            val nearbyMincers: Queue<Pair<MMEnergyStorage, Vec3>> = LinkedList(
+                level.getEntitiesOfClass(
+                    MobMincerEntity::class.java,
+                    AABB(pos).inflate(5.0)
+                ).map { it.getEnergyStorage() to it.position() }.filter { (storage, _) -> storage.energy < storage.energyCapacity }
             )
 
             if (nearbyMincers.isEmpty()) return
 
-            var extractAmount = blockEntity.energyStorage.getEnergyMaxOutput(null)
+            var totalExtract = min(blockEntity.energyStorage.getEnergyMaxOutput(null), blockEntity.energyStorage.energy)
+            val extractPerMincer = totalExtract / nearbyMincers.size
             val powerProviderPos = blockEntity.blockPos.center
-            for (mincer in nearbyMincers) {
-                if (extractAmount <= 0) break
-                val energyStorage = mincer.getEnergyStorage()
-                extractAmount -= energyStorage.insert(extractAmount)
-                drawLineOfParticles(level, powerProviderPos, mincer.position(), ParticleTypes.FLAME)
+            var extractCount = 20
+
+            while (nearbyMincers.isNotEmpty() && totalExtract > 0 && extractCount > 0) {
+                val (energyStorage, position) = nearbyMincers.poll()
+                val extractAmount = blockEntity.energyStorage.extract(extractPerMincer)
+                if (extractAmount > 0) {
+                    val insertAmount = energyStorage.insert(extractAmount)
+                    totalExtract -= insertAmount
+                    val leftoverExtract = extractAmount - insertAmount
+                    if (leftoverExtract > 0) {
+                        blockEntity.energyStorage.insert(leftoverExtract)
+                    } else if (totalExtract > 0) {
+                        nearbyMincers.add(energyStorage to position)
+                    }
+                    if (MobMincerConfig.CONFIG.enablePowerParticles.get()) {
+                        drawLineOfParticles(level, powerProviderPos, position, ParticleTypes.ELECTRIC_SPARK, 4)
+                    }
+                }
+                extractCount--
             }
         }
 
-        private fun drawLineOfParticles(level: ServerLevel, start: Vec3, end: Vec3, particle: ParticleOptions) {
+        private fun drawLineOfParticles(level: ServerLevel, start: Vec3, end: Vec3, particle: ParticleOptions, countMultiplier: Int = 2) {
             val difference = end.subtract(start)
 
             val dx = difference.x
@@ -160,16 +183,16 @@ class MincerPowerProviderBlockEntity(pos: BlockPos, blockState: BlockState) :
             val dz = difference.z
 
             val isArcUpward = end.y > start.y
-            val arcHeight = abs(dy) * 2  // Adjust this factor for the arc's height
-            val particleCount = 20
+            val arcHeight = abs(dy) / 2
+            val particleCount = difference.length().toInt() * countMultiplier
             for (i in 0..particleCount) {
                 val fraction = i.toDouble() / particleCount
 
                 val posX = start.x + fraction * dx
                 val posY = if (isArcUpward) {
-                    start.y + fraction * dy - arcHeight * Math.sin(Math.PI * fraction)
+                    start.y + fraction * dy + arcHeight * sin(Math.PI * fraction)
                 } else {
-                    start.y + fraction * dy + arcHeight * (1 - Math.sin(Math.PI * fraction))
+                    start.y + fraction * dy - arcHeight * sin(Math.PI * fraction)
                 }
                 val posZ = start.z + fraction * dz
 

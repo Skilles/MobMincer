@@ -3,6 +3,7 @@ package net.mobmincer.core.attachment
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Player
 import net.mobmincer.core.entity.MobMincerEntity
+import net.mobmincer.network.MincerNetwork
 
 abstract class AttachmentInstance(val type: MobMincerAttachment<*>, protected val mincer: MobMincerEntity) {
 
@@ -33,5 +34,11 @@ abstract class AttachmentInstance(val type: MobMincerAttachment<*>, protected va
 
     open fun getInteractionPriority(): Int {
         return 0
+    }
+
+    fun sync() {
+        if (!mincer.level().isClientSide && mincer.initialized) {
+            MincerNetwork.syncAttachmentData(mincer, type.id)
+        }
     }
 }

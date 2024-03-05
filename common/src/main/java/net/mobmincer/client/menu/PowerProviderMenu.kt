@@ -15,9 +15,9 @@ import net.mobmincer.energy.EnergyUtil.usesEnergy
 
 class PowerProviderMenu(containerId: Int, playerInventory: Inventory, private val container: Container, private val data: ContainerData, private val access: ContainerLevelAccess) :
     AbstractContainerMenu(
-    Menus.POWER_PROVIDER.get(),
-    containerId
-) {
+        Menus.POWER_PROVIDER.get(),
+        containerId
+    ) {
 
     var burnTime: Int
         get() = data.get(0)
@@ -64,8 +64,8 @@ class PowerProviderMenu(containerId: Int, playerInventory: Inventory, private va
         checkContainerSize(container, 2)
         checkContainerDataCount(data, 4)
 
-        this.addSlot(PowerSlot(container, 0, 56, 17))
-        this.addSlot(FuelSlot(container, 1, 56, 53))
+        this.addSlot(PowerSlot(container, 0, 19, 17))
+        this.addSlot(FuelSlot(container, 1, 19, 53))
         this.addDataSlots(data)
 
         for (i in 0..2) {
